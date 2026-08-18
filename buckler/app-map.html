@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>App map — honest mockument</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="../assets/spec.css" />
+<script>(function(){var s=localStorage.getItem('spec-theme')||'system';var t=s==='system'?(window.matchMedia('(prefers-color-scheme:light)').matches?'light':'dark'):s;if(t==='light')document.documentElement.classList.add('light');})();</script>
+</head>
+<body>
+<header class="topbar" id="topbar"></header>
+<div class="shell">
+  <aside class="sidebar" id="sidebar"></aside>
+  <main class="main">
+    <div class="page-eyebrow">Structure</div>
+    <h1 class="page-title">App map</h1>
+    <p class="page-lede">The proposed menu, what each page is for, how the work decomposes across devices, and which routes
+      connect to which. Destinations nobody has drawn yet stay on the map, marked — a gap you can see is worth more than a
+      tidy diagram.</p>
+    <div id="summary"></div>
+
+    <section class="block">
+      <div class="block-head"><span class="block-num">01</span><span class="block-title">The proposed menu</span>
+        <span class="block-for">business user</span></div>
+      <p class="block-note">Does this describe the way people think about their work? That is the first question the mock exists to answer.</p>
+      <div class="mock-shell"><div class="mock-stage"><div class="wf" style="max-width:760px">
+        <div class="wf-row">
+          <nav class="wf-menu" id="menu-sketch" style="width:200px"></nav>
+          <div class="wf-col wf-pad">
+            <div class="wf-box"><div class="wf-label">Any page</div>
+              <div class="wf-text">Every page in this app carries the same twenty-two blocks. The menu on the left is the app's
+                own menu, not the specification's — walking it is the point.</div></div>
+          </div>
+        </div></div></div></div>
+    </section>
+
+    <section class="block">
+      <div class="block-head"><span class="block-num">02</span><span class="block-title">Work, steps, and how they land on devices</span>
+        <span class="block-for">business user</span></div>
+      <p class="block-note">The step is what stays the same across devices. If one step needs four phone screens, that is worth
+        knowing now; if it needs twenty-six voice prompts, either the step is too big or voice is the wrong device for it.</p>
+      <div id="decomp"></div>
+    </section>
+
+    <section class="block">
+      <div class="block-head"><span class="block-num">03</span><span class="block-title">Routes between pages</span></div>
+      <p class="block-note">Collected from the connections block of every page that has been drawn. A route that appears in one
+        direction only is usually a page somebody cannot get back from.</p>
+      <div id="routes"></div>
+    </section>
+
+    <section class="block">
+      <div class="block-head"><span class="block-num">04</span><span class="block-title">Shared components</span></div>
+      <p class="block-note">Specified once, referenced by ID. A component described twice is a component that will drift.</p>
+      <div id="components"></div>
+    </section>
+
+    <section class="block">
+      <div class="block-head"><span class="block-num">05</span><span class="block-title">Workflows</span></div>
+      <div id="workflows"></div>
+    </section>
+
+    <footer class="footer"><span>Honest Mockument</span><span>An unfinished destination stays on the map.</span></footer>
+  </main>
+</div>
+<aside class="inspector" id="inspector"></aside>
+
+<script src="assets/app-config.js"></script>
+<script src="../assets/spec.js"></script>
+<script>
+(async function () {
+  const app = window.SPEC_APP;
+  SpecKit.chrome("app-map.html");
+  const esc = SpecKit.esc;
+  const specs = (await SpecKit.loadSpecs(app.specPages || [])).filter(s => !s._error);
+  const byFile = {}; specs.forEach(s => byFile[s._file] = s);
+
+  document.getElementById("summary").innerHTML = `<div class="meta-strip">
+    <span class="meta-chip">Pages in the menu <b>${(app.menu || []).length}</b></span>
+    <span class="meta-chip">Drawn <b>${(app.menu || []).filter(m => m.built).length}</b></span>
+    <span class="meta-chip">Processes <b>${(app.processes || []).length}</b></span>
+    <span class="meta-chip">Workflows <b>${(app.workflows || []).length}</b></span></div>`;
+
+  document.getElementById("menu-sketch").innerHTML = (app.menu || []).map(m =>
+    `<a href="${esc(m.href)}" ${m.built ? "" : 'style="opacity:.55"'}>${esc(m.name)}${m.built ? "" : " · not drawn"}</a>`).join("");
+
+  const rows = [];
+  (app.processes || []).forEach(p => (p.steps || []).forEach(s => {
+    const specsForStep = (s.pages || []).map(f => byFile[f]).filter(Boolean);
+    const devices = {};
+    specsForStep.forEach(sp => ((sp.represents || {}).deviceTypes || []).forEach(d => devices[d.name || d] = true));
+    rows.push([
+      esc(p.name), `<span class="id-cell">${esc(s.id)}</span> ${esc(s.name)}`,
+      (s.pages || []).map(f => byFile[f] ? `<a href="${esc(f)}">${esc(byFile[f].page.name)}</a>` : `<span style="opacity:.6">${esc(f.replace(/^page-|\.html$/g, ""))} · not drawn</span>`).join("<br>"),
+      Object.keys(devices).join(", ") || `<span class="tbd">TBD</span>`,
+      specsForStep.length ? specsForStep.map(sp => `${((sp.represents || {}).deviceTypes || []).length} device type(s) described`).join("<br>") : `<span class="tbd">nothing described yet</span>`
+    ]);
+  }));
+  document.getElementById("decomp").innerHTML = SpecKit.table(
+    ["Process", "Step", "Pages", "Device types", "Decomposition"], rows);
+
+  const routes = [];
+  specs.forEach(s => {
+    ((s.connections || {}).to || []).filter(t => t.label).forEach(t => routes.push([s.page.name, "→", esc(t.label), t.href && byFile[t.href] ? "both pages drawn" : "destination not drawn"]));
+    ((s.connections || {}).from || []).filter(t => t.label).forEach(t => routes.push([esc(t.label), "→", s.page.name, t.href && byFile[t.href] ? "both pages drawn" : "origin not drawn"]));
+  });
+  document.getElementById("routes").innerHTML = routes.length
+    ? SpecKit.table(["From", "", "To", "Status"], routes.map(r => [r[0], r[1], r[2], r[3]]))
+    : `<p class="empty-hint">No routes recorded yet — either nothing is drawn, or the pages cannot be read from here (serve the folder over http).</p>`;
+
+  document.getElementById("components").innerHTML = SpecKit.table(
+    ["ID", "Component", "What it is", "Used on"],
+    (app.components || []).map(c => [
+      `<span class="id-cell">${esc(c.id)}</span>`, esc(c.name), esc(c.note || ""),
+      specs.filter(s => ((s.connections || {}).components || []).some(x => x.id === c.id))
+        .map(s => `<a href="${esc(s._file)}">${esc(s.page.name)}</a>`).join(", ") || "—"]));
+
+  document.getElementById("workflows").innerHTML = SpecKit.table(
+    ["ID", "Workflow", "Status"],
+    (app.workflows || []).map(w => [`<span class="id-cell">${esc(w.id)}</span>`,
+      w.built ? `<a href="${esc(w.href)}">${esc(w.name)}</a>` : esc(w.name),
+      w.built ? `<span class="marker marker--required">walkable</span>` : `<span class="marker marker--scope">not drawn</span>`]));
+})();
+</script>
+</body>
+</html>

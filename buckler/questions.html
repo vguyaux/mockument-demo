@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Open questions — honest mockument</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="../assets/spec.css" />
+<script>(function(){var s=localStorage.getItem('spec-theme')||'system';var t=s==='system'?(window.matchMedia('(prefers-color-scheme:light)').matches?'light':'dark'):s;if(t==='light')document.documentElement.classList.add('light');})();</script>
+</head>
+<body>
+<header class="topbar" id="topbar"></header>
+<div class="shell">
+  <aside class="sidebar" id="sidebar"></aside>
+  <main class="main">
+    <div class="page-eyebrow">Register</div>
+    <h1 class="page-title">Open questions</h1>
+    <p class="page-lede">Every question the specification is carrying, with the person who owes the answer and what it is
+      holding up. This is the page a project meeting is run from: work down it, and the gates on each page move by themselves.</p>
+    <div id="summary"></div>
+
+    <section class="block">
+      <div class="block-head"><span class="block-num">01</span><span class="block-title">By who must answer</span></div>
+      <div id="byowner"></div>
+    </section>
+
+    <section class="block">
+      <div class="block-head"><span class="block-num">02</span><span class="block-title">Silences nobody has written down as a question</span>
+        <span class="block-for">found by the checker</span></div>
+      <p class="block-note">Elements marked unanswered with no question attached, and the two questions that are never
+        volunteered — what the app remembers between visits, and what changes while somebody is looking at it.</p>
+      <div id="silences"></div>
+    </section>
+
+    <footer class="footer"><span>Honest Mockument</span><span>A question with no owner is a question nobody answers.</span></footer>
+  </main>
+</div>
+<aside class="inspector" id="inspector"></aside>
+
+<script src="assets/app-config.js"></script>
+<script src="../assets/spec.js"></script>
+<script>
+(async function () {
+  const app = window.SPEC_APP;
+  SpecKit.chrome("questions.html");
+  const esc = SpecKit.esc;
+  const specs = (await SpecKit.loadSpecs(app.specPages || [])).filter(s => !s._error);
+
+  if (!specs.length) {
+    document.getElementById("summary").innerHTML = `<div class="callout callout--warn">
+      <div class="callout-title">Cannot read the pages from here</div>
+      <div class="callout-body">Serve the folder (<code>python3 -m http.server</code>) or open the published site — a browser
+      will not let one local file read another.</div></div>`;
+    return;
+  }
+
+  const all = [];
+  specs.forEach(s => (s.questions || []).forEach(q => all.push(Object.assign({}, q, { page: s.page.name, file: s._file }))));
+  const blocking = all.filter(q => q.blocksBuild);
+  const owners = {};
+  all.forEach(q => { const k = q.whoMustAnswer || "NOBODY NAMED"; (owners[k] = owners[k] || []).push(q); });
+
+  document.getElementById("summary").innerHTML = `
+    <div class="meta-strip">
+      <span class="meta-chip">Questions <b>${all.length}</b></span>
+      <span class="meta-chip">Blocking the build <b>${blocking.length}</b></span>
+      <span class="meta-chip">Owners <b>${Object.keys(owners).length}</b></span>
+      <span class="meta-chip">Pages read <b>${specs.length}</b></span>
+    </div>`;
+
+  const byDate = (a, b) => String(a.neededBy || "9999").localeCompare(String(b.neededBy || "9999"));
+  document.getElementById("byowner").innerHTML = Object.keys(owners).sort().map(o => `
+    <div class="card"><div class="card-label">${esc(o)} · ${owners[o].length} question${owners[o].length > 1 ? "s" : ""}</div>
+      ${SpecKit.table(["ID", "Question", "Page", "Why it matters", "Blocks", "Needed by"],
+        owners[o].sort(byDate).map(q => [
+          `<span class="id-cell"><a href="${esc(q.file)}#${esc((q.affects || [])[0] || "questions")}">${esc(q.id)}</a></span>`,
+          esc(q.question),
+          `<a href="${esc(q.file)}">${esc(q.page)}</a>`,
+          esc(q.whyItMatters || ""),
+          q.blocksBuild ? `<span class="marker marker--unanswered">the build</span>` : `<span class="marker marker--proposed">${esc(q.blocks || "review")}</span>`,
+          q.neededBy ? esc(q.neededBy) : `<span class="tbd">no date</span>`
+        ]))}
+    </div>`).join("");
+
+  const sil = [];
+  specs.forEach(s => {
+    (s.elements || []).concat(s.controls || []).forEach(e => {
+      const hasQ = (s.questions || []).some(q => (q.affects || []).indexOf(e.id) !== -1 || (e.questions || []).indexOf(q.id) !== -1);
+      if (e.marker === "unanswered" && !hasQ) sil.push([s.page.name, e.id, esc(e.name), "marked unanswered, but no question names who decides it"]);
+      if (!e.marker) sil.push([s.page.name, e.id, esc(e.name), "drawn with no marker at all"]);
+      if (e.marker === "proposed" && !e.note) sil.push([s.page.name, e.id, esc(e.name), "proposed with no note saying why it was drawn"]);
+    });
+    if (!(s.remembered && s.remembered.marker === "required"))
+      sil.push([s.page.name, "—", "What the app remembers between visits", "not settled" + (s.remembered && s.remembered.whoMustAnswer ? " · owed by " + esc(s.remembered.whoMustAnswer) : " · nobody named")]);
+    if (!(s.liveChange && s.liveChange.marker === "required"))
+      sil.push([s.page.name, "—", "What changes while it is being looked at", "not settled" + (s.liveChange && s.liveChange.whoMustAnswer ? " · owed by " + esc(s.liveChange.whoMustAnswer) : " · nobody named")]);
+  });
+  document.getElementById("silences").innerHTML = sil.length
+    ? SpecKit.table(["Page", "ID", "What", "Why it is here"], sil.map(r => [esc(r[0]), `<span class="id-cell">${esc(r[1])}</span>`, r[2], r[3]]))
+    : `<p class="empty-hint">No silences. Unusual — check the checker is actually reading the pages.</p>`;
+
+  const tb = document.getElementById("tb-q-count"); if (tb) tb.textContent = "· " + all.length;
+})();
+</script>
+</body>
+</html>

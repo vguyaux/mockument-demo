@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>The Honest Mockument — app overview</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="../assets/spec.css" />
+<script>(function(){var s=localStorage.getItem('spec-theme')||'system';var t=s==='system'?(window.matchMedia('(prefers-color-scheme:light)').matches?'light':'dark'):s;if(t==='light')document.documentElement.classList.add('light');})();</script>
+</head>
+<body>
+<header class="topbar" id="topbar"></header>
+<div class="shell">
+  <aside class="sidebar" id="sidebar"></aside>
+  <main class="main">
+    <div id="head"></div>
+
+    <section class="block">
+      <div class="block-head"><span class="block-num">01</span><span class="block-title">Readiness of the sample</span>
+        <span class="block-for">computed, not asserted</span></div>
+      <p class="block-note">Each page carries three gates. They are calculated from the specification data, so nobody has to
+        argue about whether something is ready — the page either answers the questions or it does not.</p>
+      <div id="readiness"><p class="empty-hint">Reading the pages…</p></div>
+    </section>
+
+    <section class="block">
+      <div class="block-head"><span class="block-num">02</span><span class="block-title">Pages of the sample app</span>
+        <span class="block-for">one mockument page per app page</span></div>
+      <div class="page-grid" id="pages"></div>
+    </section>
+
+    <section class="block">
+      <div class="block-head"><span class="block-num">03</span><span class="block-title">Who uses it</span>
+        <span class="block-for">business user</span></div>
+      <div id="usedby"></div>
+    </section>
+
+    <section class="block">
+      <div class="block-head"><span class="block-num">04</span><span class="block-title">What the work is</span>
+        <span class="block-for">business user</span></div>
+      <p class="block-note">Processes and their steps. A page exists because a step needs it — not the other way round.</p>
+      <div id="processes"></div>
+    </section>
+
+    <section class="block">
+      <div class="block-head"><span class="block-num">05</span><span class="block-title">How to read a mockument page</span></div>
+      <div class="grid-2">
+        <div class="card"><div class="card-label">The five markers</div><div class="card-body">
+          <p><span class="marker marker--required">required</span> an answered requirement supports it.</p>
+          <p><span class="marker marker--proposed">proposed</span> drawn to make the mock concrete; nobody has accepted it.</p>
+          <p><span class="marker marker--unanswered">unanswered</span> a decision is missing, and it names who owes it.</p>
+          <p><span class="marker marker--observed">observed</span> noticed while walking through; not yet a decision.</p>
+          <p><span class="marker marker--scope">out of scope</span> deliberately not answered here.</p>
+        </div></div>
+        <div class="card"><div class="card-label">Three ways to use this</div><div class="card-body">
+          <p><strong>Walk it.</strong> Use the menu as if it were the app. Switch role, device and state on any mock.</p>
+          <p><strong>Question it.</strong> Turn on the honesty overlay. Everything outlined in amber or pink is not yet agreed.</p>
+          <p><strong>Build from it.</strong> Each page ends with a build contract and a machine-readable island. Hand that to
+             whoever — or whatever — writes the code.</p>
+          <p><strong>Or read the method.</strong> <a href="honest-mockument.html">The Honest Mockument</a> ·
+             <a href="data-layer.html">The data layer</a></p>
+        </div></div>
+      </div>
+    </section>
+
+    <footer class="footer"><span>Honest Mockument</span><span>A convincing screen is not an agreement.</span></footer>
+  </main>
+</div>
+<aside class="inspector" id="inspector"></aside>
+
+<script src="assets/app-config.js"></script>
+<script src="../assets/spec.js"></script>
+<script>
+(async function () {
+  const app = window.SPEC_APP;
+  SpecKit.chrome("index.html");
+  const esc = SpecKit.esc;
+
+  document.getElementById("head").innerHTML = `
+    <div class="page-eyebrow">Half mock-up, half document</div>
+    <h1 class="page-title">The Honest Mockument</h1>
+    <p class="page-lede">Two things to look at. First, a worked example you can walk: a proposed app drawn crudely, where
+      every visible thing says what backs it, who owes the missing answer, and whether it is ready to build. Second, the
+      method that produced it.</p>
+
+    <div class="entry-grid">
+      <a class="entry-card" href="page-approvals.html">
+        <div class="k">Walk it</div>
+        <h3>The sample mockument</h3>
+        <p>${esc(app.name)} — ${esc(app.domain)}. Deliberately generic; swap it for your own app and the structure holds.</p>
+        <ul>
+          <li>Switch device, role and state on any page</li>
+          <li>Turn on the honesty overlay to see what is actually agreed</li>
+          <li>Click any element for its record, its source and its open questions</li>
+        </ul>
+        <div class="go">Open the worked page →</div>
+      </a>
+      <a class="entry-card" href="honest-mockument.html">
+        <div class="k">Read it</div>
+        <h3>The method</h3>
+        <p>The Honest Mockument in full: the model, the representation, the twenty-two blocks, the data ladder and the gates.</p>
+        <ul>
+          <li>Eight parts, thirty-one sections, with a contents sidebar</li>
+          <li>A companion document on the data layer</li>
+          <li>Prints to PDF for sending on</li>
+        </ul>
+        <div class="go">Open the documentation →</div>
+      </a>
+    </div>
+
+    <div class="meta-strip">
+      <span class="meta-chip">Sample app <b>${esc(app.name)}</b></span>
+      <span class="meta-chip">Version <b>${esc(app.version)}</b></span>
+      <span class="meta-chip">Updated <b>${esc(app.updated)}</b></span>
+      <span class="meta-chip">${(app.menu||[]).filter(m=>m.built).length} of ${(app.menu||[]).length} pages drawn</span>
+      <a class="meta-chip" href="questions.html">Open questions <b id="qcount">…</b></a>
+    </div>`;
+
+  document.getElementById("usedby").innerHTML = SpecKit.table(
+    ["Who", "Person or agent", "What they do here"],
+    (app.usedBy || []).map(u => [esc(u.name), u.isAgent ? "agent" : "person", esc(u.note || "")]));
+
+  document.getElementById("processes").innerHTML = (app.processes || []).map(p => `
+    <div class="card"><div class="card-label">${esc(p.id)} · ${esc(p.name)}</div>
+      <div class="card-body"><strong>Remembered between visits:</strong> ${esc(p.remembered || "TBD")}</div>
+      <div style="height:10px"></div>
+      ${SpecKit.table(["Step", "Name", "Specified on"], (p.steps || []).map(s => [
+        esc(s.id), esc(s.name),
+        (s.pages || []).map(f => `<a href="${esc(f)}">${esc(f.replace(/^page-|\.html$/g, ""))}</a>`).join(", ")]))}
+    </div>`).join("");
+
+  const specs = await SpecKit.loadSpecs(app.specPages || []);
+  const ok = specs.filter(s => !s._error);
+  if (!ok.length) {
+    document.getElementById("readiness").innerHTML = `<div class="callout callout--warn">
+      <div class="callout-title">Cannot read the pages from here</div>
+      <div class="callout-body">Opened straight off the disk, a browser will not let one file read another. Serve the folder
+      (<code>python3 -m http.server</code>) or view it on the published site, and this dashboard fills in. Every individual
+      page works either way.</div></div>`;
+  } else {
+    const rows = ok.map(s => {
+      const g = SpecKit.gates(s), c = SpecKit.coverage(s);
+      const openQ = (s.questions || []).filter(q => q.blocksBuild).length;
+      return { s, g, c, openQ };
+    });
+    document.getElementById("readiness").innerHTML = SpecKit.table(
+      ["Page", "Walk through", "Business review", "Implementation", "Required", "Fields on the ladder", "Blocking questions", "What is in the way"],
+      rows.map(r => [
+        `<a href="${esc(r.s._file)}">${esc(r.s.page.name)}</a>`,
+        r.g[0].pass ? "Yes" : `<span class="tbd">No</span>`,
+        r.g[1].pass ? "Yes" : `<span class="tbd">No</span>`,
+        r.g[2].pass ? "Yes" : `<span class="tbd">No</span>`,
+        r.c.pct + "%",
+        (function () { const l = [0,0,0,0,0]; (r.s.data || []).forEach(d => l[Math.max(SpecKit.rung(d), -1) + 1]++);
+          return l.slice(1).map((n, i) => `L${i}:${n}`).join(" ") + (l[0] ? ` <span class="tbd">below L0:${l[0]}</span>` : ""); })(),
+        r.openQ ? `<span class="marker marker--unanswered">${r.openQ}</span>` : "0",
+        esc((r.g[2].why[0] || "nothing")) + (r.g[2].why.length > 1 ? ` (+${r.g[2].why.length - 1})` : "")
+      ]));
+    const totalQ = ok.reduce((n, s) => n + (s.questions || []).length, 0);
+    document.getElementById("qcount").textContent = totalQ;
+    const tb = document.getElementById("tb-q-count"); if (tb) tb.textContent = "· " + totalQ;
+  }
+
+  const byFile = {}; ok.forEach(s => byFile[s._file] = s);
+  document.getElementById("pages").innerHTML = (app.menu || []).map(m => {
+    const s = byFile[m.href];
+    const c = s ? SpecKit.coverage(s) : null;
+    return `<a class="page-card ${m.built ? "" : "is-unbuilt"}" href="${esc(m.href)}">
+      <div class="page-card-top"><span class="page-card-name">${esc(m.name)}</span>
+        <span class="marker marker--${m.built ? (s && s.page.buildStatus || "new") : "scope"}">${m.built ? esc((s && s.page.buildStatus) || "drawn") : "not drawn"}</span></div>
+      <div class="page-card-desc">${s ? esc((s.purpose || "").slice(0, 130)) + "…" : "Nobody has drawn this page yet. It stays listed so the gap is visible rather than forgotten."}</div>
+      ${c ? SpecKit.coverageBar(s) : ""}</a>`;
+  }).join("");
+})();
+</script>
+</body>
+</html>

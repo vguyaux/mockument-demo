@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Due Diligence — mockument page</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="../assets/spec.css" />
+<script>(function(){var s=localStorage.getItem('spec-theme')||'system';var t=s==='system'?(window.matchMedia('(prefers-color-scheme:light)').matches?'light':'dark'):s;if(t==='light')document.documentElement.classList.add('light');})();</script>
+</head>
+<body>
+<header class="topbar" id="topbar"></header>
+<div class="shell">
+  <aside class="sidebar" id="sidebar"></aside>
+  <main class="main">
+    <div id="page-head"></div>
+
+    <section class="block" id="mock-block">
+      <div class="block-head"><span class="block-num">05</span><span class="block-title">The mock frame</span>
+        <span class="block-for">walk it — do not read it</span></div>
+      <p class="block-note">Two tabs, two separate tables: the reviews that were carried out, and the documents that were
+        uploaded. The specification is explicit that these are not one list.</p>
+
+      <div class="mock-shell" id="mock">
+        <div class="mock-controls"></div>
+        <div class="mock-stage" data-device="desktop">
+          <div id="role-note"></div>
+          <div id="state-note"></div>
+
+          <div class="mock-view is-on" data-device="desktop" data-state="default">
+            <div class="wf">
+              <div class="wf-row">
+                <nav class="wf-menu">
+                  <a href="page-home.html">Home</a>
+                  <a href="page-book-of-business.html">Book of Business</a>
+                  <a href="page-monitoring.html">Monitoring</a>
+                  <a class="is-on" href="page-due-diligence.html">Due Diligence</a>
+                  <a href="page-analytics.html">Analytics</a>
+                </nav>
+                <div class="wf-col wf-pad">
+                  <div class="wf-row">
+                    <span class="wf-tab is-on" data-el="CTL-01" data-mock-tab="pane-reviews">Reviews</span>
+                    <span class="wf-tab" data-el="CTL-02" data-mock-tab="pane-docs">Documentation</span>
+                  </div>
+
+                  <div class="wf-pane is-on" id="pane-reviews">
+                    <div class="wf-box" data-el="EL-01">
+                      <div class="wf-label">Filters · component CMP-04</div>
+                      <div class="wf-row" style="gap:8px;flex-wrap:wrap;align-items:center">
+                        <span class="wf-chip" data-el="CTL-03">search</span>
+                        <span class="wf-chip" data-el="CTL-04">Mutual Fund · ETF · Equity</span>
+                        <span class="wf-chip" data-el="CTL-05">Owned · All · Not owned</span>
+                        <span class="wf-chip" data-el="CTL-06">Complete · All · Draft</span>
+                        <span class="wf-chip" data-el="CTL-07">Filters</span>
+                        <span class="wf-chip" data-el="CTL-08">Save view</span>
+                        <span class="wf-chip" data-el="EL-08">pinned views</span>
+                        <span class="wf-chip" data-el="EL-09">research note</span>
+                      </div>
+                    </div>
+                    <div class="wf-box" data-el="EL-02" style="margin-top:10px">
+                      <div class="wf-label">Reviews · newest first</div>
+                      <table class="wf-table">
+                        <thead><tr><th>Security</th><th>Date of review</th><th>Document ID</th><th>Status</th><th>Outcome</th><th>Next review</th><th>Owned</th></tr></thead>
+                        <tbody>
+                          <tr data-el="CTL-12"><td>ABC Growth Fund</td><td>2026-04-11</td><td>DOC-2026-0142</td><td>Complete</td><td data-el="EL-06">Positive</td><td data-el="EL-07">2027-04-11</td><td data-el="EL-05">Owned</td></tr>
+                          <tr><td>Sable Trust</td><td>2026-03-02</td><td>DOC-2026-0119</td><td>Complete</td><td>Undetermined</td><td>2027-03-02</td><td>Not owned</td></tr>
+                          <tr><td>Halden Equity</td><td>2026-08-14</td><td>—</td><td>Draft</td><td>—</td><td>—</td><td>Owned</td></tr>
+                        </tbody>
+                      </table>
+                      <div class="wf-text" style="margin-top:6px">A complete row opens the document read-only; a draft row
+                        resumes the review where it was left.</div>
+                    </div>
+                  </div>
+
+                  <div class="wf-pane" id="pane-docs">
+                    <div class="wf-box" data-el="EL-03">
+                      <div class="wf-label">Toolbar</div>
+                      <div class="wf-row" style="gap:8px;flex-wrap:wrap;align-items:center">
+                        <span class="wf-chip" data-el="CTL-09">search</span>
+                        <span class="wf-chip" data-el="CTL-10">Any report · Research report · Research note</span>
+                        <span class="wf-chip" data-el="CTL-07">Filters</span>
+                        <span class="wf-chip" data-el="CTL-11">Upload</span>
+                      </div>
+                    </div>
+                    <div class="wf-box" data-el="EL-04" style="margin-top:10px">
+                      <div class="wf-label">Documents · four confirmed columns</div>
+                      <table class="wf-table">
+                        <thead><tr><th>Security</th><th>Document name</th><th>Type</th><th>Date uploaded</th></tr></thead>
+                        <tbody>
+                          <tr><td>ABC Growth Fund</td><td>Annual report 2026</td><td>Any report</td><td>2026-05-02</td></tr>
+                          <tr><td>XYZ Index ETF</td><td>Manager research</td><td>Research report</td><td>2026-04-20</td></tr>
+                          <tr><td>Northline Equity</td><td>Call notes</td><td>Research note</td><td>2026-04-02</td></tr>
+                        </tbody>
+                      </table>
+                      <div class="wf-text" style="margin-top:6px">A row opens the uploaded document in a new tab.</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="mock-view" data-device="desktop" data-state="empty">
+            <div class="wf wf-pad">
+              <div class="wf-box" data-el="EL-02">
+                <div class="wf-label">Reviews</div>
+                <div class="wf-strong">No reviews recorded yet.</div>
+                <div class="wf-text">Wording not recorded in the source specification. This is the ordinary state for a new
+                  advisor, and the page is an audit repository — what it says when it is empty matters.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="mock-caption">Structure only. Document IDs and dates follow the examples in the source specification.</div>
+      </div>
+    </section>
+
+    <div id="spec-body"></div>
+    <footer class="footer"><span>Buckler mockument · converted from the functional specification</span>
+      <span>Walk it, question it, then build it.</span></footer>
+  </main>
+</div>
+<aside class="inspector" id="inspector"></aside>
+
+<script type="application/json" id="spec">
+{
+  "kit": "honest-mockument/v1",
+  "page": { "id": "due-diligence", "name": "Due Diligence", "route": "/due-diligence", "buildStatus": "modify", "version": "0.1", "updated": "2026-08-18", "owner": "Product" },
+  "represents": { "process": "Daily book supervision", "step": "Record the due diligence review", "stepId": "STEP-03", "deviceTypes": [{ "name": "desktop" }] },
+  "purpose": "The audit repository of the advisor's due diligence work, in two tabs. Reviews holds completed and draft reviews, including securities no longer held or never held. Documentation holds everything uploaded against a security. It is the page somebody opens years later to show what was done and when.",
+
+  "availableTo": [
+    { "role": "Advisor", "mayReach": true, "differs": "Own reviews and documents.", "mustNotSee": "" },
+    { "role": "Compliance", "mayReach": true, "differs": "Not described for this page in the source specification, although the page exists for audit.", "mustNotSee": "" }
+  ],
+
+  "elements": [
+    { "id": "EL-01", "name": "Reviews filter bar", "shows": "Search, security type chips, an owned segmented control, a completion segmented control, and the shared filter builder", "source": "Review records", "marker": "required", "trace": "FS-DD-02" },
+    { "id": "EL-02", "name": "Reviews table", "shows": "Per review: security, date of review, document ID, status, outcome, next review date, and whether the security is currently owned", "source": "Review records", "marker": "required", "trace": "FS-DD-03", "note": "Strictly due diligence reviews — nothing from the documentation tab appears here." },
+    { "id": "EL-03", "name": "Documentation toolbar", "shows": "Search over security and document name, document type chips, the filter builder, and upload", "source": "Documents", "marker": "required", "trace": "FS-DD-04" },
+    { "id": "EL-04", "name": "Documentation table", "shows": "Per document: linked security, document name, document type, date uploaded", "source": "Documents", "marker": "required", "trace": "FS-DD-05", "note": "These four columns are confirmed as required." },
+    { "id": "EL-05", "name": "Owned badge", "shows": "Owned or Not owned, checked live against current book membership rather than stored on the review", "source": "Book of business membership", "marker": "required", "trace": "FS-DD-06" },
+    { "id": "EL-06", "name": "Outcome", "shows": "Positive, Negative or Undetermined on a complete review; a dash on a draft", "source": "Review records", "marker": "required", "trace": "FS-DD-07" },
+    { "id": "EL-07", "name": "Next review date", "shows": "When the next review falls due, or a dash on a draft", "source": "Review records", "marker": "required", "trace": "FS-DD-08" },
+    { "id": "EL-08", "name": "Saved view tabs", "shows": "Personal views saved on either tab, pinnable across the top", "source": "Saved views", "marker": "proposed", "trace": "", "note": "Added for consistency with the rest of the app, and called out at request time as possibly not very useful on the Reviews tab, whose filters are already narrow." },
+    { "id": "EL-09", "name": "Research note", "shows": "A note written in the app rather than uploaded as a file", "source": "", "marker": "out of scope", "trace": "", "note": "Named as future development. How one is created is not settled — see Q-02." }
+  ],
+
+  "controls": [
+    { "id": "CTL-01", "name": "Reviews tab", "effect": "alters the screen", "serverData": false, "leadsTo": "The reviews table", "confirm": "None", "marker": "required", "trace": "FS-DD-01", "note": "The default tab." },
+    { "id": "CTL-02", "name": "Documentation tab", "effect": "alters the screen", "serverData": false, "leadsTo": "The documents table", "confirm": "None", "marker": "required", "trace": "FS-DD-01" },
+    { "id": "CTL-03", "name": "Reviews search", "effect": "alters the screen", "serverData": true, "confirm": "None", "marker": "required", "trace": "FS-DD-02", "note": "Matches by security, ticker or Fundserv code." },
+    { "id": "CTL-04", "name": "Security type chips", "effect": "alters the screen", "serverData": false, "confirm": "None", "marker": "required", "trace": "FS-DD-02", "note": "Mutual Fund, ETF, Equity — multi-select." },
+    { "id": "CTL-05", "name": "Owned segmented control", "effect": "alters the screen", "serverData": false, "confirm": "None", "marker": "required", "trace": "FS-DD-02", "note": "Owned / All / Not owned — mutually exclusive." },
+    { "id": "CTL-06", "name": "Completion segmented control", "effect": "alters the screen", "serverData": false, "confirm": "None", "marker": "required", "trace": "FS-DD-02", "note": "Complete / All / Draft — mutually exclusive." },
+    { "id": "CTL-07", "name": "Filter builder", "effect": "alters the screen", "serverData": false, "leadsTo": "The shared filter builder", "confirm": "None", "marker": "required", "trace": "FS-FILTER-01" },
+    { "id": "CTL-08", "name": "Save view", "effect": "acts on data", "serverData": true, "confirm": "None", "marker": "proposed", "trace": "", "note": "Consistency with other pages rather than a stated need on this one." },
+    { "id": "CTL-09", "name": "Documentation search", "effect": "alters the screen", "serverData": true, "confirm": "None", "marker": "required", "trace": "FS-DD-04", "note": "Matches by security or document name — this is how a document is found." },
+    { "id": "CTL-10", "name": "Document type chips", "effect": "alters the screen", "serverData": false, "confirm": "None", "marker": "required", "trace": "FS-DD-04", "note": "A confirmed list; “Due diligence report” was deliberately removed from it, because a review is a system-generated record rather than an uploaded file." },
+    { "id": "CTL-11", "name": "Upload", "effect": "acts on data", "serverData": true, "confirm": "The upload tags the file with a document type.", "marker": "unanswered", "trace": "FS-DD-09", "note": "Confirmed that an upload flow lives here; its placement and whether it is a modal or inline is not settled.", "questions": ["Q-03"] },
+    { "id": "CTL-12", "name": "Row action", "effect": "alters the screen", "serverData": true, "leadsTo": "The document, or the draft review", "confirm": "None", "marker": "required", "trace": "FS-DD-03", "note": "A complete review opens read-only in a new tab; a draft resumes editing; a document opens as a PDF in a new tab." }
+  ],
+
+  "data": [
+    { "field": "Review", "metricId": "F-REVIEW", "means": "One due diligence review of one security, complete or draft", "holds": "a list", "unit": "record", "provenance": "held by us", "source": "Review records", "calculated": false, "sample": "DOC-2026-0142" },
+    { "field": "Date of review", "metricId": "F-REVIEWDATE", "means": "When the review was completed, or started if it is still a draft", "holds": "one value", "provenance": "held by us", "source": "Review records", "calculated": false, "sample": "2026-04-11" },
+    { "field": "Document ID", "metricId": "F-DOCID", "means": "The identifier a reviewer or auditor quotes", "holds": "one value", "unit": "text", "nullRule": "A draft has no document ID and shows a dash", "provenance": "computed", "source": "Review records", "calculated": true, "calculation": "assigned when a review is completed", "sample": "DOC-2026-0142" },
+    { "field": "Outcome", "metricId": "F-OUTCOME", "means": "The conclusion of the review", "holds": "one value", "unit": "Positive | Negative | Undetermined", "nullRule": "A draft shows a dash", "provenance": "the user", "source": "Review records", "calculated": false, "sample": "Positive" },
+    { "field": "Next review date", "metricId": "F-NEXTREVIEW", "means": "When this security must be reviewed again", "holds": "one value", "nullRule": "A draft shows a dash", "provenance": "held by us", "sample": "2027-04-11" },
+    { "field": "Owned", "metricId": "F-OWNED", "means": "Whether the security is in the advisor's book right now", "holds": "one value", "unit": "Owned | Not owned", "provenance": "computed", "source": "Book of business membership", "calculated": true, "calculation": "live check against current book membership, not stored on the review", "sample": "Owned" },
+    { "field": "Document", "metricId": "F-DOCUMENT", "means": "A file uploaded against a security", "holds": "a list", "unit": "record", "provenance": "the user", "source": "Documents", "calculated": false, "sample": "Annual report 2026" },
+    { "field": "Document type", "metricId": "F-DOCTYPE", "means": "What kind of document it is, from a confirmed list", "holds": "one value", "provenance": "the user", "sample": "Research report" }
+  ],
+
+  "lists": [
+    {
+      "name": "Reviews",
+      "ordering": "Date of review, newest first",
+      "filtering": "Search, security type, owned or not, complete or draft, and the shared filter builder",
+      "selection": "Row action differs by status: complete opens read-only, draft resumes",
+      "nesting": "None",
+      "device": [{ "device": "desktop", "empty": "Not recorded", "one": "", "overflow": "" }]
+    },
+    {
+      "name": "Documents",
+      "ordering": "Date uploaded, newest first",
+      "filtering": "Search over security and document name, and document type",
+      "selection": "Row opens the document in a new tab",
+      "nesting": "None",
+      "device": [{ "device": "desktop", "empty": "Not recorded", "one": "", "overflow": "" }]
+    }
+  ],
+
+  "states": [
+    { "key": "default", "label": "Default", "when": "Reviews exist", "sees": "Reviews tab with filters and the table, newest first", "next": "Open a review, or switch to Documentation" },
+    { "key": "empty", "label": "Empty", "when": "A new advisor, or a filter that excludes everything", "sees": "Not recorded — and this is the ordinary state for a new advisor", "next": "" },
+    { "key": "one", "label": "One item", "when": "One review or document matches", "sees": "", "next": "" },
+    { "key": "overflow", "label": "More than fits", "when": "Years of reviews", "sees": "", "next": "" },
+    { "key": "loading", "label": "Loading", "when": "The table is loading", "sees": "", "next": "" },
+    { "key": "error", "label": "Error", "when": "A document cannot be opened", "sees": "", "next": "" },
+    { "key": "restricted", "label": "Restricted", "when": "Another advisor's reviews", "sees": "", "next": "" }
+  ],
+
+  "failures": [
+    { "noticed": "A document will not open", "thenWhat": "", "whoIsTold": "" },
+    { "noticed": "A review shows Not owned for a security I do hold", "thenWhat": "The badge is a live check against book membership, so this points at the book rather than the review", "whoIsTold": "" },
+    { "noticed": "I uploaded a file and cannot find it", "thenWhat": "Search matches security and document name; a file named badly is hard to recover", "whoIsTold": "" }
+  ],
+
+  "remembered": { "answer": "", "marker": "unanswered", "whoMustAnswer": "Product owner", "duration": "", "clearable": "", "note": "Which tab opens first, and whether the last filter survives, are not stated." },
+  "liveChange": { "answer": "", "marker": "unanswered", "whoMustAnswer": "Product owner", "howTold": "", "midAction": "" },
+
+  "connections": {
+    "from": [
+      { "label": "Monitoring — closing a SEV1 requires a review recorded here", "href": "page-monitoring.html" },
+      { "label": "Book of Business — the review behind a status", "href": "page-book-of-business.html" }
+    ],
+    "to": [{ "label": "The document itself, in a new tab", "href": "" }],
+    "components": [{ "id": "CMP-04", "label": "Filter toolbar" }]
+  },
+  "workflows": [{ "id": "WF-01", "name": "Clear a SEV1 alert", "href": "workflow-clear-alert.html", "position": "Step 4 happens here" }],
+
+  "copy": [
+    { "key": "Tab labels", "string": "Reviews · Documentation", "status": "required wording" },
+    { "key": "Outcome values", "string": "Positive · Negative · Undetermined", "status": "required wording" },
+    { "key": "Owned badge", "string": "Owned · Not owned", "status": "required wording" },
+    { "key": "Empty state", "string": "", "status": "placeholder" }
+  ],
+
+  "decisions": [
+    { "what": "Reviews and Documentation are two fully separate tables, not one merged list", "who": "Product owner", "when": "at request time" },
+    { "what": "“Due diligence report” was removed from the document type list: a review is a system-generated record, not an uploaded file", "who": "Product owner", "when": "at request time" },
+    { "what": "The owned badge is a live check against current book membership rather than a stored value", "who": "Product owner", "when": "at request time" },
+    { "what": "There is no settings icon on either tab, because there is no configuration screen for it to open", "who": "Product owner", "when": "at request time" }
+  ],
+
+  "observations": [
+    { "what": "This is the page an auditor reads years later, and it is the page whose empty and error states are least described.", "raisedBy": "Conversion", "when": "2026-08-18" },
+    { "what": "Saved views were added here for consistency rather than need, and the source specification says so itself.", "raisedBy": "Source specification", "when": "2026-08-18" },
+    { "what": "Research Note is treated as a document type in the list and as future development in the notes. Both are true, which will confuse whoever builds the dropdown.", "raisedBy": "Conversion", "when": "2026-08-18" }
+  ],
+
+  "questions": [
+    { "id": "Q-01", "question": "Is tagging a security with a type the same action as categorising a document, or two different things that happen to share a word?", "whyItMatters": "It decides whether one control or two are built", "blocks": "the build", "blocksBuild": true, "whoMustAnswer": "Product owner", "neededBy": "", "affects": ["CTL-10"] },
+    { "id": "Q-02", "question": "How does a research note actually get created — typed in the app, or uploaded like everything else?", "whyItMatters": "It is the one document type that is not a file", "blocks": "the build", "blocksBuild": true, "whoMustAnswer": "Product owner", "neededBy": "", "affects": ["EL-09", "CTL-10"] },
+    { "id": "Q-03", "question": "Where does the upload control sit, and is it a modal or inline?", "whyItMatters": "Upload is confirmed; its placement is not, and it changes the toolbar", "blocks": "business review", "blocksBuild": false, "whoMustAnswer": "Product owner", "neededBy": "", "affects": ["CTL-11"] },
+    { "id": "Q-04", "question": "What do the two tables show when they are empty?", "whyItMatters": "Every advisor starts here empty, and this page is the audit trail", "blocks": "business review", "blocksBuild": false, "whoMustAnswer": "Product owner", "neededBy": "", "affects": ["EL-02", "EL-04"] }
+  ],
+
+  "outOfScope": [
+    { "what": "Research notes as a written-in-app record", "why": "Named as future development" },
+    { "what": "Where documents are stored and how they are retained", "why": "Implementer's, and a records-retention policy question" }
+  ],
+
+  "contract": {
+    "must": [
+      "Two separate tables, one per tab — not a merged list",
+      "The four confirmed documentation columns: security, document name, document type, date uploaded",
+      "Reviews sorted by date of review, newest first; documents by date uploaded",
+      "Row action by status: complete opens read-only, draft resumes, document opens in a new tab",
+      "The owned badge as a live check against current book membership"
+    ],
+    "mustNotInvent": [
+      "How a research note is created (Q-02)",
+      "Whether document categorisation and security tagging are one action (Q-01)",
+      "Empty-state wording (Q-04)",
+      "Any settings or configuration screen for these tabs"
+    ],
+    "askFirst": [
+      "Placement of the upload control (Q-03)",
+      "Which tab opens first on a return visit"
+    ],
+    "acceptance": [
+      "A completed review can be reached from the alert that required it",
+      "A document opens in a new tab without losing the filtered list behind it",
+      "Every EL/CTL ID appears in the built page's test IDs"
+    ]
+  }
+}
+</script>
+
+<script src="assets/app-config.js"></script>
+<script src="../assets/spec.js"></script>
+<script>SpecKit.boot("page-due-diligence.html");</script>
+</body>
+</html>

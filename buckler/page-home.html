@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Home — mockument page</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="../assets/spec.css" />
+<script>(function(){var s=localStorage.getItem('spec-theme')||'system';var t=s==='system'?(window.matchMedia('(prefers-color-scheme:light)').matches?'light':'dark'):s;if(t==='light')document.documentElement.classList.add('light');})();</script>
+</head>
+<body>
+<header class="topbar" id="topbar"></header>
+<div class="shell">
+  <aside class="sidebar" id="sidebar"></aside>
+  <main class="main">
+    <div id="page-head"></div>
+
+    <section class="block" id="mock-block">
+      <div class="block-head"><span class="block-num">05</span><span class="block-title">The mock frame</span>
+        <span class="block-for">walk it — do not read it</span></div>
+      <p class="block-note">Converted from the page-by-page functional specification. Click any part to see what backs it;
+        turn on the honesty overlay to see how much of this page the source specification actually settles.</p>
+
+      <div class="mock-shell" id="mock">
+        <div class="mock-controls"></div>
+        <div class="mock-stage" data-device="desktop">
+          <div id="role-note"></div>
+          <div id="state-note"></div>
+
+          <div class="mock-view is-on" data-device="desktop" data-state="default">
+            <div class="wf">
+              <div class="wf-row">
+                <nav class="wf-menu">
+                  <a class="is-on" href="page-home.html">Home</a>
+                  <a href="page-book-of-business.html">Book of Business</a>
+                  <a href="page-monitoring.html">Monitoring</a>
+                  <a href="page-due-diligence.html">Due Diligence</a>
+                  <a href="page-analytics.html">Analytics</a>
+                </nav>
+                <div class="wf-col wf-pad">
+                  <div class="wf-row" style="gap:8px;align-items:center;justify-content:flex-end">
+                    <span class="wf-chip" data-el="EL-10">Last updated 06:14</span>
+                    <span class="wf-chip" data-el="CTL-09"><span data-el="EL-11">Settings</span></span>
+                  </div>
+
+                  <div class="wf-box" data-el="EL-01">
+                    <div class="wf-label">Advisor team header · component CMP-01</div>
+                    <div class="wf-row" style="gap:14px;align-items:center">
+                      <span class="wf-chip" data-el="CTL-01">▾ Team Alpha</span>
+                      <span class="wf-strong">AUM $97M</span>
+                      <span class="wf-text">Positions 4,242</span>
+                    </div>
+                  </div>
+
+                  <div class="wf-box">
+                    <div class="wf-label">Stat strip · four interactive tiles · component CMP-02</div>
+                    <div class="wf-row">
+                      <div class="wf-tile" data-el="CTL-02"><div class="wf-box" data-el="EL-02" style="border:0;padding:0;background:none"><div class="wf-label">SEV1</div><div class="wf-num">12</div><div class="wf-text">$15.3 million exposure</div></div></div>
+                      <div class="wf-tile" data-el="CTL-03"><div class="wf-box" data-el="EL-03" style="border:0;padding:0;background:none"><div class="wf-label">SEV2</div><div class="wf-num">27</div><div class="wf-text">$25.8 million exposure</div></div></div>
+                      <div class="wf-tile" data-el="CTL-04"><div class="wf-box" data-el="EL-04" style="border:0;padding:0;background:none"><div class="wf-label">Outstanding reviews</div><div class="wf-num">43</div><div class="wf-text">25% of securities</div></div></div>
+                      <div class="wf-tile" data-el="CTL-05"><div class="wf-box" data-el="EL-05" style="border:0;padding:0;background:none"><div class="wf-label">Upcoming reviews</div><div class="wf-num">9</div><div class="wf-text">next 30 days</div></div></div>
+                    </div>
+                  </div>
+
+                  <div class="wf-row">
+                    <div class="wf-box" data-el="EL-06" style="flex:1">
+                      <div class="wf-label">Active alerts · SEV1 and SEV2 only</div>
+                      <table class="wf-table">
+                        <thead><tr><th>Tier</th><th>Security</th><th>Sector</th><th>Trigger</th><th>Triggered</th></tr></thead>
+                        <tbody>
+                          <tr data-el="CTL-06"><td>SEV1</td><td data-el="CTL-07">ABC Growth Fund</td><td>Equity</td><td>Drawdown</td><td>2 days ago</td></tr>
+                          <tr><td>SEV2</td><td>XYZ Index ETF</td><td>Index</td><td>Tracking error</td><td>5 days ago</td></tr>
+                          <tr><td>SEV2</td><td>Northline Equity</td><td>Financials</td><td>Concentration</td><td>9 days ago</td></tr>
+                        </tbody>
+                      </table>
+                    </div>
+                    <div class="wf-box" data-el="EL-07" style="flex:1">
+                      <div class="wf-label">Quant screen changes</div>
+                      <table class="wf-table">
+                        <thead><tr><th>Screen</th><th>Security</th><th>Rank</th><th>Status</th></tr></thead>
+                        <tbody>
+                          <tr data-el="CTL-08"><td>Momentum</td><td>ABC Growth Fund</td><td>4</td><td>entered</td></tr>
+                          <tr><td>Quality</td><td>Sable Trust</td><td>—</td><td>exited</td></tr>
+                          <tr><td>Value</td><td>Halden Equity</td><td>9</td><td>entered</td></tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+
+                  <div class="wf-box" data-el="EL-08">
+                    <div class="wf-label">Platform changes since last login</div>
+                    <div class="wf-row" style="gap:18px">
+                      <span class="wf-text">New securities <b>4</b></span>
+                      <span class="wf-text">Removed <b>2</b></span>
+                      <span class="wf-text">Alerts triggered <b>2 · 5 · 8</b></span>
+                      <span class="wf-text">Screens changed <b>3</b></span>
+                      <span class="wf-text">Reviews expired <b>6</b></span>
+                    </div>
+                  </div>
+
+                  <div class="wf-box" data-el="EL-09">
+                    <div class="wf-label">Recent activity · trailing 7 days · narrative</div>
+                    <div class="wf-bar wf-bar--lg"></div><div class="wf-bar wf-bar--md"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="mock-view" data-device="desktop" data-state="empty">
+            <div class="wf wf-pad">
+              <div class="wf-box" data-el="EL-01"><div class="wf-label">Advisor team header</div><div class="wf-strong">Team Alpha · AUM $97M · 4,242 positions</div></div>
+              <div class="wf-box" data-el="EL-06" style="margin-top:10px">
+                <div class="wf-label">Active alerts</div>
+                <div class="wf-strong">Nothing has fired against this book.</div>
+                <div class="wf-text">The specification says each block shows a message when it has nothing to show. The wording of
+                  that message is not recorded — see the copy register.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="mock-caption">Structure only — not a visual design, not real data. Sample values are the ones the source
+          specification uses as examples.</div>
+      </div>
+    </section>
+
+    <div id="spec-body"></div>
+    <footer class="footer"><span>Buckler mockument · converted from the functional specification</span>
+      <span>Walk it, question it, then build it.</span></footer>
+  </main>
+</div>
+<aside class="inspector" id="inspector"></aside>
+
+<script type="application/json" id="spec">
+{
+  "kit": "honest-mockument/v1",
+  "page": { "id": "home", "name": "Home", "route": "/home", "buildStatus": "new", "version": "0.1", "updated": "2026-08-18", "owner": "Product" },
+  "represents": { "process": "Daily book supervision", "step": "See what needs attention today", "stepId": "STEP-01", "deviceTypes": [{ "name": "desktop" }] },
+  "purpose": "The landing page. When an advisor logs in it carries everything needed to understand book status, open issues and what needs attention today, without scrolling: team identity and size, severity and review counts, the two tables that matter, what changed since last login, and a narrative of the past week.",
+
+  "availableTo": [
+    { "role": "Advisor", "mayReach": true, "differs": "Own book. Everything on the page is scoped to the team selected in the header.", "mustNotSee": "" },
+    { "role": "Advisor team lead", "mayReach": true, "differs": "Can switch between the teams and books they cover; switching refreshes the whole page.", "mustNotSee": "" }
+  ],
+
+  "elements": [
+    { "id": "EL-01", "name": "Advisor team header", "shows": "Team selector, total AUM for the selected team, total position count", "source": "Book of business membership", "marker": "required", "trace": "FS-HOME-01", "note": "Same header pattern as the Book of Business summary strip, scoped to a team. Multi-book selector confirmed." },
+    { "id": "EL-02", "name": "SEV1 tile", "shows": "Count of open SEV1 alerts and the AUM exposure behind them, in red as the most severe indicator", "source": "Alert store + positions", "marker": "required", "trace": "FS-HOME-02" },
+    { "id": "EL-03", "name": "SEV2 tile", "shows": "Count of open SEV2 alerts and their AUM exposure, in burnt orange", "source": "Alert store + positions", "marker": "required", "trace": "FS-HOME-03" },
+    { "id": "EL-04", "name": "Outstanding reviews tile", "shows": "Count of securities with no review completed, and that count as a percentage of all securities, in neutral slate", "source": "Review records", "marker": "required", "trace": "FS-HOME-04" },
+    { "id": "EL-05", "name": "Upcoming reviews tile", "shows": "Count of securities whose review falls due soon. No exposure figure on this tile.", "source": "Review records", "marker": "required", "trace": "FS-HOME-05", "note": "The window that counts as “upcoming” is not stated on this page — see Q-02." },
+    { "id": "EL-06", "name": "Active alerts table", "shows": "Open SEV1 and SEV2 alerts: tier, security, sector or category, trigger, date triggered", "source": "Alert store", "marker": "required", "trace": "FS-HOME-06", "note": "Deliberately scoped to SEV1 and SEV2 only — a recorded decision, and a deliberate divergence from the fuller list on Monitoring." },
+    { "id": "EL-07", "name": "Quant screen changes table", "shows": "Securities that entered or left the top of a screen: screen, security, rank, status", "source": "Screen membership run", "marker": "required", "trace": "FS-HOME-07" },
+    { "id": "EL-08", "name": "Platform changes summary", "shows": "Since last login: new securities, securities removed, alerts triggered by tier, screens changed, reviews expired", "source": "Change log since last login", "marker": "required", "trace": "FS-HOME-08" },
+    { "id": "EL-09", "name": "Recent activity summary", "shows": "The same underlying activity as the platform changes, written as a narrative over the trailing seven days. Read-only.", "source": "Change log", "marker": "required", "trace": "FS-HOME-09" },
+    { "id": "EL-10", "name": "Last updated", "shows": "A single timestamp saying when this page's data was last refreshed", "source": "Last successful run", "marker": "required", "trace": "FS-HOME-10", "note": "Stated as “top-right corner, for now” — placement itself is not settled." },
+    { "id": "EL-11", "name": "Settings quick link", "shows": "A link to the settings page showing last upload time and rejected securities", "source": "", "marker": "unanswered", "trace": "", "note": "The destination page does not exist. The specification says so plainly: this link has nowhere to go.", "questions": ["Q-01"] }
+  ],
+
+  "controls": [
+    { "id": "CTL-01", "name": "Team selector", "effect": "both", "serverData": true, "leadsTo": "The same page, rebuilt for another team", "confirm": "None. Switching does a full page refresh — a recorded decision, not a client-side swap.", "marker": "required", "trace": "FS-HOME-01" },
+    { "id": "CTL-02", "name": "SEV1 tile", "effect": "alters the screen", "serverData": true, "leadsTo": "SEV1 active alerts", "href": "page-monitoring.html", "confirm": "None", "marker": "required", "trace": "FS-HOME-02" },
+    { "id": "CTL-03", "name": "SEV2 tile", "effect": "alters the screen", "serverData": true, "leadsTo": "SEV2 active alerts", "href": "page-monitoring.html", "confirm": "None", "marker": "required", "trace": "FS-HOME-03" },
+    { "id": "CTL-04", "name": "Outstanding reviews tile", "effect": "alters the screen", "serverData": true, "leadsTo": "Outstanding reviews", "confirm": "None", "marker": "unanswered", "trace": "FS-HOME-04", "note": "The specification names the destination only; which page it opens and with what filter is not stated.", "questions": ["Q-03"] },
+    { "id": "CTL-05", "name": "Upcoming reviews tile", "effect": "alters the screen", "serverData": true, "leadsTo": "Upcoming reviews", "confirm": "None", "marker": "unanswered", "trace": "FS-HOME-05", "questions": ["Q-03"] },
+    { "id": "CTL-06", "name": "Alert row", "effect": "alters the screen", "serverData": true, "leadsTo": "The alerts tab", "href": "page-monitoring.html", "confirm": "None", "marker": "required", "trace": "FS-HOME-06", "note": "The row and the security name inside it are two distinct click targets." },
+    { "id": "CTL-07", "name": "Security name inside a row", "effect": "alters the screen", "serverData": true, "leadsTo": "That security", "confirm": "None", "marker": "required", "trace": "FS-HOME-06" },
+    { "id": "CTL-08", "name": "Quant screen row and screen name", "effect": "alters the screen", "serverData": true, "leadsTo": "The screen, or the security", "confirm": "None", "marker": "required", "trace": "FS-HOME-07", "note": "Same row-versus-name split as the alerts table." },
+    { "id": "CTL-09", "name": "Settings quick link", "effect": "alters the screen", "serverData": false, "leadsTo": "Settings", "href": "page-settings.html", "confirm": "None", "marker": "unanswered", "trace": "", "questions": ["Q-01"] }
+  ],
+
+  "data": [
+    { "field": "Team AUM", "metricId": "F-AUM", "means": "Total assets under management for the selected team", "holds": "one value", "unit": "$ · “$15.3 million”, or “$85.3k” below a million", "provenance": "computed", "source": "Positions", "calculated": true, "calculation": "sum of position value across the team's securities", "sample": "$97M" },
+    { "field": "Positions", "metricId": "F-POS", "means": "Total position count for the selected team", "holds": "one value", "unit": "integer", "provenance": "computed", "source": "Positions", "calculated": true, "calculation": "count of positions across the team's securities", "sample": "4,242" },
+    { "field": "Open alerts by tier", "metricId": "F-ALERTCOUNT", "means": "How many alerts are open at each severity", "holds": "one value", "provenance": "computed", "sample": "12 / 27" },
+    { "field": "AUM exposure by tier", "metricId": "F-EXPOSURE", "means": "Total AUM of the securities carrying an open alert at that tier", "holds": "one value", "unit": "$ · “$15.3 million”", "provenance": "computed", "sample": "$15.3 million" },
+    { "field": "Outstanding reviews", "metricId": "F-OUTSTANDING", "means": "Securities with no completed review, as a count and as a share of all securities", "holds": "one value", "provenance": "computed", "sample": "43 · 25%" },
+    { "field": "Alert record", "metricId": "F-ALERT", "means": "One trigger firing against one security: tier, security, sector or category, trigger, date triggered", "holds": "a list", "provenance": "computed", "sample": "SEV1 · ABC Growth Fund · drawdown" },
+    { "field": "Screen membership change", "metricId": "F-SCREENCHANGE", "means": "A security entering or leaving the top of a screen, with its rank", "holds": "a list", "provenance": "computed", "sample": "Momentum · entered · rank 4" },
+    { "field": "Change since last login", "metricId": "F-CHANGES", "means": "New securities, removals, alerts triggered by tier, screens changed and reviews expired since the advisor last logged in", "holds": "a list", "provenance": "computed", "sample": "4 new · 2 removed" },
+    { "field": "Last updated", "metricId": "F-UPDATED", "means": "When this page's data was last refreshed", "holds": "one value", "provenance": "computed", "sample": "06:14" }
+  ],
+
+  "lists": [
+    {
+      "name": "Active alerts",
+      "ordering": "By severity, per the source specification",
+      "filtering": "Not filterable on this page — the page shows SEV1 and SEV2 only",
+      "selection": "Row opens the alerts tab; the security name opens the security",
+      "nesting": "None",
+      "device": [
+        { "device": "desktop", "empty": "A message in place of the table — wording not recorded", "one": "", "overflow": "" }
+      ]
+    },
+    {
+      "name": "Quant screen changes",
+      "ordering": "",
+      "filtering": "Not filterable on this page",
+      "selection": "Row opens the screen; the security name opens the security",
+      "nesting": "None",
+      "device": [
+        { "device": "desktop", "empty": "A message in place of the table — wording not recorded", "one": "", "overflow": "" }
+      ]
+    }
+  ],
+
+  "states": [
+    { "key": "default", "label": "Default", "when": "The advisor has a book and something to look at", "sees": "Header, four tiles, two tables, the change strip and the narrative — all without scrolling", "next": "Open an alert, or work the review list" },
+    { "key": "empty", "label": "Empty", "when": "A block has nothing to show — no alerts, no screen changes, no commentary", "sees": "A message in place of that block. The specification requires the message; it does not give its wording.", "next": "Nothing on this page" },
+    { "key": "one", "label": "One item", "when": "A table holds a single row", "sees": "", "next": "" },
+    { "key": "overflow", "label": "More than fits", "when": "A table holds more rows than the page can show without scrolling — the page is meant to fit without scrolling", "sees": "", "next": "" },
+    { "key": "loading", "label": "Loading", "when": "The page is opened while the overnight refresh is still running", "sees": "", "next": "" },
+    { "key": "error", "label": "Error", "when": "The refresh did not complete", "sees": "", "next": "" },
+    { "key": "restricted", "label": "Restricted", "when": "A team the person may not see is selected", "sees": "", "next": "" }
+  ],
+
+  "failures": [
+    { "noticed": "The tiles and the tables disagree", "thenWhat": "", "whoIsTold": "" },
+    { "noticed": "I click Settings and nothing happens", "thenWhat": "The destination does not exist yet — see Q-01", "whoIsTold": "" }
+  ],
+
+  "remembered": { "answer": "", "marker": "unanswered", "whoMustAnswer": "Product owner", "duration": "", "clearable": "" },
+  "liveChange": { "answer": "", "marker": "unanswered", "whoMustAnswer": "Product owner", "howTold": "", "midAction": "" },
+
+  "connections": {
+    "from": [{ "label": "Sign-in", "href": "" }],
+    "to": [
+      { "label": "Monitoring — the alert tiles and the alerts table route here", "href": "page-monitoring.html" },
+      { "label": "Book of Business — securities and review status", "href": "page-book-of-business.html" },
+      { "label": "Settings — does not exist yet", "href": "page-settings.html" }
+    ],
+    "components": [{ "id": "CMP-01", "label": "Header strip" }, { "id": "CMP-02", "label": "Stat tile" }, { "id": "CMP-03", "label": "Severity badge" }]
+  },
+  "workflows": [{ "id": "WF-01", "name": "Clear a SEV1 alert", "href": "workflow-clear-alert.html", "position": "Step 1 happens here" }],
+
+  "copy": [
+    { "key": "AUM format", "string": "$15.3 million · $85.3k below a million", "status": "required wording", "note": "Stated explicitly in the source specification." },
+    { "key": "Empty block message", "string": "", "status": "placeholder", "note": "The specification requires a message and does not give one." },
+    { "key": "Tile labels", "string": "SEV1 · SEV2 · Outstanding Reviews · Upcoming Reviews", "status": "required wording" }
+  ],
+
+  "decisions": [
+    { "what": "Active alerts on Home stays scoped to SEV1 and SEV2 only, diverging from the fuller list elsewhere", "who": "Product owner", "when": "at request time" },
+    { "what": "Switching team does a full page refresh rather than a client-side swap", "who": "Product owner", "when": "at request time" },
+    { "what": "Supervision is a separate page, not a view inside Home", "who": "Product owner", "when": "at request time" },
+    { "what": "The multi-book team selector is built for advisors covering several books", "who": "Product owner", "when": "at request time" }
+  ],
+
+  "observations": [
+    { "what": "The page is required to fit without scrolling, and it carries five stacked blocks including two tables. What gives way first when a table is long is not stated.", "raisedBy": "Conversion", "when": "2026-08-18" },
+    { "what": "Three of the four tiles route somewhere; the specification names the destinations but not the filters they arrive with.", "raisedBy": "Conversion", "when": "2026-08-18" },
+    { "what": "Every figure on the page is a number about time — since last login, trailing seven days, next review — and none of them says what it is as of.", "raisedBy": "Conversion", "when": "2026-08-18" }
+  ],
+
+  "questions": [
+    { "id": "Q-01", "question": "Where does the Settings quick link go, and when will that page exist?", "whyItMatters": "The link is drawn on the landing page and currently reaches nothing", "blocks": "the build", "blocksBuild": true, "whoMustAnswer": "Product owner", "neededBy": "", "affects": ["EL-11", "CTL-09"] },
+    { "id": "Q-02", "question": "What window counts as an upcoming review — 30 days, or something else?", "whyItMatters": "It decides what the fourth tile counts", "blocks": "the build", "blocksBuild": true, "whoMustAnswer": "Product owner", "neededBy": "", "affects": ["EL-05"] },
+    { "id": "Q-03", "question": "Which page does each tile open, and with which filter already applied?", "whyItMatters": "The specification names destinations only; the filtered state is what makes a tile useful", "blocks": "the build", "blocksBuild": true, "whoMustAnswer": "Product owner", "neededBy": "", "affects": ["CTL-04", "CTL-05"] },
+    { "id": "Q-04", "question": "What is each figure on this page as of, and how long after that does it become visible?", "whyItMatters": "A landing page of counts with no as-of time cannot be trusted or tested; it is also what the data ladder needs to move past L0", "blocks": "the build", "blocksBuild": true, "whoMustAnswer": "Data owner with the product owner", "neededBy": "", "affects": ["EL-02", "EL-03", "EL-06", "EL-08"] },
+    { "id": "Q-05", "question": "What does an empty block actually say?", "whyItMatters": "Five blocks can each be empty on day one of a new book", "blocks": "business review", "blocksBuild": false, "whoMustAnswer": "Product owner", "neededBy": "", "affects": ["EL-06", "EL-07", "EL-09"] }
+  ],
+
+  "outOfScope": [
+    { "what": "Supervision", "why": "Decided to be a separate page, not a view within Home" },
+    { "what": "How the underlying evaluation runs are scheduled or retried", "why": "Implementer's" }
+  ],
+
+  "contract": {
+    "must": [
+      "The five stacked blocks in the order given, fitting without scrolling",
+      "SEV1 red, SEV2 burnt orange, informational counts in neutral slate",
+      "Active alerts scoped to SEV1 and SEV2 only",
+      "AUM formatted as “$15.3 million”, or “$85.3k” below a million",
+      "Row and security-name as two distinct click targets in both tables"
+    ],
+    "mustNotInvent": [
+      "The window that counts as an upcoming review (Q-02)",
+      "Where the tiles land and with what filter (Q-03)",
+      "The wording of any empty block (Q-05)",
+      "A refresh cadence or as-of time for any figure (Q-04)"
+    ],
+    "askFirst": [
+      "Anything about the Settings destination (Q-01)",
+      "Whether this page updates while it is open — not settled"
+    ],
+    "acceptance": [
+      "Every state in the States block can be produced with example data",
+      "No figure ships without an as-of time visible or documented",
+      "Every EL/CTL ID appears in the built page's test IDs"
+    ]
+  }
+}
+</script>
+
+<script src="assets/app-config.js"></script>
+<script src="../assets/spec.js"></script>
+<script>SpecKit.boot("page-home.html");</script>
+</body>
+</html>

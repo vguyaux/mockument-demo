@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Analytics — mockument page</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="../assets/spec.css" />
+<script>(function(){var s=localStorage.getItem('spec-theme')||'system';var t=s==='system'?(window.matchMedia('(prefers-color-scheme:light)').matches?'light':'dark'):s;if(t==='light')document.documentElement.classList.add('light');})();</script>
+</head>
+<body>
+<header class="topbar" id="topbar"></header>
+<div class="shell">
+  <aside class="sidebar" id="sidebar"></aside>
+  <main class="main">
+    <div id="page-head"></div>
+
+    <section class="block" id="mock-block">
+      <div class="block-head"><span class="block-num">05</span><span class="block-title">The mock frame</span>
+        <span class="block-for">walk it — do not read it</span></div>
+      <p class="block-note">A free-format canvas rather than a fixed page: the advisor builds the view by adding, arranging
+        and configuring widgets. Most of what is drawn here is proposed rather than settled, and the overlay shows it.</p>
+
+      <div class="mock-shell" id="mock">
+        <div class="mock-controls"></div>
+        <div class="mock-stage" data-device="desktop">
+          <div id="role-note"></div>
+          <div id="state-note"></div>
+
+          <div class="mock-view is-on" data-device="desktop" data-state="default">
+            <div class="wf">
+              <div class="wf-row">
+                <nav class="wf-menu">
+                  <a href="page-home.html">Home</a>
+                  <a href="page-book-of-business.html">Book of Business</a>
+                  <a href="page-monitoring.html">Monitoring</a>
+                  <a href="page-due-diligence.html">Due Diligence</a>
+                  <a class="is-on" href="page-analytics.html">Analytics</a>
+                </nav>
+                <div class="wf-col wf-pad">
+                  <div class="wf-box" data-el="EL-01">
+                    <div class="wf-label">Header · component CMP-01, without the book filters</div>
+                    <div class="wf-row" style="gap:16px;align-items:center">
+                      <span class="wf-strong">ABC123 · Richard Owen</span>
+                      <span class="wf-text">AUM $97M</span>
+                      <span class="wf-text">Positions 4,242</span>
+                      <span class="wf-text" data-el="EL-02">Alerts 82</span>
+                    </div>
+                  </div>
+
+                  <div class="wf-row" data-el="EL-03" style="gap:6px">
+                    <span class="wf-tab is-on">Default canvas</span>
+                    <span class="wf-tab">Concentration</span>
+                    <span class="wf-tab">Review pressure</span>
+                    <span class="wf-chip" data-el="CTL-01">Save view</span>
+                    <span class="wf-chip" data-el="CTL-02">Pin as tab</span>
+                  </div>
+
+                  <div class="wf-row">
+                    <div class="wf-col" style="flex:2">
+                      <div class="wf-box" data-el="EL-04">
+                        <div class="wf-label">Widget canvas · drag to rearrange, resize, add and close</div>
+                        <div class="wf-row">
+                          <div class="wf-tile" data-el="EL-05"><div class="wf-label">KPI widget</div><div class="wf-num">78</div><div class="wf-text">average score</div></div>
+                          <div class="wf-tile" data-el="EL-06"><div class="wf-label">Time series widget</div><div class="wf-bar wf-bar--lg"></div><div class="wf-bar wf-bar--md"></div></div>
+                        </div>
+                        <div class="wf-row" style="margin-top:8px">
+                          <div class="wf-tile" data-el="EL-07"><div class="wf-label">Scatter widget</div><div class="wf-text">score against AUM, by category</div><div class="wf-bar wf-bar--lg"></div></div>
+                          <div class="wf-tile" data-el="EL-08"><div class="wf-label">Table widget</div><div class="wf-bar wf-bar--md"></div><div class="wf-bar wf-bar--lg"></div></div>
+                        </div>
+                        <div class="wf-row" style="gap:8px;margin-top:8px;align-items:center">
+                          <span class="wf-chip" data-el="CTL-03">expand</span>
+                          <span class="wf-chip" data-el="CTL-04">widget filter</span>
+                          <span class="wf-chip" data-el="CTL-05">resize</span>
+                          <span class="wf-chip" data-el="CTL-08">drag</span>
+                          <span class="wf-chip" data-el="CTL-06">close</span>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="wf-col" style="max-width:230px">
+                      <div class="wf-box" data-el="EL-09">
+                        <div class="wf-label">Widget library · pop-out, design open</div>
+                        <div class="wf-row" style="gap:6px;align-items:center"><span class="wf-chip" data-el="CTL-07">search</span></div>
+                        <div class="wf-text" style="margin-top:6px"><b>By category</b></div>
+                        <div class="wf-bar wf-bar--lg"></div><div class="wf-bar wf-bar--md"></div>
+                        <div class="wf-text" style="margin-top:6px"><b>By display type</b></div>
+                        <div class="wf-bar wf-bar--md"></div><div class="wf-bar wf-bar--sm"></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="mock-view" data-device="desktop" data-state="empty">
+            <div class="wf wf-pad">
+              <div class="wf-box" data-el="EL-04">
+                <div class="wf-label">Widget canvas</div>
+                <div class="wf-strong">An empty canvas.</div>
+                <div class="wf-text">The first thing a new advisor sees on this page. Whether it opens blank, with a starter
+                  layout, or with the library already open is not stated — see Q-01.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="mock-caption">Structure only. Widget shapes are indicative; the library's design is explicitly still open.</div>
+      </div>
+    </section>
+
+    <div id="spec-body"></div>
+    <footer class="footer"><span>Buckler mockument · converted from the functional specification</span>
+      <span>Walk it, question it, then build it.</span></footer>
+  </main>
+</div>
+<aside class="inspector" id="inspector"></aside>
+
+<script type="application/json" id="spec">
+{
+  "kit": "honest-mockument/v1",
+  "page": { "id": "analytics", "name": "Analytics", "route": "/analytics", "buildStatus": "new", "version": "0.1", "updated": "2026-08-18", "owner": "Product" },
+  "represents": { "process": "Answering a question about the book", "step": "Build a view that answers it", "stepId": "STEP-06", "deviceTypes": [{ "name": "desktop" }] },
+  "purpose": "A free-format space where an advisor builds their own view of the book by adding, arranging and configuring widgets from a library, rather than reading a fixed page somebody else designed. Layouts can be saved and pinned as tabs.",
+
+  "availableTo": [
+    { "role": "Advisor", "mayReach": true, "differs": "Own book; own saved layouts.", "mustNotSee": "" }
+  ],
+
+  "elements": [
+    { "id": "EL-01", "name": "Header", "shows": "Advisor identity, AUM and positions, matching the Book of Business header without its filters", "source": "Book of business membership", "marker": "required", "trace": "FS-AN-01" },
+    { "id": "EL-02", "name": "Alerts figure", "shows": "An alert count carried into this header, which the Book of Business header does not show", "source": "Alert store", "marker": "required", "trace": "FS-AN-02", "note": "Which alerts it counts — all open, or a tier — is not stated.", "questions": ["Q-02"] },
+    { "id": "EL-03", "name": "Pinned layout tabs", "shows": "Saved widget layouts, pinnable as tabs across the top", "source": "Saved layouts", "marker": "required", "trace": "FS-AN-03", "note": "Deliberately independent of the filter-based saved views used elsewhere in the app." },
+    { "id": "EL-04", "name": "Widget canvas", "shows": "The free-format area where widgets are placed, moved and resized", "source": "Saved layouts", "marker": "required", "trace": "FS-AN-04" },
+    { "id": "EL-05", "name": "KPI widget", "shows": "A small rectangular block carrying a single figure", "source": "Widget library", "marker": "required", "trace": "FS-AN-05" },
+    { "id": "EL-06", "name": "Time-series widget", "shows": "A longer block carrying a series over a range the advisor can adjust", "source": "Widget library", "marker": "required", "trace": "FS-AN-05" },
+    { "id": "EL-07", "name": "Scatter widget", "shows": "A scatter plot built around a category the advisor chooses", "source": "Widget library", "marker": "required", "trace": "FS-AN-05" },
+    { "id": "EL-08", "name": "Table widget", "shows": "A tabular widget", "source": "Widget library", "marker": "required", "trace": "FS-AN-05" },
+    { "id": "EL-09", "name": "Widget library", "shows": "The available widgets, searchable and grouped by category and by display type", "source": "Widget library", "marker": "proposed", "trace": "FS-AN-06", "note": "Confirmed that the capability is required; whether it is a pop-out, a panel or something else is explicitly still a design question.", "questions": ["Q-03"] }
+  ],
+
+  "controls": [
+    { "id": "CTL-01", "name": "Save layout", "effect": "acts on data", "serverData": true, "confirm": "None", "marker": "required", "trace": "FS-AN-03", "note": "Saves which widgets are on the canvas, where, at what size, and each widget's own settings." },
+    { "id": "CTL-02", "name": "Pin as tab", "effect": "both", "serverData": true, "confirm": "None", "marker": "required", "trace": "FS-AN-03" },
+    { "id": "CTL-03", "name": "Expand or collapse a widget", "effect": "alters the screen", "serverData": false, "confirm": "None", "marker": "required", "trace": "FS-AN-07" },
+    { "id": "CTL-04", "name": "Widget filter", "effect": "both", "serverData": true, "confirm": "None", "marker": "required", "trace": "FS-AN-07", "note": "Each widget carries its own settings: security type, category or sector, time-series range, scatter category, and further widget-specific filtering." },
+    { "id": "CTL-05", "name": "Resize a widget", "effect": "alters the screen", "serverData": false, "confirm": "None", "marker": "required", "trace": "FS-AN-04", "note": "Widgets come in standard pre-defined shapes but can be resized." },
+    { "id": "CTL-06", "name": "Add, close or reselect a widget", "effect": "both", "serverData": true, "confirm": "None", "marker": "required", "trace": "FS-AN-04" },
+    { "id": "CTL-07", "name": "Search the library", "effect": "alters the screen", "serverData": false, "confirm": "None", "marker": "required", "trace": "FS-AN-06" },
+    { "id": "CTL-08", "name": "Drag and drop", "effect": "both", "serverData": true, "confirm": "None", "marker": "required", "trace": "FS-AN-04", "note": "Widgets are added from the library and rearranged on the canvas by dragging, or an equivalent." }
+  ],
+
+  "data": [
+    { "field": "Advisor identity", "metricId": "F-ADVISOR", "means": "Whose book the canvas is built over", "holds": "one value", "unit": "text", "provenance": "held by us", "source": "Advisor record", "calculated": false, "sample": "ABC123 · Richard Owen" },
+    { "field": "AUM", "metricId": "F-AUM", "means": "Total assets under management across the book", "holds": "one value", "unit": "$", "provenance": "computed", "source": "Positions", "calculated": true, "calculation": "carried over from the Book of Business header", "sample": "$97M" },
+    { "field": "Positions", "metricId": "F-POS", "means": "Total position count across the book", "holds": "one value", "unit": "integer", "provenance": "computed", "source": "Positions", "calculated": true, "calculation": "carried over from the Book of Business header", "sample": "4,242" },
+    { "field": "Alert count on this header", "metricId": "F-ANALERTS", "means": "", "holds": "one value", "provenance": "computed", "note": "Present on this header only; what it counts is not stated." },
+    { "field": "Saved layout", "metricId": "F-LAYOUT", "means": "A named arrangement of widgets, per advisor: which widgets, where, at what size, with which settings", "holds": "a list", "unit": "record", "provenance": "the user", "source": "Saved layouts", "calculated": false, "sample": "Concentration" },
+    { "field": "Widget definition", "metricId": "F-WIDGET", "means": "One entry in the library: name, category and display type", "holds": "a list", "unit": "record", "provenance": "held by us", "source": "Widget library", "calculated": false, "sample": "Score distribution · chart" },
+    { "field": "Widget instance", "metricId": "F-WIDGETINST", "means": "A widget placed on a canvas, with its own data selection and filter state", "holds": "a list", "provenance": "the user", "sample": "Scatter · by category" }
+  ],
+
+  "lists": [
+    {
+      "name": "Widget library",
+      "ordering": "Grouped by category and by display type",
+      "filtering": "Search by name, or scroll",
+      "selection": "Selecting a widget adds it to the canvas",
+      "nesting": "Two groupings over one list — category and display type",
+      "device": [{ "device": "desktop", "empty": "Cannot be empty", "one": "", "overflow": "" }]
+    },
+    {
+      "name": "Widgets on the canvas",
+      "ordering": "Wherever the advisor puts them",
+      "filtering": "Each widget filters its own data",
+      "selection": "Selecting a widget reveals its controls",
+      "nesting": "None",
+      "device": [{ "device": "desktop", "empty": "An empty canvas — the first thing a new advisor sees, and not described", "one": "", "overflow": "No limit on widget count, confirmed" }]
+    }
+  ],
+
+  "states": [
+    { "key": "default", "label": "Default", "when": "A layout exists", "sees": "Header, pinned layout tabs, the canvas and the library", "next": "Add, move, resize or filter a widget" },
+    { "key": "empty", "label": "Empty", "when": "A new advisor opens the page for the first time", "sees": "Not described — see Q-01", "next": "" },
+    { "key": "one", "label": "One item", "when": "A canvas with a single widget", "sees": "", "next": "" },
+    { "key": "overflow", "label": "More than fits", "when": "More widgets than the canvas shows at once — there is no limit on how many", "sees": "", "next": "" },
+    { "key": "loading", "label": "Loading", "when": "Widgets are still fetching", "sees": "", "next": "" },
+    { "key": "error", "label": "Error", "when": "A widget cannot load its data", "sees": "", "next": "" },
+    { "key": "restricted", "label": "Restricted", "when": "A widget covering data the advisor may not see", "sees": "", "next": "" }
+  ],
+
+  "failures": [
+    { "noticed": "A widget shows nothing", "thenWhat": "", "whoIsTold": "" },
+    { "noticed": "I saved a layout and it came back different", "thenWhat": "Position, size and each widget's settings are part of the saved layout", "whoIsTold": "" },
+    { "noticed": "Two widgets disagree about the same figure", "thenWhat": "Each widget carries its own filters, so two can legitimately differ — nothing on screen explains that", "whoIsTold": "" }
+  ],
+
+  "remembered": { "answer": "Saved layouts and pinned tabs, per advisor, including each widget's position, size and settings.", "marker": "unanswered", "whoMustAnswer": "Product owner", "duration": "", "clearable": "", "note": "Layouts clearly persist. Whether an unsaved canvas survives a visit is not stated." },
+  "liveChange": { "answer": "", "marker": "unanswered", "whoMustAnswer": "Product owner", "howTold": "", "midAction": "" },
+
+  "connections": {
+    "from": [{ "label": "Book of Business — the same header figures", "href": "page-book-of-business.html" }],
+    "to": [{ "label": "A security, from a widget", "href": "" }],
+    "components": [{ "id": "CMP-01", "label": "Header strip" }]
+  },
+  "workflows": [],
+
+  "copy": [
+    { "key": "Header figures", "string": "AUM · Positions · Alerts", "status": "required wording" },
+    { "key": "Empty canvas", "string": "", "status": "placeholder" },
+    { "key": "Save and pin", "string": "Save view · Pin as tab", "status": "placeholder", "note": "“View” here means a widget layout, while “view” elsewhere in the app means a filter set. Same word, two meanings." }
+  ],
+
+  "decisions": [
+    { "what": "Pinned custom layouts are fully independent of the shared filter-based saved views used elsewhere", "who": "Product owner", "when": "at request time" },
+    { "what": "There is no limit on how many widgets a canvas may hold", "who": "Product owner", "when": "at request time" },
+    { "what": "The header matches the Book of Business header minus its filters, plus an alerts figure", "who": "Product owner", "when": "at request time" }
+  ],
+
+  "observations": [
+    { "what": "“View” now means two different things in the app — a saved filter set, and a saved widget layout. The specification keeps them apart deliberately; the word does not.", "raisedBy": "Conversion", "when": "2026-08-18" },
+    { "what": "This is the only page whose content is chosen by the advisor rather than specified, which makes the library the real specification and it is the least settled part.", "raisedBy": "Conversion", "when": "2026-08-18" },
+    { "what": "Every widget filters independently, so the page can show two true figures that disagree. Nothing tells the reader that.", "raisedBy": "Conversion", "when": "2026-08-18" }
+  ],
+
+  "questions": [
+    { "id": "Q-01", "question": "What does a new advisor see the first time they open this page — a blank canvas, a starter layout, or the library already open?", "whyItMatters": "It is the first impression of the page and there is no fallback content", "blocks": "the build", "blocksBuild": true, "whoMustAnswer": "Product owner", "neededBy": "", "affects": ["EL-04"] },
+    { "id": "Q-02", "question": "What does the alerts figure on this header count?", "whyItMatters": "It appears nowhere else and has no definition", "blocks": "the build", "blocksBuild": true, "whoMustAnswer": "Product owner", "neededBy": "", "affects": ["EL-02"] },
+    { "id": "Q-03", "question": "Is the widget library a pop-out, a docked panel, or something else?", "whyItMatters": "Named in the specification as still open, and it changes the canvas layout", "blocks": "business review", "blocksBuild": false, "whoMustAnswer": "Product owner with design", "neededBy": "", "affects": ["EL-09"] },
+    { "id": "Q-04", "question": "Which widgets exist at first release, and who decides what goes into the library?", "whyItMatters": "The library is the actual content of this page; without a list there is nothing to build", "blocks": "the build", "blocksBuild": true, "whoMustAnswer": "Product owner", "neededBy": "", "affects": ["EL-09", "EL-05", "EL-06", "EL-07", "EL-08"] }
+  ],
+
+  "outOfScope": [
+    { "what": "Sharing a layout with another advisor", "why": "Not mentioned; layouts are per advisor" },
+    { "what": "How widget data is queried or cached", "why": "Implementer's" }
+  ],
+
+  "contract": {
+    "must": [
+      "A header matching Book of Business without its filters, plus an alerts figure",
+      "Save and pin a widget layout as a tab, independent of the app's filter-based saved views",
+      "Drag to rearrange, resize from standard shapes, add, close and reselect widgets",
+      "Per-widget expand, filter and settings, persisted as part of the saved layout",
+      "A searchable library grouped by category and display type"
+    ],
+    "mustNotInvent": [
+      "The list of widgets available at first release (Q-04)",
+      "What the alerts figure counts (Q-02)",
+      "The first-run experience of an empty canvas (Q-01)",
+      "The library's form — it is explicitly an open design question (Q-03)"
+    ],
+    "askFirst": [
+      "Whether an unsaved canvas survives a visit",
+      "Whether two widgets disagreeing should be explained on screen"
+    ],
+    "acceptance": [
+      "A saved layout reopens with every widget in the same place, at the same size, with the same settings",
+      "Every EL/CTL ID appears in the built page's test IDs"
+    ]
+  }
+}
+</script>
+
+<script src="assets/app-config.js"></script>
+<script src="../assets/spec.js"></script>
+<script>SpecKit.boot("page-analytics.html");</script>
+</body>
+</html>

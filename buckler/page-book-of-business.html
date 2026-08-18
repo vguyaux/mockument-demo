@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Book of Business — mockument page</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="../assets/spec.css" />
+<script>(function(){var s=localStorage.getItem('spec-theme')||'system';var t=s==='system'?(window.matchMedia('(prefers-color-scheme:light)').matches?'light':'dark'):s;if(t==='light')document.documentElement.classList.add('light');})();</script>
+</head>
+<body>
+<header class="topbar" id="topbar"></header>
+<div class="shell">
+  <aside class="sidebar" id="sidebar"></aside>
+  <main class="main">
+    <div id="page-head"></div>
+
+    <section class="block" id="mock-block">
+      <div class="block-head"><span class="block-num">05</span><span class="block-title">The mock frame</span>
+        <span class="block-for">walk it — do not read it</span></div>
+      <p class="block-note">The page an advisor works from: every security they hold, with review status and portfolio
+        metrics, and the filtering and view machinery the whole app shares.</p>
+
+      <div class="mock-shell" id="mock">
+        <div class="mock-controls"></div>
+        <div class="mock-stage" data-device="desktop">
+          <div id="role-note"></div>
+          <div id="state-note"></div>
+
+          <div class="mock-view is-on" data-device="desktop" data-state="default">
+            <div class="wf">
+              <div class="wf-row">
+                <nav class="wf-menu">
+                  <a href="page-home.html">Home</a>
+                  <a class="is-on" href="page-book-of-business.html">Book of Business</a>
+                  <a href="page-monitoring.html">Monitoring</a>
+                  <a href="page-due-diligence.html">Due Diligence</a>
+                  <a href="page-analytics.html">Analytics</a>
+                </nav>
+                <div class="wf-col wf-pad">
+                  <div class="wf-box" data-el="EL-01">
+                    <div class="wf-label">Book summary strip · component CMP-01</div>
+                    <div class="wf-row" style="gap:16px;align-items:center">
+                      <span class="wf-strong">ABC123 · Richard Owen</span>
+                      <span class="wf-text">Securities 116</span>
+                      <span class="wf-text">To review 43</span>
+                      <span class="wf-text">Reviewed 73</span>
+                      <span class="wf-text">AUM $97M</span>
+                      <span class="wf-text">Positions 4,242</span>
+                    </div>
+                  </div>
+
+                  <div class="wf-box" data-el="EL-02">
+                    <div class="wf-label">Filters · component CMP-04</div>
+                    <div class="wf-row" style="gap:8px;align-items:center;flex-wrap:wrap">
+                      <span class="wf-chip" data-el="CTL-01">Security type: All ▾</span>
+                      <span class="wf-chip" data-el="CTL-02">Sector / category ▾</span>
+                      <span class="wf-chip" data-el="CTL-03">30-day score change ▾</span>
+                      <span class="wf-chip" data-el="CTL-04">search</span>
+                      <span class="wf-chip" data-el="CTL-05">★ favourites</span>
+                      <span class="wf-chip" data-el="CTL-06">Filters</span>
+                      <span class="wf-chip" data-el="CTL-07">Save view</span>
+                      <span class="wf-chip" data-el="CTL-08">Export</span>
+                      <span class="wf-chip">⟳</span>
+                    </div>
+                  </div>
+
+                  <div class="wf-box" data-el="EL-06">
+                    <div class="wf-label">Active filter chips</div>
+                    <div class="wf-row" style="gap:6px"><span class="wf-chip">Equity ×</span><span class="wf-chip">Financials ×</span><span class="wf-chip" data-el="CTL-11">columns</span></div>
+                  </div>
+
+                  <div class="wf-row" data-el="EL-03" style="gap:6px">
+                    <span class="wf-tab is-on">All (116)</span>
+                    <span class="wf-tab">To review (43)</span>
+                    <span class="wf-tab">Reviewed (73)</span>
+                    <span class="wf-tab">Upcoming reviews 30 days</span>
+                    <span class="wf-tab">+ pinned view</span>
+                  </div>
+
+                  <div class="wf-box" data-el="EL-05">
+                    <div class="wf-label">Bulk actions · appears only while rows are selected</div>
+                    <div class="wf-row" style="gap:8px"><span class="wf-chip">3 selected</span><span class="wf-chip">★ favourite</span><span class="wf-chip">download</span></div>
+                  </div>
+
+                  <div class="wf-box" data-el="EL-04">
+                    <div class="wf-label">Securities · sortable on every column · component CMP-05</div>
+                    <table class="wf-table">
+                      <thead><tr><th data-el="CTL-10">☐</th><th>Security</th><th>★</th><th>Symbol</th><th>Type</th><th>Sector</th><th>Status</th><th>Last reviewed</th><th>AUM</th><th>Positions</th><th data-el="EL-07">Score</th><th data-el="EL-08">30 day %</th></tr></thead>
+                      <tbody>
+                        <tr data-el="CTL-09"><td>☐</td><td>ABC Growth Fund</td><td>★</td><td>ABCGX</td><td>Mutual Fund</td><td>Equity</td><td>To review</td><td>—</td><td>$4.1M</td><td>212</td><td>78</td><td>+2.4</td></tr>
+                        <tr><td>☐</td><td>XYZ Index ETF</td><td>☆</td><td>XYZ</td><td>ETF</td><td>Index</td><td>Reviewed</td><td>2026-04-11</td><td>$3.7M</td><td>188</td><td>81</td><td>−1.1</td></tr>
+                        <tr><td>☐</td><td>Northline Equity</td><td>☆</td><td>NLE</td><td>Equity</td><td>Financials</td><td>Reviewed</td><td>2026-02-02</td><td>$2.2M</td><td>96</td><td>—</td><td>—</td></tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="mock-view" data-device="desktop" data-state="empty">
+            <div class="wf wf-pad">
+              <div class="wf-box" data-el="EL-01"><div class="wf-label">Book summary strip</div><div class="wf-strong">ABC123 · Richard Owen · 0 securities</div></div>
+              <div class="wf-box" data-el="EL-04" style="margin-top:10px">
+                <div class="wf-label">Securities</div>
+                <div class="wf-strong">Nothing matches the filters in this view.</div>
+                <div class="wf-text">Wording not recorded in the source specification. Nor is whether an empty book and an
+                  over-filtered view say the same thing — they are different situations.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="mock-caption">Structure only. Sample values follow the examples used in the source specification.</div>
+      </div>
+    </section>
+
+    <div id="spec-body"></div>
+    <footer class="footer"><span>Buckler mockument · converted from the functional specification</span>
+      <span>Walk it, question it, then build it.</span></footer>
+  </main>
+</div>
+<aside class="inspector" id="inspector"></aside>
+
+<script type="application/json" id="spec">
+{
+  "kit": "honest-mockument/v1",
+  "page": { "id": "book-of-business", "name": "Book of Business", "route": "/book-of-business", "buildStatus": "modify", "version": "0.1", "updated": "2026-08-18", "owner": "Product" },
+  "represents": { "process": "Working the book", "step": "Inspect and filter the whole book", "stepId": "STEP-04", "deviceTypes": [{ "name": "desktop" }] },
+  "purpose": "Every security the advisor holds, with review status and portfolio metrics, in one sortable table. It is where an advisor answers “what do I hold, what have I reviewed, and what needs work”, and where the app's filtering, saved views and export machinery is used most heavily.",
+
+  "availableTo": [
+    { "role": "Advisor", "mayReach": true, "differs": "Own book. Counts in the summary strip reflect whatever filter, tab or view is active.", "mustNotSee": "" },
+    { "role": "Advisor team lead", "mayReach": true, "differs": "", "mustNotSee": "" }
+  ],
+
+  "elements": [
+    { "id": "EL-01", "name": "Book summary strip", "shows": "Advisor code and name, securities count, to-review count, reviewed count, AUM and positions — all reflecting the active filter, tab or view", "source": "Book of business membership", "marker": "required", "trace": "FS-BOB-01" },
+    { "id": "EL-02", "name": "Filter bar", "shows": "Security type checkboxes, sector or category dropdown, 30-day score change dropdown, search, refresh, favourites toggle, the filter builder, save and export", "source": "Book of business membership", "marker": "required", "trace": "FS-BOB-02", "note": "Shared component CMP-04; the mechanics are specified once for the whole app in the filtering reference." },
+    { "id": "EL-03", "name": "Tabs and pinned views", "shows": "All, To review and Reviewed with counts, plus any pinned personal views and the “Upcoming reviews 30 days” system preset", "source": "Saved views", "marker": "required", "trace": "FS-BOB-03", "note": "Up to ten additional tabs may be pinned behind the default, eleven in total." },
+    { "id": "EL-04", "name": "Securities table", "shows": "One row per security. Fixed columns: select, logo, security. Default columns: favourites, symbol, type, sector or category, status, last reviewed, AUM, positions, score, 30-day change. Sortable on every column.", "source": "Book of business membership", "marker": "required", "trace": "FS-BOB-04" },
+    { "id": "EL-05", "name": "Bulk actions bar", "shows": "Appears only while at least one row is selected: how many are selected, favourite, and download", "source": "Selection state", "marker": "required", "trace": "FS-BOB-05" },
+    { "id": "EL-06", "name": "Active filter chips", "shows": "Every condition currently applied, as removable chips", "source": "Filter state", "marker": "required", "trace": "FS-BOB-06" },
+    { "id": "EL-07", "name": "Score", "shows": "The security's numeric score, or a dash when it is not scored", "source": "Scoring run", "marker": "required", "trace": "FS-BOB-07" },
+    { "id": "EL-08", "name": "30-day change", "shows": "Score change over the trailing thirty days, as a plain signed number", "source": "Scoring run", "marker": "unanswered", "trace": "FS-BOB-08", "note": "The source specification records no display format for this figure anywhere. It appears on several pages.", "questions": ["Q-02"] }
+  ],
+
+  "controls": [
+    { "id": "CTL-01", "name": "Security type checkboxes", "effect": "alters the screen", "serverData": false, "confirm": "None", "marker": "required", "trace": "FS-BOB-02", "note": "All, Equity, ETF, Mutual Fund." },
+    { "id": "CTL-02", "name": "Sector or category dropdown", "effect": "alters the screen", "serverData": false, "confirm": "None", "marker": "required", "trace": "FS-BOB-02" },
+    { "id": "CTL-03", "name": "30-day score change dropdown", "effect": "alters the screen", "serverData": false, "confirm": "None", "marker": "unanswered", "trace": "FS-BOB-02", "note": "The buckets it offers are not stated.", "questions": ["Q-01"] },
+    { "id": "CTL-04", "name": "Search", "effect": "alters the screen", "serverData": true, "confirm": "None", "marker": "required", "trace": "FS-BOB-02", "note": "Matches by name, symbol, code or ticker." },
+    { "id": "CTL-05", "name": "Favourites toggle and star", "effect": "both", "serverData": true, "confirm": "None", "marker": "required", "trace": "FS-BOB-09", "note": "The toggle filters to favourites; the star on a row marks one; the bulk bar marks many." },
+    { "id": "CTL-06", "name": "Filter builder", "effect": "alters the screen", "serverData": false, "leadsTo": "The shared filter builder", "confirm": "None", "marker": "required", "trace": "FS-FILTER-01" },
+    { "id": "CTL-07", "name": "Save view", "effect": "acts on data", "serverData": true, "confirm": "None", "marker": "required", "trace": "FS-BOB-10", "note": "Saves filters and column configuration together as one personal view, which can then be pinned as a tab." },
+    { "id": "CTL-08", "name": "Export to Excel", "effect": "acts on data", "serverData": true, "confirm": "None", "marker": "required", "trace": "FS-BOB-11", "note": "Exports exactly the columns visible in the active view; raw values and header titles only, no formatting." },
+    { "id": "CTL-09", "name": "Row click", "effect": "alters the screen", "serverData": true, "leadsTo": "That security", "confirm": "None", "marker": "required", "trace": "FS-BOB-04", "note": "The entire row is clickable, not only the security name." },
+    { "id": "CTL-10", "name": "Header checkbox", "effect": "alters the screen", "serverData": false, "confirm": "One behaviour, not a choice: it selects every security currently matching, not only those on screen.", "marker": "required", "trace": "FS-BOB-05" },
+    { "id": "CTL-11", "name": "Column customisation", "effect": "both", "serverData": true, "confirm": "None", "marker": "required", "trace": "FS-BOB-10", "note": "Reorder the default columns or add ones not shown by default. The three fixed columns cannot be moved or removed." }
+  ],
+
+  "data": [
+    { "field": "Advisor code and name", "metricId": "F-ADVISOR", "means": "Whose book this is", "holds": "one value", "unit": "text", "provenance": "held by us", "source": "Advisor record", "calculated": false, "sample": "ABC123 · Richard Owen" },
+    { "field": "Securities count", "metricId": "F-SECCOUNT", "means": "Distinct securities in the book, under the active filter", "holds": "one value", "unit": "integer", "provenance": "computed", "source": "Book of business membership", "calculated": true, "calculation": "count of distinct securities matching the active filter, tab or view", "sample": "116" },
+    { "field": "To review count", "metricId": "F-TOREVIEW", "means": "Securities with no completed review on record", "holds": "one value", "unit": "integer", "provenance": "computed", "sample": "43" },
+    { "field": "Reviewed count", "metricId": "F-REVIEWED", "means": "Securities with a review completed within the trailing twelve months", "holds": "one value", "unit": "integer", "provenance": "computed", "sample": "73" },
+    { "field": "Security", "metricId": "F-SECURITY", "means": "One holding: logo, name, symbol, type, sector or category", "holds": "a list", "provenance": "a provider", "sample": "ABC Growth Fund · ABCGX" },
+    { "field": "Review status", "metricId": "F-STATUS", "means": "To review or Reviewed, with the date of the last completed review", "holds": "one value", "unit": "To review | Reviewed", "provenance": "held by us", "source": "Review records", "calculated": false, "sample": "Reviewed · 2026-04-11" },
+    { "field": "Score", "metricId": "F-SCORE", "hero": true, "means": "The security's score — the number the whole product is judged on", "holds": "one value", "provenance": "computed", "sample": "78" },
+    { "field": "30-day score change", "metricId": "F-SCOREDELTA", "means": "How the score moved over the trailing thirty days", "holds": "one value", "provenance": "computed", "sample": "+2.4" },
+    { "field": "Personal view", "metricId": "F-VIEW", "means": "A saved combination of filters and columns, per advisor", "holds": "a list", "unit": "record", "provenance": "the user", "source": "Saved views", "calculated": false, "sample": "Upcoming reviews 30 days" }
+  ],
+
+  "lists": [
+    {
+      "name": "Securities",
+      "ordering": "Sortable on every column; AUM descending in the reference view",
+      "filtering": "Security type, sector or category, 30-day change bucket, search, favourites, the filter builder, and the active tab or saved view",
+      "selection": "Row checkbox selects one; the header checkbox selects every security currently matching, not only the ones on screen",
+      "nesting": "None",
+      "device": [
+        { "device": "desktop", "empty": "Not recorded — and an empty book and an over-filtered view are different situations", "one": "", "overflow": "" }
+      ]
+    }
+  ],
+
+  "states": [
+    { "key": "default", "label": "Default", "when": "The advisor holds securities and no filter excludes them all", "sees": "Summary strip, filters, tabs and the table", "next": "Sort, filter, open a security, or save a view" },
+    { "key": "empty", "label": "Empty", "when": "Nothing matches, or the book is genuinely empty", "sees": "Not recorded in the source specification", "next": "" },
+    { "key": "one", "label": "One item", "when": "One security matches", "sees": "", "next": "" },
+    { "key": "overflow", "label": "More than fits", "when": "A book of hundreds of securities", "sees": "", "next": "" },
+    { "key": "loading", "label": "Loading", "when": "The table is being refreshed", "sees": "", "next": "" },
+    { "key": "error", "label": "Error", "when": "The refresh fails", "sees": "", "next": "" },
+    { "key": "restricted", "label": "Restricted", "when": "Another advisor's book", "sees": "", "next": "" }
+  ],
+
+  "failures": [
+    { "noticed": "The counts in the strip do not match the rows I can see", "thenWhat": "", "whoIsTold": "" },
+    { "noticed": "I exported and the numbers came out unformatted", "thenWhat": "Expected: the export carries raw values and header titles only", "whoIsTold": "" },
+    { "noticed": "I selected everything and acted on more than I meant to", "thenWhat": "The header checkbox selects every match, not the visible page — stated, but the person is not warned", "whoIsTold": "" }
+  ],
+
+  "remembered": { "answer": "Saved personal views and pinned tabs, per advisor, and which securities are favourited.", "marker": "unanswered", "whoMustAnswer": "Product owner", "duration": "", "clearable": "", "note": "Views and favourites clearly persist; whether the last active filter, sort and tab also survive a visit is not stated." },
+  "liveChange": { "answer": "", "marker": "unanswered", "whoMustAnswer": "Product owner", "howTold": "", "midAction": "" },
+
+  "connections": {
+    "from": [
+      { "label": "Home — the review tiles", "href": "page-home.html" },
+      { "label": "Monitoring — a security's AUM and positions are shown there", "href": "page-monitoring.html" }
+    ],
+    "to": [
+      { "label": "A security", "href": "" },
+      { "label": "Due Diligence — the review behind a status", "href": "page-due-diligence.html" }
+    ],
+    "components": [{ "id": "CMP-01", "label": "Header strip" }, { "id": "CMP-04", "label": "Filter toolbar" }, { "id": "CMP-05", "label": "Securities table" }]
+  },
+  "workflows": [{ "id": "WF-02", "name": "Build and pin a personal view", "href": "workflow-personal-view.html", "position": "The whole workflow happens here" }],
+
+  "copy": [
+    { "key": "Tab labels", "string": "All (116) · To review (43) · Reviewed (73)", "status": "required wording", "note": "Counts shown in the label, per the source specification." },
+    { "key": "Preset view", "string": "Upcoming Reviews 30 Days", "status": "required wording", "note": "A system-provided view, not one an advisor built." },
+    { "key": "Empty table", "string": "", "status": "placeholder" },
+    { "key": "Status badge", "string": "To review · Reviewed", "status": "placeholder", "note": "The underlying status is “No Review Completed”; the badge wording is not confirmed." }
+  ],
+
+  "decisions": [
+    { "what": "The three fixed columns — select, logo, security — are always present, always first, and cannot be reordered or removed", "who": "Product owner", "when": "at request time" },
+    { "what": "The header checkbox selects every security currently matching, not only those on screen", "who": "Product owner", "when": "at request time" },
+    { "what": "Up to ten personal views may be pinned as tabs behind the default, eleven in total", "who": "Product owner", "when": "at request time" },
+    { "what": "Export carries the columns visible in the active view, as raw values with header titles only", "who": "Product owner", "when": "at request time" }
+  ],
+
+  "observations": [
+    { "what": "The summary strip counts follow the active filter, so two advisors looking at “their book” can quote different numbers for the same book. Nothing on the page says the figures are filtered.", "raisedBy": "Conversion", "when": "2026-08-18" },
+    { "what": "Favourites can be set three ways — row star, bulk bar, filter toggle — and the specification treats them as one feature. Whether they interact is not stated.", "raisedBy": "Conversion", "when": "2026-08-18" },
+    { "what": "The score and its 30-day change appear on several pages; only this page describes them, and neither has a display format.", "raisedBy": "Conversion", "when": "2026-08-18" }
+  ],
+
+  "questions": [
+    { "id": "Q-01", "question": "What buckets does the 30-day score change filter offer?", "whyItMatters": "The control is specified but its values are not, so it cannot be built", "blocks": "the build", "blocksBuild": true, "whoMustAnswer": "Product owner", "neededBy": "", "affects": ["CTL-03"] },
+    { "id": "Q-02", "question": "How is the score and its 30-day change displayed — decimals, sign, colour?", "whyItMatters": "It is the product's headline number and it appears on four pages with no format recorded anywhere", "blocks": "the build", "blocksBuild": true, "whoMustAnswer": "Product owner with the data owner", "neededBy": "", "affects": ["EL-07", "EL-08"] },
+    { "id": "Q-03", "question": "Does an empty book say something different from an over-filtered view?", "whyItMatters": "One is a new advisor, the other is a mistake, and the recovery differs", "blocks": "business review", "blocksBuild": false, "whoMustAnswer": "Product owner", "neededBy": "", "affects": ["EL-04"] },
+    { "id": "Q-04", "question": "What does the page remember between visits — the last tab, sort and filter, or only saved views and favourites?", "whyItMatters": "Never volunteered, and it changes what an advisor sees on Monday morning", "blocks": "the build", "blocksBuild": true, "whoMustAnswer": "Product owner", "neededBy": "", "affects": ["EL-03"] }
+  ],
+
+  "outOfScope": [
+    { "what": "The filtering and saved-view mechanics themselves", "why": "Specified once for the whole app in the filtering reference, not per page" },
+    { "what": "Where the securities and scores come from", "why": "Held in the field-level data dictionary, not in this specification" }
+  ],
+
+  "contract": {
+    "must": [
+      "Three fixed columns first, in order, not reorderable or removable",
+      "Every column sortable, with the sort direction visible",
+      "Summary strip counts that follow the active filter, tab or view",
+      "Header checkbox selects every match, not the visible page",
+      "Export limited to the columns visible in the active view, raw values only"
+    ],
+    "mustNotInvent": [
+      "The 30-day score change buckets (Q-01)",
+      "A display format for the score or its change (Q-02)",
+      "Empty-state wording (Q-03)",
+      "What survives between visits (Q-04)"
+    ],
+    "askFirst": [
+      "Whether favourites, the favourites filter and bulk favouriting interact",
+      "Whether the eleven-tab limit is enforced or advisory"
+    ],
+    "acceptance": [
+      "Selecting all and acting on the selection affects exactly what the specification says it does",
+      "An export opens in a spreadsheet with the same columns the screen showed",
+      "Every EL/CTL ID appears in the built page's test IDs"
+    ]
+  }
+}
+</script>
+
+<script src="assets/app-config.js"></script>
+<script src="../assets/spec.js"></script>
+<script>SpecKit.boot("page-book-of-business.html");</script>
+</body>
+</html>

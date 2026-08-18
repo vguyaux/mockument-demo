@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Monitoring — mockument page</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="../assets/spec.css" />
+<script>(function(){var s=localStorage.getItem('spec-theme')||'system';var t=s==='system'?(window.matchMedia('(prefers-color-scheme:light)').matches?'light':'dark'):s;if(t==='light')document.documentElement.classList.add('light');})();</script>
+</head>
+<body>
+<header class="topbar" id="topbar"></header>
+<div class="shell">
+  <aside class="sidebar" id="sidebar"></aside>
+  <main class="main">
+    <div id="page-head"></div>
+
+    <section class="block" id="mock-block">
+      <div class="block-head"><span class="block-num">05</span><span class="block-title">The mock frame</span>
+        <span class="block-for">walk it — do not read it</span></div>
+      <p class="block-note">Two tabs on one page: what is being watched, and what has fired. Switch state to see the empty
+        and restricted cases; turn on the honesty overlay to see what the source specification leaves open.</p>
+
+      <div class="mock-shell" id="mock">
+        <div class="mock-controls"></div>
+        <div class="mock-stage" data-device="desktop">
+          <div id="role-note"></div>
+          <div id="state-note"></div>
+
+          <div class="mock-view is-on" data-device="desktop" data-state="default">
+            <div class="wf">
+              <div class="wf-row">
+                <nav class="wf-menu">
+                  <a href="page-home.html">Home</a>
+                  <a href="page-book-of-business.html">Book of Business</a>
+                  <a class="is-on" href="page-monitoring.html">Monitoring</a>
+                  <a href="page-due-diligence.html">Due Diligence</a>
+                  <a href="page-analytics.html">Analytics</a>
+                </nav>
+                <div class="wf-col wf-pad">
+                  <div class="wf-box" data-el="EL-01">
+                    <div class="wf-label">Page header</div>
+                    <div class="wf-strong">Jane Whitfield · Rep code A4521</div>
+                  </div>
+                  <div class="wf-box" data-el="EL-02">
+                    <div class="wf-label">Severity tiles · component CMP-02</div>
+                    <div class="wf-row">
+                      <div class="wf-tile"><div class="wf-label">SEV1</div><div class="wf-num">12</div><div class="wf-text">$13.2 million</div></div>
+                      <div class="wf-tile"><div class="wf-label">SEV2</div><div class="wf-num">27</div><div class="wf-text">$25.8 million</div></div>
+                      <div class="wf-tile"><div class="wf-label">SEV3</div><div class="wf-num">43</div><div class="wf-text">$9.1 million</div></div>
+                      <div class="wf-tile"><div class="wf-label">All open</div><div class="wf-num">82</div><div class="wf-text">$48.1 million</div></div>
+                    </div>
+                  </div>
+
+                  <div class="wf-row">
+                    <span class="wf-tab is-on" data-el="CTL-01" data-mock-tab="pane-monitoring">Monitoring</span>
+                    <span class="wf-tab" data-el="CTL-02" data-mock-tab="pane-alerts">Alerts</span>
+                  </div>
+
+                  <div class="wf-pane is-on" id="pane-monitoring">
+                    <div class="wf-row">
+                      <div class="wf-col" style="max-width:300px">
+                        <div class="wf-box" data-el="CTL-03"><div class="wf-label">Search triggers</div><div class="wf-bar wf-bar--lg"></div></div>
+                        <div class="wf-box" data-el="EL-03">
+                          <div class="wf-label">Triggers · grouped by severity</div>
+                          <div class="wf-text"><b>SEV1</b></div>
+                          <div class="wf-row" style="align-items:center;gap:6px;margin:4px 0"><span class="wf-chip" data-el="CTL-04">on</span><span class="wf-bar wf-bar--md" style="flex:1"></span></div>
+                          <div class="wf-row" style="align-items:center;gap:6px;margin:4px 0"><span class="wf-chip">locked</span><span class="wf-bar wf-bar--lg" style="flex:1"></span></div>
+                          <div class="wf-text" style="margin-top:8px"><b>SEV2</b></div>
+                          <div class="wf-bar wf-bar--md"></div>
+                          <div class="wf-box" data-el="EL-04" style="margin-top:8px">
+                            <div class="wf-label">Selected trigger</div>
+                            <div class="wf-text">Asset classes <span class="wf-chip" data-el="CTL-05">Equities ▾</span> · cadence daily · cooldown 30d · fired 6× in 90 days</div>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="wf-col">
+                        <div class="wf-box" data-el="EL-05"><div class="wf-label">What this trigger watches</div>
+                          <div class="wf-strong">Drawdown greater than 20% from the trailing 12-month high</div></div>
+                        <div class="wf-box" data-el="EL-06">
+                          <div class="wf-label">Securities in the book, ranked by AUM · heat map over 90 days</div>
+                          <div class="wf-row" style="gap:6px;margin-bottom:6px"><span class="wf-chip" data-el="CTL-06">Security type ▾</span><span class="wf-chip">Category ▾</span></div>
+                          <table class="wf-table">
+                            <thead><tr><th>Security</th><th>AUM</th><th>Trailing 90 days</th></tr></thead>
+                            <tbody>
+                              <tr><td>ABC Growth Fund</td><td>$4.1M</td><td>▯▯▮▯▯▮▯▯▯▯▯▯</td></tr>
+                              <tr><td>XYZ Index ETF</td><td>$3.7M</td><td>▯▯▯▯▯▯▯▮▯▯▯▯</td></tr>
+                              <tr><td>Northline Equity</td><td>$2.2M</td><td>▯▯▯▯▯▯▯▯▯▯▯▯</td></tr>
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="wf-pane" id="pane-alerts">
+                    <div class="wf-box">
+                      <div class="wf-row" style="gap:8px;align-items:center">
+                        <span class="wf-chip" data-el="CTL-07">search</span>
+                        <span class="wf-chip" data-el="CTL-08">Open · All · Closed</span>
+                        <span class="wf-chip" data-el="CTL-09">Filters</span>
+                      </div>
+                    </div>
+                    <div class="wf-box" data-el="EL-07" style="margin-top:10px">
+                      <div class="wf-label">Alerts</div>
+                      <table class="wf-table">
+                        <thead><tr><th>Tier</th><th>Security</th><th>Trigger</th><th>Triggered</th><th>AUM</th><th></th></tr></thead>
+                        <tbody>
+                          <tr><td>SEV1</td><td>ABC Growth Fund</td><td>Drawdown &gt; 20%</td><td>2 days ago</td><td>$4.1M</td><td><span class="wf-chip" data-el="CTL-10">view</span></td></tr>
+                          <tr><td>SEV2</td><td>XYZ Index ETF</td><td>Tracking error</td><td>5 days ago</td><td>$3.7M</td><td><span class="wf-chip">view</span></td></tr>
+                        </tbody>
+                      </table>
+                    </div>
+                    <div class="wf-box" data-el="EL-08" style="margin-top:10px">
+                      <div class="wf-label">Alert panel</div>
+                      <div class="wf-strong">SEV1 · ABC Growth Fund · drawdown &gt; 20%</div>
+                      <div class="wf-bar wf-bar--lg"></div>
+                      <div class="wf-box" data-el="EL-09" style="margin-top:8px"><div class="wf-label">Notes · required to close</div><div class="wf-bar wf-bar--lg"></div></div>
+                      <div class="wf-box" data-el="EL-10" style="margin-top:8px"><div class="wf-label">Auto note when a review completes</div><div class="wf-text">“Review Completed” — exact wording not decided</div></div>
+                      <div class="wf-row" style="gap:8px;margin-top:8px;align-items:center">
+                        <span class="wf-chip" data-el="CTL-11">Close alert</span>
+                        <a class="wf-chip" href="page-due-diligence.html" data-el="EL-11">→ due diligence review</a>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="mock-view" data-device="desktop" data-state="empty">
+            <div class="wf wf-pad">
+              <div class="wf-box" data-el="EL-02"><div class="wf-row">
+                <div class="wf-tile"><div class="wf-label">SEV1</div><div class="wf-num">0</div></div>
+                <div class="wf-tile"><div class="wf-label">SEV2</div><div class="wf-num">0</div></div>
+                <div class="wf-tile"><div class="wf-label">SEV3</div><div class="wf-num">0</div></div>
+                <div class="wf-tile"><div class="wf-label">All open</div><div class="wf-num">0</div></div>
+              </div></div>
+              <div class="wf-box" data-el="EL-07" style="margin-top:10px">
+                <div class="wf-label">Alerts</div>
+                <div class="wf-strong">Nothing has fired against this book.</div>
+                <div class="wf-text">Wording not recorded. Whether the triggers list still shows what is watching is not stated either.</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="mock-view" data-device="phone" data-state="default">
+            <div class="wf wf-phone wf-pad">
+              <div class="wf-box" data-el="EL-01"><div class="wf-strong">Jane Whitfield</div><div class="wf-text">A4521</div></div>
+              <div class="wf-box" data-el="EL-02" style="margin-top:8px"><div class="wf-row">
+                <div class="wf-tile"><div class="wf-label">SEV1</div><div class="wf-num">12</div></div>
+                <div class="wf-tile"><div class="wf-label">SEV2</div><div class="wf-num">27</div></div></div></div>
+              <div class="wf-box" style="margin-top:8px"><div class="wf-label">Not specified</div>
+                <div class="wf-text">The source specification describes this page on desktop only. Whether the trigger list,
+                  the heat map or closing an alert work on a phone is not stated — see Q-05.</div></div>
+            </div>
+          </div>
+        </div>
+        <div class="mock-caption">Structure only. The heat map is drawn as blocks because its shading rules are undefined.</div>
+      </div>
+    </section>
+
+    <div id="spec-body"></div>
+    <footer class="footer"><span>Buckler mockument · converted from the functional specification</span>
+      <span>Walk it, question it, then build it.</span></footer>
+  </main>
+</div>
+<aside class="inspector" id="inspector"></aside>
+
+<script type="application/json" id="spec">
+{
+  "kit": "honest-mockument/v1",
+  "page": { "id": "monitoring", "name": "Monitoring", "route": "/monitoring", "buildStatus": "modify", "version": "0.1", "updated": "2026-08-18", "owner": "Product" },
+  "represents": { "process": "Daily book supervision", "step": "Review what fired and decide", "stepId": "STEP-02", "deviceTypes": [{ "name": "desktop" }] },
+  "purpose": "The page an advisor opens when something has fired against their book. It answers what is watching the book, what has tripped, and what has to be recorded before an alert can be set down. The Monitoring tab leads; the Alerts tab is where the work is done.",
+
+  "availableTo": [
+    { "role": "Advisor", "mayReach": true, "differs": "Own book. Can switch a trigger on or off unless the firm has locked it.", "mustNotSee": "" },
+    { "role": "Compliance", "mayReach": true, "differs": "Not described in the source specification for this page.", "mustNotSee": "" }
+  ],
+
+  "elements": [
+    { "id": "EL-01", "name": "Page header", "shows": "Advisor name and rep code for the book being viewed", "source": "Advisor record", "marker": "required", "trace": "FS-MON-01" },
+    { "id": "EL-02", "name": "Severity tiles", "shows": "Open alert count and month-end AUM exposure per severity tier, plus a combined total across tiers", "source": "Alert store + positions", "marker": "required", "trace": "FS-MON-02" },
+    { "id": "EL-03", "name": "Triggers list", "shows": "Every trigger, grouped by severity, with its on/off state and whether it is firm-mandatory and therefore locked", "source": "Trigger definitions", "marker": "required", "trace": "FS-MON-04" },
+    { "id": "EL-04", "name": "Selected trigger detail", "shows": "Applicable asset classes, cadence, cooldown length, and how many times it fired across the book in the trailing ninety days", "source": "Trigger definitions + fire history", "marker": "required", "trace": "FS-MON-05" },
+    { "id": "EL-05", "name": "Metric header", "shows": "The metric being tracked, described plainly", "source": "Trigger definitions", "marker": "required", "trace": "FS-MON-06" },
+    { "id": "EL-06", "name": "Analytics panel table", "shows": "Securities in the book ranked by AUM, with a heat map column showing fire events and near misses over a trailing timeline", "source": "Positions + fire history", "marker": "required", "trace": "FS-MON-07", "note": "The near-miss gradient is described but not defined.", "questions": ["Q-02"] },
+    { "id": "EL-07", "name": "Alerts table", "shows": "One row per alert: tier, security, trigger, when it fired, AUM", "source": "Alert store", "marker": "required", "trace": "FS-MON-08" },
+    { "id": "EL-08", "name": "Alert panel", "shows": "One alert in full, opened from the view icon on its row", "source": "Alert store", "marker": "required", "trace": "FS-MON-09" },
+    { "id": "EL-09", "name": "Notes field", "shows": "Free text the advisor types; required before an alert can be closed", "source": "Typed by the advisor", "marker": "required", "trace": "FS-MON-10" },
+    { "id": "EL-10", "name": "Auto note on review completion", "shows": "A note written by the app when a due diligence review is recorded against the security", "source": "Due diligence record", "marker": "unanswered", "trace": "FS-MON-14", "questions": ["Q-01"] },
+    { "id": "EL-11", "name": "Link to the review", "shows": "A jump from the alert's notes to the review that closed it", "source": "Due diligence record", "marker": "unanswered", "trace": "", "note": "Asked for as “ideally”, which is not a requirement.", "questions": ["Q-03"] }
+  ],
+
+  "controls": [
+    { "id": "CTL-01", "name": "Monitoring tab", "effect": "alters the screen", "serverData": false, "leadsTo": "Triggers and their effect", "confirm": "None", "marker": "required", "trace": "FS-MON-03", "note": "Leads by default — a fixed default, not one that switches when alerts exist." },
+    { "id": "CTL-02", "name": "Alerts tab", "effect": "alters the screen", "serverData": false, "leadsTo": "The alerts list", "confirm": "None", "marker": "required", "trace": "FS-MON-03" },
+    { "id": "CTL-03", "name": "Trigger search", "effect": "alters the screen", "serverData": false, "confirm": "None", "marker": "required", "trace": "FS-MON-04" },
+    { "id": "CTL-04", "name": "Trigger on / off toggle", "effect": "acts on data", "serverData": true, "confirm": "No confirmation. A firm-mandatory trigger is locked and cannot be switched at all.", "marker": "required", "trace": "FS-MON-11" },
+    { "id": "CTL-05", "name": "Asset class picker", "effect": "both", "serverData": true, "confirm": "None", "marker": "required", "trace": "FS-MON-11" },
+    { "id": "CTL-06", "name": "Security type and category filters", "effect": "alters the screen", "serverData": false, "confirm": "None", "marker": "required", "trace": "FS-MON-07" },
+    { "id": "CTL-07", "name": "Alert search", "effect": "alters the screen", "serverData": false, "confirm": "None", "marker": "required", "trace": "FS-MON-12", "note": "Matches by security, ticker or Fundserv code." },
+    { "id": "CTL-08", "name": "Alert state filter", "effect": "alters the screen", "serverData": false, "confirm": "None", "marker": "required", "trace": "FS-MON-12", "note": "Open / All / Closed — renamed after the decision that an alert has exactly two states." },
+    { "id": "CTL-09", "name": "Filters", "effect": "alters the screen", "serverData": false, "leadsTo": "The shared filter builder", "confirm": "None", "marker": "required", "trace": "FS-FILTER-01" },
+    { "id": "CTL-10", "name": "View alert", "effect": "alters the screen", "serverData": true, "leadsTo": "Alert panel (EL-08)", "confirm": "None", "marker": "required", "trace": "FS-MON-09" },
+    { "id": "CTL-11", "name": "Close alert", "effect": "both", "serverData": true, "leadsTo": "Due diligence review", "href": "page-due-diligence.html", "confirm": "Notes required. A SEV1 additionally requires a completed due diligence review recorded against the security.", "marker": "required", "trace": "FS-MON-13" }
+  ],
+
+  "data": [
+    { "field": "Advisor name and rep code", "metricId": "F-ADVISOR", "means": "Whose book is on screen", "holds": "one value", "unit": "text", "provenance": "held by us", "source": "Advisor record", "calculated": false, "sample": "Jane Whitfield · A4521" },
+    { "field": "Open alerts by tier", "metricId": "F-ALERTCOUNT", "means": "How many alerts are open at each severity", "holds": "one value", "unit": "integer", "provenance": "computed", "source": "Alert store", "calculated": true, "calculation": "count of open alerts grouped by tier for this book", "sample": "12 / 27 / 43" },
+    { "field": "AUM exposure by tier", "metricId": "F-EXPOSURE", "hero": true, "means": "Month-end assets behind the open alerts at that tier — the figure the conversation is about", "holds": "one value", "unit": "$ · “$13.2 million”", "provenance": "computed", "source": "Positions + alert store", "calculated": true, "calculation": "sum of month-end position value for securities with an open alert at that tier", "sample": "$13.2 million" },
+    { "field": "Trigger", "metricId": "F-TRIGGER", "means": "A rule the firm or the advisor is watching with", "holds": "a list", "unit": "text", "provenance": "held by us", "source": "Trigger definitions", "calculated": false, "sample": "Drawdown > 20%" },
+    { "field": "Fire history", "metricId": "F-FIREHIST", "means": "When a trigger fired against a security, over the trailing ninety days", "holds": "a list", "provenance": "computed", "source": "Evaluation run", "calculated": true, "calculation": "fires per security per trigger over ninety days", "sample": "6 fires / 90 days" },
+    { "field": "Alert", "metricId": "F-ALERT", "means": "One trigger firing against one security in one book", "holds": "a list", "provenance": "computed", "source": "Alert store", "calculated": false, "sample": "SEV1 · ABC Growth Fund" },
+    { "field": "Alert state", "metricId": "F-ALERTSTATE", "means": "Open or Closed. There is no third state.", "holds": "one value", "unit": "Open | Closed", "provenance": "held by us", "source": "Alert store", "calculated": false, "sample": "Open" },
+    { "field": "Alert notes", "metricId": "F-ALERTNOTES", "means": "What the advisor recorded when acting on the alert", "holds": "a list", "unit": "text", "provenance": "the user", "source": "Typed by the advisor", "calculated": false, "sample": "Client contacted, holding retained." },
+    { "field": "Near-miss threshold", "metricId": "F-NEARMISS", "means": "", "holds": "", "provenance": "", "note": "Drawn on the heat map, defined by nobody." }
+  ],
+
+  "lists": [
+    {
+      "name": "Triggers",
+      "ordering": "Grouped by severity, SEV1 first",
+      "filtering": "Free text over trigger names",
+      "selection": "Selecting one loads its analytics panel on the right",
+      "nesting": "One level — severity group, then trigger",
+      "device": [{ "device": "desktop", "empty": "Cannot be empty — every book carries the firm-mandatory triggers", "one": "", "overflow": "" }]
+    },
+    {
+      "name": "Alerts",
+      "ordering": "",
+      "filtering": "Open / All / Closed, free text over security, ticker or Fundserv code, and the shared filter builder",
+      "selection": "The view icon opens the alert panel",
+      "nesting": "None",
+      "device": [{ "device": "desktop", "empty": "Not recorded", "one": "", "overflow": "" }]
+    }
+  ],
+
+  "states": [
+    { "key": "default", "label": "Default", "when": "Alerts exist against the book", "sees": "Monitoring tab, trigger list, analytics panel", "next": "Switch to Alerts and work the list" },
+    { "key": "empty", "label": "Empty", "when": "Nothing has fired", "sees": "Not recorded — the tiles presumably show zero, and what the trigger list shows is not stated", "next": "" },
+    { "key": "one", "label": "One item", "when": "One alert is open", "sees": "", "next": "" },
+    { "key": "overflow", "label": "More than fits", "when": "A book with hundreds of open alerts", "sees": "", "next": "" },
+    { "key": "loading", "label": "Loading", "when": "The overnight evaluation has not finished", "sees": "", "next": "" },
+    { "key": "error", "label": "Error", "when": "The evaluation did not run", "sees": "", "next": "" },
+    { "key": "restricted", "label": "Restricted", "when": "Another advisor's book", "sees": "", "next": "" }
+  ],
+
+  "failures": [
+    { "noticed": "An alert I expected never appeared", "thenWhat": "", "whoIsTold": "" },
+    { "noticed": "I closed an alert and it came back", "thenWhat": "Expected behaviour after the cooldown: it is a new firing, not a reopening", "whoIsTold": "" },
+    { "noticed": "I cannot switch a trigger off", "thenWhat": "It is firm-mandatory and locked", "whoIsTold": "" }
+  ],
+
+  "remembered": { "answer": "", "marker": "unanswered", "whoMustAnswer": "Product owner", "duration": "", "clearable": "", "note": "The tab is a fixed default, so it is not remembered. Whether read state, the last trigger or the last filter survive a visit is not stated." },
+  "liveChange": { "answer": "", "marker": "unanswered", "whoMustAnswer": "Product owner", "howTold": "", "midAction": "" },
+
+  "connections": {
+    "from": [
+      { "label": "Home — the SEV1 and SEV2 tiles and the active alerts table route here", "href": "page-home.html" },
+      { "label": "Book of Business — a security's AUM and positions appear in the analytics panel", "href": "page-book-of-business.html" }
+    ],
+    "to": [
+      { "label": "Due Diligence — a closed alert feeds the annual review for that security", "href": "page-due-diligence.html" }
+    ],
+    "components": [{ "id": "CMP-02", "label": "Stat tile" }, { "id": "CMP-03", "label": "Severity badge" }, { "id": "CMP-04", "label": "Filter toolbar" }]
+  },
+  "workflows": [{ "id": "WF-01", "name": "Clear a SEV1 alert", "href": "workflow-clear-alert.html", "position": "Steps 2 to 5 happen on this page" }],
+
+  "copy": [
+    { "key": "Tab labels", "string": "Monitoring · Alerts", "status": "required wording", "note": "The page and its default tab share the name — confirmed twice as intentional." },
+    { "key": "Alert state filter", "string": "Open · All · Closed", "status": "required wording", "note": "Replaces earlier Active / Inactive wording." },
+    { "key": "Auto note", "string": "Review Completed", "status": "placeholder", "note": "This string is audit evidence — see Q-01." },
+    { "key": "Locked trigger", "string": "", "status": "placeholder", "note": "A locked trigger must say why it cannot be switched; the wording is not recorded." }
+  ],
+
+  "decisions": [
+    { "what": "Monitoring leads over Alerts as a fixed default, not one that switches when alerts exist", "who": "Product owner", "when": "at request time" },
+    { "what": "An alert has exactly two states, Open and Closed", "who": "Product owner", "when": "at request time" },
+    { "what": "The page and its default tab share the name Monitoring, intentionally", "who": "Product owner", "when": "confirmed twice" },
+    { "what": "A SEV1 cannot be closed without a completed due diligence review against the security", "who": "Compliance", "when": "at request time" }
+  ],
+
+  "observations": [
+    { "what": "“Go to Monitoring” is ambiguous between the page and its default tab. Confirmed as intentional, but it will reach tickets, conversation and event names.", "raisedBy": "Source specification and conversion", "when": "2026-08-18" },
+    { "what": "Closing an alert and recording the review live on two pages, and the link between them is the part marked “ideally”.", "raisedBy": "Conversion", "when": "2026-08-18" },
+    { "what": "The heat map is the most visually prominent thing on the page and the least defined.", "raisedBy": "Conversion", "when": "2026-08-18" }
+  ],
+
+  "questions": [
+    { "id": "Q-01", "question": "What exactly does the auto-generated note say when a review completes, and does it name the reviewer and date inline?", "whyItMatters": "It is the sentence a regulator reads years later", "blocks": "the build", "blocksBuild": true, "whoMustAnswer": "Compliance", "neededBy": "", "affects": ["EL-10"] },
+    { "id": "Q-02", "question": "What counts as a near miss on the heat map, and who sets the threshold?", "whyItMatters": "Half the column is meaningless until it is defined, and advisors will read it as fact", "blocks": "the build", "blocksBuild": true, "whoMustAnswer": "Product owner", "neededBy": "", "affects": ["EL-06"] },
+    { "id": "Q-03", "question": "Does the alert note link straight to the review row, or is naming the review enough for the first build?", "whyItMatters": "Asked for as “ideally”, which is not a requirement", "blocks": "business review", "blocksBuild": false, "whoMustAnswer": "Product owner", "neededBy": "", "affects": ["EL-11"] },
+    { "id": "Q-04", "question": "Does this page update while somebody is looking at it, and what happens if an alert arrives while a note is half typed?", "whyItMatters": "In an alerting product this is close to the whole product", "blocks": "the build", "blocksBuild": true, "whoMustAnswer": "Product owner", "neededBy": "", "affects": ["EL-07", "EL-09"] },
+    { "id": "Q-05", "question": "Does this page have to work on a phone, and if so which parts?", "whyItMatters": "The specification describes desktop only, while the work it supports is often done away from a desk", "blocks": "business review", "blocksBuild": false, "whoMustAnswer": "Product owner", "neededBy": "", "affects": ["EL-03", "EL-06"] }
+  ],
+
+  "outOfScope": [
+    { "what": "Team routing rules — who alerts route to, multi-recipient, supervisor escalation", "why": "Confirmed out of scope for this build; kept rather than deleted" },
+    { "what": "Mobile app and push notifications", "why": "Out of scope for this build" },
+    { "what": "How the evaluation run is scheduled, retried or resumed", "why": "Implementer's" }
+  ],
+
+  "contract": {
+    "must": [
+      "Monitoring as the fixed default tab; Open / All / Closed as the state filter wording",
+      "Notes required to close any alert; a completed due diligence review additionally required for a SEV1",
+      "Firm-mandatory triggers locked, with a reason shown",
+      "Every element and control listed in this file, with the IDs used here"
+    ],
+    "mustNotInvent": [
+      "Near-miss thresholds or their shading (Q-02)",
+      "The wording of the auto-generated review note (Q-01)",
+      "Any third alert state — Open and Closed are the only two",
+      "Behaviour on a phone (Q-05)"
+    ],
+    "askFirst": [
+      "Whether the page live-updates (Q-04) — do not choose polling or sockets to fill the silence",
+      "Whether the alert note links to the review row (Q-03)"
+    ],
+    "acceptance": [
+      "Every state in the States block can be produced with example data",
+      "A SEV1 cannot be closed without a review, demonstrably",
+      "Every EL/CTL ID appears in the built page's test IDs"
+    ]
+  }
+}
+</script>
+
+<script src="assets/app-config.js"></script>
+<script src="../assets/spec.js"></script>
+<script>SpecKit.boot("page-monitoring.html");</script>
+</body>
+</html>

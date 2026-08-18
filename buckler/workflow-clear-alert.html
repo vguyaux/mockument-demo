@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Workflow — clear a SEV1 alert</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="../assets/spec.css" />
+<script>(function(){var s=localStorage.getItem('spec-theme')||'system';var t=s==='system'?(window.matchMedia('(prefers-color-scheme:light)').matches?'light':'dark'):s;if(t==='light')document.documentElement.classList.add('light');})();</script>
+</head>
+<body>
+<header class="topbar" id="topbar"></header>
+<div class="shell">
+  <aside class="sidebar" id="sidebar"></aside>
+  <main class="main">
+    <div id="head"></div>
+    <section class="block">
+      <div class="block-head"><span class="block-num">01</span><span class="block-title">The ordinary path</span>
+        <span class="block-for">walk it in order</span></div>
+      <p class="block-note">Each step names the page it happens on and what has to be true to move on. Open the page beside
+        this list and follow it — a workflow that cannot be walked has not been specified.</p>
+      <div class="flow" id="steps"></div>
+    </section>
+    <section class="block">
+      <div class="block-head"><span class="block-num">02</span><span class="block-title">Where it can end</span></div>
+      <div id="endings"></div>
+    </section>
+    <section class="block">
+      <div class="block-head"><span class="block-num">03</span><span class="block-title">Exceptional paths</span>
+        <span class="block-for">the ones people actually argue about</span></div>
+      <div class="flow" id="exceptions"></div>
+    </section>
+    <section class="block">
+      <div class="block-head"><span class="block-num">04</span><span class="block-title">Open questions on this workflow</span></div>
+      <div id="questions"></div>
+    </section>
+    <footer class="footer"><span>Honest Mockument · workflow</span><span>A workflow has a beginning, a useful ending, and paths people can discuss.</span></footer>
+  </main>
+</div>
+<aside class="inspector" id="inspector"></aside>
+
+<script type="application/json" id="workflow">
+{
+  "kit": "honest-mockument/workflow/v1",
+  "id": "WF-01",
+  "name": "Clear a SEV1 alert",
+  "starts": "The advisor opens the app in the morning after the overnight evaluation, or a supervisor asks about a particular security.",
+  "actors": ["Advisor", "Compliance (reads the review afterwards)"],
+  "process": "Daily book supervision",
+  "steps": [
+    { "title": "See that something fired", "page": "Home", "href": "page-home.html", "actor": "Advisor",
+      "does": "The SEV1 tile shows a count above zero. Selecting the tile opens the alerts, filtered to SEV1 — although the specification names the destination without saying what filter it arrives with.",
+      "moveOn": "At least one SEV1 alert is open.", "elements": "EL-02 and CTL-02 on Home" },
+    { "title": "Read what fired and why", "page": "Monitoring · Alerts tab", "href": "page-monitoring.html", "actor": "Advisor",
+      "does": "Opens the alert panel from the view icon: which trigger, when it fired, the position at the time, and the notes so far.",
+      "moveOn": "The advisor understands the firing.", "elements": "EL-07, EL-08, CTL-10" },
+    { "title": "Decide what to do about the holding", "page": "Monitoring", "href": "page-monitoring.html", "actor": "Advisor",
+      "does": "Off-app work: look at the security, contact the client if needed. The app does not model this, and says so.",
+      "moveOn": "A decision exists to record.", "elements": "—" },
+    { "title": "Record the due diligence review", "page": "Due Diligence · Reviews", "href": "page-due-diligence.html", "actor": "Advisor",
+      "does": "Records the review against the security. For a SEV1 this is not optional: the alert cannot be closed without it.",
+      "moveOn": "A completed review exists against the security.", "elements": "EL-02, EL-06, EL-07" },
+    { "title": "Close the alert with a note", "page": "Monitoring · Alert panel", "href": "page-monitoring.html", "actor": "Advisor",
+      "does": "Types the note and closes the alert. The app adds its own note referring to the completed review — the exact wording of which nobody has decided.",
+      "moveOn": "The alert is Closed. There is no third state.", "elements": "EL-09, EL-10, CTL-11" }
+  ],
+  "endings": [
+    { "ending": "Closed with a review", "means": "The ordinary ending. The alert is Closed and the review is findable from it — although the link between them is the part marked as ideal rather than required." },
+    { "ending": "Left open deliberately", "means": "The advisor decides not to act today. Nothing records that as a decision." },
+    { "ending": "Fires again after cooldown", "means": "The same condition trips again once the cooldown has passed. That is a new alert, not a reopening." }
+  ],
+  "exceptions": [
+    { "title": "The review cannot be completed today", "what": "The advisor is waiting on the client or on a document. The alert stays open and nothing records why.", "who": "Product owner", "gap": true },
+    { "title": "A second SEV1 arrives while a note is half typed", "what": "Whether the page updates underneath is not settled — see Q-04 on Monitoring.", "who": "Product owner", "gap": true },
+    { "title": "The security is no longer held", "what": "Reviews exist for securities no longer held, and the Owned badge is a live check — but what closing an alert on a sold position means is not stated.", "who": "Compliance", "gap": true },
+    { "title": "The overnight evaluation did not run", "what": "Home shows a last-updated timestamp, so a missing run is visible rather than silent. What the page says beyond the timestamp is not recorded.", "who": "Product owner", "gap": true }
+  ],
+  "questions": [
+    { "id": "Q-W1", "question": "Should “left open deliberately” be a recorded act rather than an absence?", "whoMustAnswer": "Product owner", "neededBy": "", "blocksBuild": false },
+    { "id": "Q-W2", "question": "What happens to an open alert when the security leaves the book?", "whoMustAnswer": "Compliance", "neededBy": "", "blocksBuild": true }
+  ]
+}
+</script>
+
+<script src="assets/app-config.js"></script>
+<script src="../assets/spec.js"></script>
+<script>
+(function () {
+  SpecKit.chrome("workflow-clear-alert.html");
+  const esc = SpecKit.esc;
+  const w = JSON.parse(document.getElementById("workflow").textContent);
+  const gaps = w.exceptions.filter(x => x.gap).length;
+
+  document.getElementById("head").innerHTML = `
+    <div class="page-eyebrow">Workflow · ${esc(w.id)}</div>
+    <h1 class="page-title">${esc(w.name)}</h1>
+    <p class="page-lede">${esc(w.starts)}</p>
+    <div class="meta-strip">
+      <span class="meta-chip">Process <b>${esc(w.process)}</b></span>
+      <span class="meta-chip">Steps <b>${w.steps.length}</b></span>
+      <span class="meta-chip">Actors <b>${esc(w.actors.join(", "))}</b></span>
+      <span class="meta-chip">Exceptional paths with a gap <b>${gaps}</b></span>
+    </div>`;
+
+  document.getElementById("steps").innerHTML = w.steps.map((s, i) => `
+    <div class="flow-step"><div class="flow-num">${i + 1}</div>
+      <div class="flow-body">
+        <div class="flow-title">${esc(s.title)}</div>
+        <div class="flow-meta">${esc(s.actor)} · on <a href="${esc(s.href)}">${esc(s.page)}</a> · elements ${esc(s.elements)}</div>
+        <div class="flow-text">${esc(s.does)}</div>
+        <div class="flow-meta" style="margin-top:4px">Moves on when: ${esc(s.moveOn)}</div>
+      </div></div>`).join("");
+
+  document.getElementById("endings").innerHTML = SpecKit.table(["Ending", "What it means"],
+    w.endings.map(e => [esc(e.ending), esc(e.means)]));
+
+  document.getElementById("exceptions").innerHTML = w.exceptions.map((x, i) => `
+    <div class="flow-step ${x.gap ? "flow-step--exception" : ""}"><div class="flow-num">${x.gap ? "!" : "✓"}</div>
+      <div class="flow-body"><div class="flow-title">${esc(x.title)}</div>
+        <div class="flow-text">${esc(x.what)}</div>
+        <div class="flow-meta" style="margin-top:4px">${x.gap ? "Owed by " + esc(x.who) : "Answered · " + esc(x.who)}</div>
+      </div></div>`).join("");
+
+  document.getElementById("questions").innerHTML = SpecKit.table(
+    ["ID", "Question", "Who must answer", "Needed by", "Blocks"],
+    w.questions.map(q => [`<span class="id-cell">${esc(q.id)}</span>`, esc(q.question), esc(q.whoMustAnswer),
+      esc(q.neededBy), q.blocksBuild ? `<span class="marker marker--unanswered">the build</span>` : `<span class="marker marker--proposed">review</span>`]));
+})();
+</script>
+</body>
+</html>
