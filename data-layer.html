@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>The data layer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<script>(function(){var s=localStorage.getItem('spec-theme')||'system';var t=s==='system'?(window.matchMedia('(prefers-color-scheme:light)').matches?'light':'dark'):s;if(t==='light')document.documentElement.classList.add('light');})();</script>
+<style>
+/* ==========================================================================
+   Honest Mockument — shared stylesheet
+   Rebrand by editing the tokens in :root and html.light only.
+   ========================================================================== */
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  /* --- brand tokens: swap these --- */
+  --accent:      #6366F1;   /* primary accent            */
+  --accent-2:    #22D3EE;   /* secondary accent          */
+  --font:        'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-mono:   ui-monospace, SFMono-Regular, 'SF Mono', Menlo, monospace;
+
+  /* --- surfaces (dark is the default) --- */
+  --bg:        #0B0F14;
+  --surface:   #111820;
+  --surface2:  #16202B;
+  --surface3:  #1C2836;
+  --rule:      #223142;
+  --rule2:     #2E4257;
+
+  --text1:     #F1F5F9;
+  --text2:     #94A3B8;
+  --text3:     #64748B;
+
+  /* --- marker colours --- */
+  --m-required:   #10B981;
+  --m-proposed:   #F59E0B;
+  --m-unanswered: #F43F5E;
+  --m-observed:   #A855F7;
+  --m-scope:      #64748B;
+
+  --radius: 10px;
+  --shadow: 0 10px 40px rgba(0,0,0,0.35);
+}
+
+html.light {
+  --bg:        #F6F8FB;
+  --surface:   #FFFFFF;
+  --surface2:  #F1F5F9;
+  --surface3:  #E8EEF6;
+  --rule:      #E2E8F0;
+  --rule2:     #CBD5E1;
+  --text1:     #0F172A;
+  --text2:     #475569;
+  --text3:     #7C8899;
+  --accent:    #4F46E5;
+  --accent-2:  #0891B2;
+  --m-required:   #059669;
+  --m-proposed:   #B45309;
+  --m-unanswered: #E11D48;
+  --m-observed:   #7E22CE;
+  --shadow: 0 10px 30px rgba(15,23,42,0.10);
+}
+
+html, body {
+  background: var(--bg); color: var(--text1);
+  font-family: var(--font); font-size: 15px; line-height: 1.65;
+  -webkit-font-smoothing: antialiased; min-height: 100vh;
+}
+a { color: inherit; }
+h1, h2, h3, h4 { line-height: 1.25; letter-spacing: -0.015em; }
+
+/* ── top bar ─────────────────────────────────────────────────────────── */
+.topbar {
+  position: fixed; inset: 0 0 auto 0; height: 54px; z-index: 200;
+  display: flex; align-items: center; gap: 14px; padding: 0 20px;
+  background: color-mix(in srgb, var(--bg) 88%, transparent);
+  backdrop-filter: blur(14px); border-bottom: 1px solid var(--rule);
+}
+.topbar-mark { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+.topbar-dot { width: 10px; height: 10px; border-radius: 3px; background: linear-gradient(135deg, var(--accent), var(--accent-2)); }
+.topbar-app { font-size: 13px; font-weight: 700; letter-spacing: -0.01em; }
+.topbar-kind { font-size: 10px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: var(--text3); }
+.crumbs { font-size: 12px; color: var(--text3); display: flex; gap: 8px; align-items: center; }
+.crumbs a { text-decoration: none; color: var(--text2); }
+.crumbs a:hover { color: var(--text1); }
+.topbar-spacer { flex: 1; }
+.btn {
+  font: inherit; font-size: 12px; font-weight: 600; color: var(--text2);
+  background: transparent; border: 1px solid var(--rule2); border-radius: 7px;
+  padding: 6px 12px; cursor: pointer; text-decoration: none;
+  display: inline-flex; align-items: center; gap: 6px; transition: .15s;
+}
+.btn:hover { color: var(--text1); border-color: var(--accent); }
+.btn--primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+.btn--primary:hover { color: #fff; filter: brightness(1.1); }
+
+.theme-toggle {
+  width: 30px; height: 30px; border-radius: 50%; border: 1px solid var(--rule2);
+  background: transparent; color: var(--text2); cursor: pointer;
+  display: inline-flex; align-items: center; justify-content: center; padding: 0;
+}
+.theme-toggle:hover { border-color: var(--accent); color: var(--text1); }
+.theme-toggle svg { width: 15px; height: 15px; display: none; }
+.theme-toggle .icon-active { display: block; }
+
+/* ── shell ───────────────────────────────────────────────────────────── */
+.shell { display: flex; padding-top: 54px; min-height: 100vh; }
+
+.sidebar {
+  width: 244px; flex-shrink: 0; border-right: 1px solid var(--rule);
+  background: var(--surface); padding: 24px 0 60px;
+  position: sticky; top: 54px; height: calc(100vh - 54px); overflow-y: auto;
+}
+.side-group { padding: 0 18px; margin-bottom: 26px; }
+.side-heading {
+  font-size: 10px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase;
+  color: var(--text3); margin-bottom: 10px; padding: 0 8px;
+}
+.side-link {
+  display: flex; align-items: center; gap: 8px; justify-content: space-between;
+  padding: 7px 10px; border-radius: 7px; font-size: 13.5px; font-weight: 500;
+  color: var(--text2); text-decoration: none; transition: .12s;
+}
+.side-link:hover { background: var(--surface2); color: var(--text1); }
+.side-link.is-active { background: color-mix(in srgb, var(--accent) 16%, transparent); color: var(--text1); font-weight: 600; }
+.side-link.is-unbuilt { color: var(--text3); font-style: italic; }
+.side-note { font-size: 11.5px; color: var(--text3); padding: 6px 10px 0; line-height: 1.55; }
+
+.main { flex: 1; min-width: 0; padding: 34px 44px 90px; max-width: 1180px; }
+
+/* ── page header ─────────────────────────────────────────────────────── */
+.page-eyebrow { font-size: 10px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: var(--accent); margin-bottom: 10px; }
+.page-title { font-size: 34px; font-weight: 800; margin-bottom: 10px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.page-route { font-family: var(--font-mono); font-size: 12px; color: var(--text3); }
+.page-lede { font-size: 15.5px; color: var(--text2); max-width: 74ch; margin-bottom: 22px; }
+
+.meta-strip { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 26px; }
+.meta-chip {
+  font-size: 11.5px; color: var(--text2); background: var(--surface);
+  border: 1px solid var(--rule); border-radius: 20px; padding: 4px 12px;
+  display: inline-flex; align-items: center; gap: 6px; text-decoration: none;
+}
+.meta-chip a, a.meta-chip:hover { color: var(--text1); }
+.meta-chip b { color: var(--text1); font-weight: 600; }
+
+/* ── blocks ──────────────────────────────────────────────────────────── */
+.block { margin: 0 0 38px; scroll-margin-top: 70px; }
+.block-head { display: flex; align-items: baseline; gap: 10px; padding-bottom: 10px; margin-bottom: 14px; border-bottom: 1px solid var(--rule); }
+.block-num { font-family: var(--font-mono); font-size: 11px; color: var(--text3); }
+.block-title { font-size: 12px; font-weight: 700; letter-spacing: 0.13em; text-transform: uppercase; color: var(--text1); }
+.block-for { font-size: 11px; color: var(--text3); margin-left: auto; }
+.block-note { font-size: 13.5px; color: var(--text2); margin-bottom: 12px; max-width: 82ch; }
+
+.card { background: var(--surface); border: 1px solid var(--rule); border-radius: var(--radius); padding: 18px 20px; }
+.card + .card { margin-top: 12px; }
+.card-label { font-size: 10px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent); margin-bottom: 8px; }
+.card-body { font-size: 14px; color: var(--text2); }
+.card-body strong { color: var(--text1); font-weight: 600; }
+.grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 12px; }
+.grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 12px; }
+
+/* ── tables ──────────────────────────────────────────────────────────── */
+.table-wrap { border: 1px solid var(--rule); border-radius: var(--radius); overflow: auto; background: var(--surface); }
+table { border-collapse: collapse; width: 100%; font-size: 13.5px; }
+thead th {
+  text-align: left; font-size: 10px; font-weight: 700; letter-spacing: 0.13em;
+  text-transform: uppercase; color: var(--text3); padding: 11px 14px;
+  border-bottom: 1px solid var(--rule); background: var(--surface2); white-space: nowrap;
+}
+tbody td { padding: 11px 14px; border-bottom: 1px solid var(--rule); color: var(--text2); vertical-align: top; }
+tbody tr:last-child td { border-bottom: none; }
+tbody tr:hover td { background: var(--surface2); }
+tbody td:first-child { color: var(--text1); font-weight: 600; }
+td .sub { display: block; font-size: 12px; color: var(--text3); margin-top: 3px; }
+.id-cell { font-family: var(--font-mono); font-size: 11.5px; color: var(--text3) !important; font-weight: 500 !important; white-space: nowrap; }
+.id-cell a { text-decoration: none; }
+.id-cell a:hover { color: var(--accent); }
+.tbd { color: var(--m-unanswered); font-weight: 600; font-size: 12px; }
+
+/* ── markers ─────────────────────────────────────────────────────────── */
+.marker {
+  font-size: 10px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
+  padding: 2.5px 8px; border-radius: 20px; white-space: nowrap;
+  border: 1px solid currentColor; display: inline-block;
+}
+.marker--required   { color: var(--m-required);   background: color-mix(in srgb, var(--m-required) 12%, transparent); }
+.marker--proposed   { color: var(--m-proposed);   background: color-mix(in srgb, var(--m-proposed) 12%, transparent); }
+.marker--unanswered { color: var(--m-unanswered); background: color-mix(in srgb, var(--m-unanswered) 12%, transparent); }
+.marker--observed   { color: var(--m-observed);   background: color-mix(in srgb, var(--m-observed) 12%, transparent); }
+.marker--scope      { color: var(--m-scope);      background: color-mix(in srgb, var(--m-scope) 14%, transparent); }
+.marker--new        { color: var(--accent-2);     background: color-mix(in srgb, var(--accent-2) 12%, transparent); }
+.marker--modify     { color: var(--m-proposed);   background: color-mix(in srgb, var(--m-proposed) 12%, transparent); }
+.marker--existing   { color: var(--text3);        background: transparent; }
+
+/* ── mock frame ──────────────────────────────────────────────────────── */
+.mock-shell { border: 1px solid var(--rule); border-radius: var(--radius); overflow: hidden; background: var(--surface); }
+.mock-controls {
+  display: flex; flex-wrap: wrap; gap: 14px; align-items: center;
+  padding: 10px 14px; border-bottom: 1px solid var(--rule); background: var(--surface2);
+}
+.ctrl { display: flex; align-items: center; gap: 6px; }
+.ctrl-label { font-size: 10px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text3); }
+.seg { display: flex; background: var(--bg); border: 1px solid var(--rule); border-radius: 7px; padding: 2px; }
+.seg button {
+  font: inherit; font-size: 11.5px; font-weight: 600; color: var(--text3);
+  background: transparent; border: 0; border-radius: 5px; padding: 4px 10px; cursor: pointer;
+}
+.seg button.is-on { background: var(--accent); color: #fff; }
+.seg button:hover:not(.is-on) { color: var(--text1); }
+.switch { display: inline-flex; align-items: center; gap: 7px; cursor: pointer; font-size: 12px; color: var(--text2); }
+.switch input { accent-color: var(--accent); width: 15px; height: 15px; }
+
+.mock-stage { padding: 22px; background: var(--bg); position: relative; }
+.mock-view { display: none; }
+.mock-view.is-on { display: block; }
+.mock-caption { font-size: 12px; color: var(--text3); padding: 10px 14px; border-top: 1px solid var(--rule); background: var(--surface2); }
+
+/* wireframe primitives — deliberately crude */
+.wf { border: 1px solid var(--rule2); border-radius: 8px; background: var(--surface); overflow: hidden; }
+.wf-row { display: flex; gap: 10px; }
+.wf-col { display: flex; flex-direction: column; gap: 10px; flex: 1; min-width: 0; }
+.wf-pad { padding: 12px; }
+.wf-box {
+  border: 1px dashed var(--rule2); border-radius: 6px; background: var(--surface2);
+  padding: 10px 12px; position: relative; min-width: 0;
+}
+.wf-label { font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text3); margin-bottom: 6px; }
+.wf-strong { font-size: 13px; font-weight: 700; color: var(--text1); }
+.wf-text { font-size: 12px; color: var(--text2); }
+.wf-bar { height: 8px; border-radius: 4px; background: var(--surface3); margin: 5px 0; }
+.wf-bar--sm { width: 45%; } .wf-bar--md { width: 70%; } .wf-bar--lg { width: 92%; }
+.wf-tile { flex: 1; border: 1px dashed var(--rule2); border-radius: 6px; padding: 9px 11px; background: var(--surface2); }
+.wf-num { font-size: 20px; font-weight: 800; color: var(--text1); line-height: 1.1; }
+.wf-tabs { display: flex; gap: 6px; }
+.wf-tab { font-size: 11.5px; font-weight: 600; color: var(--text3); border: 1px solid var(--rule2); border-radius: 999px; padding: 3px 12px; }
+.wf-tab.is-on { color: var(--text1); border-color: var(--accent); background: color-mix(in srgb, var(--accent) 14%, transparent); }
+.wf-table { width: 100%; font-size: 11.5px; border-collapse: collapse; }
+.wf-table th { text-align: left; font-size: 9.5px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text3); padding: 4px 6px; border-bottom: 1px solid var(--rule); }
+.wf-table td { padding: 5px 6px; border-bottom: 1px solid var(--rule); color: var(--text2); }
+.wf-chip { display: inline-block; font-size: 10px; font-weight: 700; padding: 1px 7px; border-radius: 999px; border: 1px solid var(--rule2); color: var(--text3); }
+.wf-menu { width: 132px; flex-shrink: 0; border-right: 1px solid var(--rule); padding: 10px 8px; background: var(--surface2); }
+.wf-menu a { display: block; font-size: 11.5px; color: var(--text2); text-decoration: none; padding: 5px 8px; border-radius: 5px; }
+.wf-menu a:hover { background: var(--surface3); color: var(--text1); }
+.wf-menu a.is-on { color: var(--text1); font-weight: 600; background: color-mix(in srgb, var(--accent) 16%, transparent); }
+.wf-phone { max-width: 300px; margin: 0 auto; }
+.wf-voice { font-family: var(--font-mono); font-size: 12.5px; line-height: 1.9; color: var(--text2); }
+.wf-voice b { color: var(--text1); }
+
+/* element hooks */
+[data-el] { cursor: pointer; }
+[data-el]:hover { outline: 1px solid var(--accent); outline-offset: 2px; }
+[data-el].is-selected { outline: 2px solid var(--accent); outline-offset: 2px; }
+[data-el]::after {
+  content: attr(data-el); position: absolute; top: -1px; right: -1px;
+  font-family: var(--font-mono); font-size: 8.5px; padding: 0 4px; border-radius: 0 6px 0 6px;
+  background: var(--rule2); color: var(--text2); opacity: 0; transition: .12s;
+}
+[data-el]:hover::after { opacity: 1; }
+.mock-stage.show-ids [data-el]::after { opacity: .85; }
+
+/* honesty overlay */
+.mock-stage.overlay-on [data-marker="required"]   { box-shadow: inset 0 0 0 2px var(--m-required); }
+.mock-stage.overlay-on [data-marker="proposed"]   { box-shadow: inset 0 0 0 2px var(--m-proposed); }
+.mock-stage.overlay-on [data-marker="unanswered"] { box-shadow: inset 0 0 0 2px var(--m-unanswered); }
+.mock-stage.overlay-on [data-marker="observed"]   { box-shadow: inset 0 0 0 2px var(--m-observed); }
+.mock-stage.overlay-on [data-marker="out of scope"] { opacity: .45; box-shadow: inset 0 0 0 2px var(--m-scope); }
+.mock-stage.overlay-on [data-el]:not([data-marker]) { box-shadow: inset 0 0 0 2px var(--m-unanswered); }
+
+.overlay-legend { display: none; gap: 14px; flex-wrap: wrap; padding: 10px 14px; border-top: 1px solid var(--rule); font-size: 11.5px; color: var(--text3); }
+.mock-shell.overlay-on .overlay-legend { display: flex; }
+.legend-dot { width: 9px; height: 9px; border-radius: 3px; display: inline-block; margin-right: 6px; }
+
+/* role / state filtering */
+.mock-stage [data-hidden-role] { display: none !important; }
+.state-empty-note { font-size: 12.5px; color: var(--text3); padding: 10px 12px; border: 1px dashed var(--rule2); border-radius: 6px; }
+
+/* ── inspector drawer ────────────────────────────────────────────────── */
+.inspector {
+  position: fixed; top: 54px; right: 0; bottom: 0; width: 380px; z-index: 190;
+  background: var(--surface); border-left: 1px solid var(--rule); box-shadow: var(--shadow);
+  transform: translateX(100%); transition: transform .18s ease; overflow-y: auto; padding: 20px 22px 60px;
+}
+.inspector.is-open { transform: none; }
+.inspector-close { position: absolute; top: 14px; right: 16px; }
+.insp-id { font-family: var(--font-mono); font-size: 11px; color: var(--text3); }
+.insp-name { font-size: 18px; font-weight: 700; margin: 4px 0 10px; }
+.insp-row { padding: 10px 0; border-top: 1px solid var(--rule); font-size: 13px; color: var(--text2); }
+.insp-row .k { font-size: 10px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text3); display: block; margin-bottom: 3px; }
+.insp-q { border-left: 2px solid var(--m-unanswered); padding-left: 10px; margin-top: 8px; font-size: 12.5px; }
+
+/* ── gates & meters ──────────────────────────────────────────────────── */
+.gates { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 12px; }
+.gate { background: var(--surface); border: 1px solid var(--rule); border-radius: var(--radius); padding: 14px 16px; }
+.gate-name { font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text3); margin-bottom: 8px; }
+.gate-state { font-size: 15px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+.gate--pass .gate-state { color: var(--m-required); }
+.gate--fail .gate-state { color: var(--m-unanswered); }
+.gate-why { font-size: 12px; color: var(--text3); margin-top: 6px; }
+.gate-why li { margin-left: 16px; }
+
+.bar { height: 7px; border-radius: 4px; background: var(--surface3); overflow: hidden; display: flex; }
+.bar span { display: block; height: 100%; }
+.bar .b-required   { background: var(--m-required); }
+.bar .b-proposed   { background: var(--m-proposed); }
+.bar .b-unanswered { background: var(--m-unanswered); }
+.bar .b-observed   { background: var(--m-observed); }
+.bar .b-scope      { background: var(--m-scope); }
+.bar-key { font-size: 11px; color: var(--text3); margin-top: 6px; display: flex; gap: 12px; flex-wrap: wrap; }
+
+/* ── page cards (index) ──────────────────────────────────────────────── */
+.page-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 14px; }
+.page-card { display: block; background: var(--surface); border: 1px solid var(--rule); border-radius: var(--radius); padding: 18px; text-decoration: none; transition: .15s; }
+.page-card:hover { border-color: var(--accent); transform: translateY(-1px); }
+.page-card-top { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 8px; }
+.page-card-name { font-size: 16px; font-weight: 700; color: var(--text1); }
+.page-card-desc { font-size: 12.5px; color: var(--text2); margin-bottom: 12px; min-height: 34px; }
+.page-card.is-unbuilt { opacity: .55; }
+
+/* ── workflow steps ──────────────────────────────────────────────────── */
+.flow { counter-reset: flow; }
+.flow-step { display: flex; gap: 14px; padding: 16px 0; border-top: 1px solid var(--rule); }
+.flow-step:first-child { border-top: 0; }
+.flow-num {
+  flex-shrink: 0; width: 26px; height: 26px; border-radius: 50%; font-size: 12px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  background: color-mix(in srgb, var(--accent) 18%, transparent); color: var(--text1);
+}
+.flow-step--exception .flow-num { background: color-mix(in srgb, var(--m-unanswered) 18%, transparent); color: var(--m-unanswered); }
+.flow-body { min-width: 0; }
+.flow-title { font-size: 14.5px; font-weight: 700; margin-bottom: 4px; }
+.flow-meta { font-size: 12px; color: var(--text3); }
+.flow-text { font-size: 13.5px; color: var(--text2); margin-top: 4px; }
+
+/* ── misc ────────────────────────────────────────────────────────────── */
+.callout { border-left: 3px solid var(--accent); background: var(--surface); border-radius: 0 var(--radius) var(--radius) 0; padding: 14px 18px; }
+.callout--warn { border-left-color: var(--m-unanswered); }
+.callout-title { font-size: 12px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 6px; }
+.callout-body { font-size: 13.5px; color: var(--text2); }
+pre.contract {
+  font-family: var(--font-mono); font-size: 12px; line-height: 1.7; color: var(--text2);
+  background: var(--surface); border: 1px solid var(--rule); border-radius: var(--radius);
+  padding: 16px 18px; overflow: auto; white-space: pre-wrap;
+}
+.footer { border-top: 1px solid var(--rule); margin-top: 46px; padding-top: 18px; font-size: 12px; color: var(--text3); display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.empty-hint { font-size: 13px; color: var(--text3); font-style: italic; }
+
+@media (max-width: 900px) {
+  .sidebar { display: none; }
+  .main { padding: 26px 20px 70px; }
+  .inspector { width: 100%; }
+}
+@media print {
+  .topbar, .sidebar, .mock-controls, .inspector, .btn { display: none !important; }
+  .shell { padding-top: 0; } .main { padding: 0; max-width: none; }
+  body { background: #fff; color: #000; }
+}
+
+/* wireframe panes (tabs inside a mock) */
+.wf-pane { display: none; }
+.wf-pane.is-on { display: block; }
+[data-el] { position: relative; }
+
+/* ── landing entry cards ─────────────────────────────────────────────── */
+.entry-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(330px, 1fr)); gap: 16px; margin: 6px 0 38px; }
+.entry-card {
+  display: block; background: var(--surface); border: 1px solid var(--rule); border-radius: var(--radius);
+  padding: 26px 26px 22px; text-decoration: none; transition: .15s; position: relative; overflow: hidden;
+}
+.entry-card::before { content: ""; position: absolute; inset: 0 0 auto 0; height: 3px; background: linear-gradient(90deg, var(--accent), var(--accent-2)); }
+.entry-card:hover { border-color: var(--accent); transform: translateY(-2px); box-shadow: var(--shadow); }
+.entry-card .k { font-size: 10px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; color: var(--accent); }
+.entry-card h3 { font-size: 21px; font-weight: 800; color: var(--text1); margin: 10px 0 8px; }
+.entry-card p { font-size: 13.5px; color: var(--text2); margin: 0 0 14px; }
+.entry-card .go { font-size: 12.5px; font-weight: 600; color: var(--accent); }
+.entry-card ul { margin: 0 0 14px 16px; padding: 0; }
+.entry-card li { font-size: 12.5px; color: var(--text3); margin-bottom: 3px; }
+
+/* ── document view ─────────────────────────────────────────────────── */
+.doc-nav { width: 290px; }
+.doc-nav-link { display:block; padding:4px 10px; font-size:12.5px; color:var(--text2); text-decoration:none; border-radius:6px; line-height:1.45; }
+.doc-nav-link:hover { background:var(--surface2); color:var(--text1); }
+.doc-nav-link.is-part { margin-top:14px; font-weight:700; font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--text3); }
+.doc-nav-link.is-active { background:color-mix(in srgb, var(--accent) 16%, transparent); color:var(--text1); }
+html { scroll-behavior: smooth; }
+.doc { max-width: 860px; padding: 40px 56px 120px; }
+/* clicking a contents link must land the heading below the fixed top bar */
+.doc h1, .doc h2, .doc h3 { scroll-margin-top: 78px; }
+/* contents lists keep their own numbering and stack one per line */
+.doc ol { list-style: decimal; }
+.doc ol li { margin-bottom: 4px; }
+.doc ol li a, .doc p strong a { text-decoration: none; }
+.doc ol li a:hover, .doc p strong a:hover { color: var(--accent); }
+.doc h1 { font-size:38px; font-weight:800; margin:52px 0 16px; padding-top:18px; border-top:1px solid var(--rule); }
+.doc h1:first-child { border-top:0; margin-top:0; padding-top:0; }
+.doc h2 { font-size:23px; font-weight:700; margin:38px 0 12px; }
+.doc h3 { font-size:16px; font-weight:700; margin:26px 0 8px; color:var(--text1); }
+.doc p, .doc li { font-size:15px; color:var(--text2); }
+.doc p { margin: 0 0 14px; }
+.doc ul, .doc ol { margin: 0 0 16px 22px; }
+.doc li { margin-bottom: 6px; }
+.doc strong { color: var(--text1); font-weight:600; }
+.doc em { color: var(--text1); }
+.doc hr { border:0; border-top:1px solid var(--rule); margin:44px 0; }
+.doc table { margin: 6px 0 22px; border:1px solid var(--rule); border-radius:var(--radius); overflow:hidden; }
+.doc thead th { background: var(--surface2); }
+.doc code { font-family:var(--font-mono); font-size:12.5px; background:var(--surface2); border:1px solid var(--rule); border-radius:4px; padding:1px 5px; color:var(--text1); }
+.doc pre { background:var(--surface); border:1px solid var(--rule); border-radius:var(--radius); padding:18px 20px; overflow:auto; margin:0 0 22px; }
+.doc pre code { background:none; border:0; padding:0; font-size:12px; line-height:1.65; color:var(--text2); }
+.doc blockquote { border-left:3px solid var(--accent); padding-left:16px; color:var(--text2); margin:0 0 18px; }
+.doc blockquote:first-of-type { border:1px solid var(--rule); border-left:1px solid var(--rule); border-radius:var(--radius);
+  background:var(--surface); padding:22px 18px; text-align:center; margin:0 0 26px; }
+.doc blockquote:first-of-type p { font-family:var(--font-mono); font-size:15px; letter-spacing:.16em; color:var(--text3); margin:0; }
+.doc blockquote:first-of-type strong { color:var(--accent); letter-spacing:.16em; }
+@media (max-width: 900px) { .doc { padding: 26px 20px 80px; } }
+@media print { .doc { padding:0; max-width:none; } .doc h1 { page-break-before: always; } .doc h1:first-child { page-break-before: avoid; } }
+</style>
+</head>
+<body>
+<header class="topbar">
+  <a class="topbar-mark" href="index.html"><span class="topbar-dot"></span>
+    <span><span class="topbar-app">The data layer</span> <span class="topbar-kind">&nbsp;companion</span></span></a>
+  <div class="topbar-spacer"></div>
+  <a class="btn" href="index.html">Back to the sample mockument</a>
+  <button class="btn" onclick="window.print()">Print / PDF</button>
+  <button class="theme-toggle" id="themeToggle" aria-label="Theme">
+    <svg class="icon-system" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2a10 10 0 0 1 0 20z" fill="currentColor"/></svg>
+    <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+    <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.2" y1="4.2" x2="5.6" y2="5.6"/><line x1="18.4" y1="18.4" x2="19.8" y2="19.8"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.2" y1="19.8" x2="5.6" y2="18.4"/><line x1="18.4" y1="5.6" x2="19.8" y2="4.2"/></svg>
+  </button>
+</header>
+<div class="shell">
+  <aside class="sidebar doc-nav">
+    <div class="side-group"><div class="side-heading">Contents</div>
+<a class="doc-nav-link is-part" href="#the-data-layer">The data layer</a>
+<a class="doc-nav-link" href="#1-the-problem-this-solves">1. The problem this solves</a>
+<a class="doc-nav-link" href="#2-the-ladder">2. The ladder</a>
+<a class="doc-nav-link" href="#3-what-a-dictionary-row-should-carry">3. What a dictionary row should carry</a>
+<a class="doc-nav-link" href="#4-vocabularies">4. Vocabularies</a>
+<a class="doc-nav-link" href="#5-ten-defects-worth-checking-for">5. Ten defects worth checking for</a>
+<a class="doc-nav-link" href="#6-joining-the-dictionary-to-the-mockument">6. Joining the dictionary to the mockument</a>
+<a class="doc-nav-link" href="#7-what-to-do-first">7. What to do first</a>
+    </div>
+    <div class="side-group"><div class="side-heading">Also here</div>
+      <a class="side-link" href="index.html"><span>Sample mockument</span></a>
+      <a class="side-link" href="honest-mockument.html"><span>The Honest Mockument</span></a>
+    </div>
+  </aside>
+  <main class="main doc"><h1 id="the-data-layer">The data layer</h1><p><strong>What a field-level dictionary has to carry, and when to fill it in.</strong></p>
+<p>Companion to <em>The Honest Mockument</em> · Version 1.0 · 18 August 2026</p>
+<hr>
+<h2 id="1-the-problem-this-solves">1. The problem this solves</h2><p>Field-level work — where each number comes from, how it is calculated, what it is worth checking
+against — is the most expensive part of specifying an app, and the easiest to do at the wrong time.</p>
+<p>Do it too late and the screens are already agreed when somebody discovers that the central figure is
+only produced monthly, or does not exist at all. Do it all up front and most of the effort is spent on
+fields belonging to pages that get cut, redesigned or postponed. In a typical dictionary the majority
+of fields are calculated rather than copied, so &quot;all up front&quot; is not a small bill.</p>
+<p>The way out is to notice that data questions divide cleanly in two.</p>
+<p><strong>Questions that can invalidate a page.</strong> Does this number exist at all? Who supplies it? What point in
+time is it <em>as of</em>, and how long after that can a person see it? Is it a stored fact or something we
+compute? These are design questions wearing a data costume: a figure that only closes monthly kills a
+daily tile no matter how good the layout is. They take seconds to answer, only the business can answer
+them, and they belong in the mockument from the first day.</p>
+<p><strong>Questions that can only change the code.</strong> Which system, which field, the exact formula, the display
+format, the routing when the same figure arrives from two places, the reconciled value for a known
+example. None of these can invalidate a screen. They are also most of the work.</p>
+<h2 id="2-the-ladder">2. The ladder</h2><p>Field detail is therefore not a phase. It is a ladder, climbed <strong>per page</strong>, so nothing above the
+bottom rung is ever paid for on a page that does not survive review.</p>
+<table>
+<thead>
+<tr>
+<th>Rung</th>
+<th>What is answered</th>
+<th>When</th>
+<th>Fields</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>L0 · exists</strong></td>
+<td>What it means in business words · one value or a list · what it is <em>as of</em> · when a person can see it · who supplies it</td>
+<td>With the mockument. <strong>Required to pass the business-review gate.</strong></td>
+<td><code>means</code> <code>holds</code> <code>periodicity</code> <code>visibleWhen</code> <code>provenance</code></td>
+</tr>
+<tr>
+<td><strong>L1 · display</strong></td>
+<td>Unit or format · what an empty value shows · what a stale value shows</td>
+<td>After the page passes business review</td>
+<td><code>unit</code> <code>nullRule</code> <code>staleRule</code></td>
+</tr>
+<tr>
+<td><strong>L2 · sourced</strong></td>
+<td>System · feed, table or field · calculated or not · the calculation · what it derives from · sensitivity</td>
+<td>Before the page is built. <strong>Required to pass the implementation gate.</strong></td>
+<td><code>source</code> <code>calculated</code> <code>calculation</code> <code>derivedFrom</code> <code>sensitivity</code></td>
+</tr>
+<tr>
+<td><strong>L3 · verified</strong></td>
+<td>Evidence the lineage was traced · the tolerance a test may use</td>
+<td>At QA, before release</td>
+<td><code>evidence</code> <code>tolerance</code></td>
+</tr>
+</tbody></table>
+<p><strong>Hero fields are the exception.</strong> Some numbers <em>are</em> the product — a score, a ranking, a figure
+somebody would have to defend under scrutiny. Validating pages that display a wrong number proves
+nothing, so a hero field goes to L2 while the mockument is still being drawn. Expect a handful, not
+fifty.</p>
+<p><strong>Promotion is per page.</strong> The same field may sit at L2 because one page is being built, and be
+irrelevant everywhere else. Nothing forces a whole dictionary to move at once.</p>
+<p><strong>A field is defined once and referenced everywhere.</strong> Give each field a stable identifier. A figure
+that appears on nine screens then has one meaning, one source and one calculation, and where two pages
+describe it differently the register shows the disagreement rather than averaging it away.</p>
+<h2 id="3-what-a-dictionary-row-should-carry">3. What a dictionary row should carry</h2><p>Split into what the catalogue holds once per field, and what each page&#39;s use of it records.</p>
+<p><strong>Per field, once:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Column</th>
+<th>Why it is there</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Identifier</td>
+<td>So nine appearances share one definition</td>
+</tr>
+<tr>
+<td>Business meaning</td>
+<td>In the words somebody would use to a customer, not the column name</td>
+</tr>
+<tr>
+<td>Holds</td>
+<td>One value, or a list</td>
+</tr>
+<tr>
+<td>Unit and format</td>
+<td>Including scale — the ×1,000 and ÷100 errors are the two most common production data defects, and prose is where they hide</td>
+</tr>
+<tr>
+<td>Null rule</td>
+<td>What appears when there is no value</td>
+</tr>
+<tr>
+<td><strong>Stale rule</strong></td>
+<td>What appears when the value is older than it should be. Different question, different answer, and the one that actually happens</td>
+</tr>
+<tr>
+<td>Periodicity</td>
+<td>Which fixed value describes what it is <em>as of</em></td>
+</tr>
+<tr>
+<td>Visibility</td>
+<td>How long after that point a person can see it, stated as a business interval, never as a job name</td>
+</tr>
+<tr>
+<td>Provenance</td>
+<td>Held by us · a provider · the user · computed · nobody knows</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>The system, feed or table</td>
+</tr>
+<tr>
+<td>Calculated</td>
+<td>Yes / no — and if yes, the calculation</td>
+</tr>
+<tr>
+<td><strong>Derives from</strong></td>
+<td>The identifiers of the fields it is computed from. Makes &quot;which screens break if this source is late?&quot; a query rather than an investigation</td>
+</tr>
+<tr>
+<td>Sensitivity</td>
+<td>Personal, restricted, public — it drives test data and access, and somebody will ask for the list</td>
+</tr>
+<tr>
+<td>Tolerance</td>
+<td>What counts as a match when checking. Without it, &quot;does it agree?&quot; is untestable for anything with decimals</td>
+</tr>
+<tr>
+<td>Evidence</td>
+<td>Where the lineage was traced, and when</td>
+</tr>
+</tbody></table>
+<p><strong>Per appearance, on the page:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Column</th>
+<th>Why it is there</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Element identifier</td>
+<td>Which thing on which page shows this field. This is the join that makes the dictionary and the mockument one system</td>
+</tr>
+<tr>
+<td>Sample value</td>
+<td>The value drawn in the mock, so the sketch, the screenshot and the build agree</td>
+</tr>
+<tr>
+<td>Rung</td>
+<td>How far this field has been taken for this page</td>
+</tr>
+</tbody></table>
+<h2 id="4-vocabularies">4. Vocabularies</h2><p>Three columns must use fixed vocabularies. Free text in them cannot be counted, filtered, tested or
+trusted, and drifts into dozens of near-synonyms within months.</p>
+<p><strong>Periodicity</strong> — live · end of previous business day · end of previous month · latest closed period ·
+on demand · reference / on change. A project may extend the list with a period its own work actually
+uses — a trading day, a filing, a shift, a billing cycle — but it extends the list deliberately, in one
+place.</p>
+<p><strong>Visibility</strong> — a business interval: &quot;next business day&quot;, &quot;second to fourth working day of the month&quot;,
+&quot;immediately on save&quot;. Never a job or script name.</p>
+<p><strong>Provenance</strong> — held by us · a provider · the user · computed · nobody knows.</p>
+<p>Nuance goes in an adjacent note, never in the vocabulary column itself.</p>
+<p>Two things that are commonly filed as periodicities and are not. A <strong>derived rate</strong> — a figure
+expressed per year, per head, per unit — is a calculation, computed as of a point that is itself one of
+the values above. And a <strong>refresh cadence</strong> is not a periodicity either: a weekly job that reloads
+figures published quarterly does not make the data weekly.</p>
+<h2 id="5-ten-defects-worth-checking-for">5. Ten defects worth checking for</h2><p>These recur in almost every field-level dictionary. Each is cheap to fix and expensive to leave.</p>
+<ol>
+<li><strong>Lineage that covers a fraction of the fields</strong> while the introduction implies it covers all of
+them. Either finish it, or narrow the stated scope to the fields whose source genuinely varies.</li>
+<li><strong>No reconciled examples.</strong> Two or three known records, traced end to end with their expected
+values, are what turn a dictionary from documentation into a test.</li>
+<li><strong>Vocabulary drift</strong> — six defined values, seventeen in use. Bind the columns to dropdowns and move
+the nuance into notes.</li>
+<li><strong>Open flags with no owner and no date.</strong> A question mark in a notes column is not a question; it is
+a shrug. Split it into question · who must answer · needed by · ticket.</li>
+<li><strong>Transformations described in prose.</strong> &quot;Divided by a hundred&quot;, &quot;in millions&quot;. Give scale and sign
+their own columns.</li>
+<li><strong>No dependency edges</strong>, so nobody can answer &quot;if this source is late, which screens go blank?&quot;</li>
+<li><strong>No tolerance</strong>, so equality checks on anything with decimals are undefined.</li>
+<li><strong>Sensitivity buried inside a free-text column</strong> rather than being a field you can filter on.</li>
+<li><strong>No stale rule</strong>, in a system whose data is regularly late by design.</li>
+<li><strong>No link back to the screen specification</strong>, so the dictionary and the mockument drift into two
+documents describing two different products.</li>
+</ol>
+<h2 id="6-joining-the-dictionary-to-the-mockument">6. Joining the dictionary to the mockument</h2><p>One identifier in each direction, and the two artefacts become one system:</p>
+<pre><code>element in the mockument                  dictionary row
+────────────────────────                  ──────────────
+EL-06  Matched requests table   ──►   field: F-MATCHES        (what this element shows)
+                               ◄──   used on: page-approvals.html#EL-06
+</code></pre>
+<p>With that in place:</p>
+<ul>
+<li>The page&#39;s <em>Data and fields</em> block is rendered from the dictionary instead of being retyped,
+so the two cannot disagree.</li>
+<li>The checker can fail a page whose element shows a field that is not in the catalogue, or whose field
+sits below the rung its gate requires.</li>
+<li>&quot;Which pages are affected if this source is late?&quot; and &quot;which fields on this page are still at L0?&quot;
+each become one query.</li>
+<li>A figure that appears on nine screens keeps one definition, permanently.</li>
+</ul>
+<h2 id="7-what-to-do-first">7. What to do first</h2><ol>
+<li>Give every field an identifier, and every element on a mockument page the identifier of the field it
+shows.</li>
+<li>Bind periodicity, visibility and provenance to their vocabularies.</li>
+<li>Split the notes column into question · owner · needed by, and push the open ones to named people.</li>
+<li>Take the hero fields to L2 now. Leave everything else at L0.</li>
+<li>Then work the ladder page by page, as pages pass business review.</li>
+</ol>
+<p>The test of whether this is working: at any moment you can say, for any page, <strong>what rung every field
+on it has reached and who owes the next answer.</strong> If the dictionary can answer that, the question of
+when to do field-level work never has to be argued again.</p>
+</main>
+</div>
+<script>
+(function(){
+  var CYCLE=['system','dark','light'], html=document.documentElement, btn=document.getElementById('themeToggle');
+  function sys(){return window.matchMedia('(prefers-color-scheme: light)').matches?'light':'dark';}
+  function apply(m){var e=m==='system'?sys():m;html.classList.toggle('light',e==='light');
+    btn.querySelectorAll('svg').forEach(function(s){s.classList.remove('icon-active');});
+    var map={system:'icon-system',dark:'icon-moon',light:'icon-sun'};
+    var i=btn.querySelector('.'+map[m]); if(i) i.classList.add('icon-active'); btn.title='Theme: '+m;}
+  var st=localStorage.getItem('spec-theme')||'system'; apply(st);
+  btn.addEventListener('click',function(){var c=localStorage.getItem('spec-theme')||'system';
+    var n=CYCLE[(CYCLE.indexOf(c)+1)%CYCLE.length];
+    n==='system'?localStorage.removeItem('spec-theme'):localStorage.setItem('spec-theme',n); apply(n);});
+  var links=[].slice.call(document.querySelectorAll('.doc-nav-link'));
+  var heads=links.map(function(l){return document.getElementById(l.getAttribute('href').slice(1));}).filter(Boolean);
+  window.addEventListener('scroll',function(){
+    var y=window.scrollY+90, cur=0;
+    heads.forEach(function(h,i){ if(h.offsetTop<=y) cur=i; });
+    links.forEach(function(l,i){ l.classList.toggle('is-active', i===cur); });
+  },{passive:true});
+})();
+</script>
+</body>
+</html>

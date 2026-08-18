@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Workflow — decide a high-value request</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="assets/spec.css" />
+<script>(function(){var s=localStorage.getItem('spec-theme')||'system';var t=s==='system'?(window.matchMedia('(prefers-color-scheme:light)').matches?'light':'dark'):s;if(t==='light')document.documentElement.classList.add('light');})();</script>
+</head>
+<body>
+<header class="topbar" id="topbar"></header>
+<div class="shell">
+  <aside class="sidebar" id="sidebar"></aside>
+  <main class="main">
+    <div id="head"></div>
+    <section class="block">
+      <div class="block-head"><span class="block-num">01</span><span class="block-title">The ordinary path</span>
+        <span class="block-for">walk it in order</span></div>
+      <p class="block-note">Each step names the page it happens on and what has to be true to move on. Open the page beside
+        this list and follow it — a workflow that cannot be walked has not been specified.</p>
+      <div class="flow" id="steps"></div>
+    </section>
+    <section class="block">
+      <div class="block-head"><span class="block-num">02</span><span class="block-title">Where it can end</span></div>
+      <div id="endings"></div>
+    </section>
+    <section class="block">
+      <div class="block-head"><span class="block-num">03</span><span class="block-title">Exceptional paths</span>
+        <span class="block-for">the ones people actually argue about</span></div>
+      <div class="flow" id="exceptions"></div>
+    </section>
+    <section class="block">
+      <div class="block-head"><span class="block-num">04</span><span class="block-title">Open questions on this workflow</span></div>
+      <div id="questions"></div>
+    </section>
+    <footer class="footer"><span>Honest Mockument · workflow</span><span>A workflow has a beginning, a useful ending, and paths people can discuss.</span></footer>
+  </main>
+</div>
+<aside class="inspector" id="inspector"></aside>
+
+<script type="application/json" id="workflow">
+{
+  "kit": "honest-mockument/workflow/v1",
+  "id": "WF-01",
+  "name": "Decide a high-value request",
+  "starts": "An approver opens the app in the morning, or a team lead asks why a particular request has not moved.",
+  "actors": ["Approver", "Team lead (may watch, may not decide for someone else)", "Auditor (reads afterwards)"],
+  "process": "Getting a request decided",
+  "steps": [
+    { "title": "See that something is waiting", "page": "Home", "href": "page-home.html", "actor": "Approver",
+      "does": "The stat strip shows an overdue count above zero. Selecting the tile goes straight to the filtered queue.",
+      "moveOn": "At least one request is overdue.", "elements": "EL-02 on Approvals is the same component" },
+    { "title": "Read what is being asked for", "page": "Approvals · Queue", "href": "page-approvals.html#elements", "actor": "Approver",
+      "does": "Opens the request panel (EL-08): what was asked for, by whom, against which rule, and what has been said so far.",
+      "moveOn": "The approver understands the request.", "elements": "EL-07, EL-08, CTL-08" },
+    { "title": "Do whatever the decision actually needs", "page": "Approvals", "href": "page-approvals.html", "actor": "Approver",
+      "does": "Off-app work: check the budget, call the requester, read the contract. The app does not model this, and says so.",
+      "moveOn": "A decision exists to record.", "elements": "—" },
+    { "title": "Get the second approval", "page": "Requests", "href": "page-requests.html", "actor": "Team lead",
+      "does": "Above the threshold, a second approval has to be recorded against the request. For a high-value request this is not optional.",
+      "moveOn": "A second approval exists against the request.", "elements": "not drawn yet — this page is a gap in the walk" },
+    { "title": "Record the decision with a note", "page": "Approvals · Request panel", "href": "page-approvals.html#controls", "actor": "Approver",
+      "does": "Types the note (EL-09) and records the decision (CTL-09). The app adds its own note referring to the second approval.",
+      "moveOn": "The request is Decided. There is no third state.", "elements": "EL-09, EL-11, CTL-09" }
+  ],
+  "endings": [
+    { "ending": "Decided with a note", "means": "The ordinary ending. The request is Decided and the reasoning is findable from it." },
+    { "ending": "Left waiting deliberately", "means": "The approver has decided not to act today. Nothing marks this as a decision — an observation worth a question." },
+    { "ending": "Sent back for detail", "means": "The requester is asked for more. The request stays Waiting, and the clock keeps running." }
+  ],
+  "exceptions": [
+    { "title": "The second approval cannot be obtained today", "what": "The other approver is away. The request stays waiting and nothing records why.", "who": "Approver", "gap": true },
+    { "title": "A new request arrives while a note is half typed", "what": "Nobody has decided whether the list updates underneath. See Q-04 on Approvals.", "who": "Product owner", "gap": true },
+    { "title": "A team lead wants to decide on the approver's behalf", "what": "Permitted or not? The permissions block says a lead may reassign but not decide, which implies no.", "who": "Policy owner", "gap": true },
+    { "title": "The overnight routing run did not complete", "what": "The error state on Approvals says when the queue was last routed, and the approver works the older list knowingly.", "who": "Approver", "gap": false }
+  ],
+  "questions": [
+    { "id": "Q-W1", "question": "Should “left waiting deliberately” be a recorded act rather than an absence?", "whoMustAnswer": "Product owner", "neededBy": "2026-09-05", "blocksBuild": false },
+    { "id": "Q-W2", "question": "Can a team lead record a decision on an approver's behalf, and is that visible to the approver afterwards?", "whoMustAnswer": "Policy owner", "neededBy": "2026-08-29", "blocksBuild": true }
+  ]
+}
+</script>
+
+<script src="assets/app-config.js"></script>
+<script src="assets/spec.js"></script>
+<script>
+(function () {
+  SpecKit.chrome("workflow-decide-request.html");
+  const esc = SpecKit.esc;
+  const w = JSON.parse(document.getElementById("workflow").textContent);
+  const gaps = w.exceptions.filter(x => x.gap).length;
+
+  document.getElementById("head").innerHTML = `
+    <div class="page-eyebrow">Workflow · ${esc(w.id)}</div>
+    <h1 class="page-title">${esc(w.name)}</h1>
+    <p class="page-lede">${esc(w.starts)}</p>
+    <div class="meta-strip">
+      <span class="meta-chip">Process <b>${esc(w.process)}</b></span>
+      <span class="meta-chip">Steps <b>${w.steps.length}</b></span>
+      <span class="meta-chip">Actors <b>${esc(w.actors.join(", "))}</b></span>
+      <span class="meta-chip">Exceptional paths with a gap <b>${gaps}</b></span>
+    </div>`;
+
+  document.getElementById("steps").innerHTML = w.steps.map((s, i) => `
+    <div class="flow-step"><div class="flow-num">${i + 1}</div>
+      <div class="flow-body">
+        <div class="flow-title">${esc(s.title)}</div>
+        <div class="flow-meta">${esc(s.actor)} · on <a href="${esc(s.href)}">${esc(s.page)}</a> · elements ${esc(s.elements)}</div>
+        <div class="flow-text">${esc(s.does)}</div>
+        <div class="flow-meta" style="margin-top:4px">Moves on when: ${esc(s.moveOn)}</div>
+      </div></div>`).join("");
+
+  document.getElementById("endings").innerHTML = SpecKit.table(["Ending", "What it means"],
+    w.endings.map(e => [esc(e.ending), esc(e.means)]));
+
+  document.getElementById("exceptions").innerHTML = w.exceptions.map((x, i) => `
+    <div class="flow-step ${x.gap ? "flow-step--exception" : ""}"><div class="flow-num">${x.gap ? "!" : "✓"}</div>
+      <div class="flow-body"><div class="flow-title">${esc(x.title)}</div>
+        <div class="flow-text">${esc(x.what)}</div>
+        <div class="flow-meta" style="margin-top:4px">${x.gap ? "Owed by " + esc(x.who) : "Answered · " + esc(x.who)}</div>
+      </div></div>`).join("");
+
+  document.getElementById("questions").innerHTML = SpecKit.table(
+    ["ID", "Question", "Who must answer", "Needed by", "Blocks"],
+    w.questions.map(q => [`<span class="id-cell">${esc(q.id)}</span>`, esc(q.question), esc(q.whoMustAnswer),
+      esc(q.neededBy), q.blocksBuild ? `<span class="marker marker--unanswered">the build</span>` : `<span class="marker marker--proposed">review</span>`]));
+})();
+</script>
+</body>
+</html>

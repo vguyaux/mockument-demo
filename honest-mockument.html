@@ -1,0 +1,1917 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>The Honest Mockument</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<script>(function(){var s=localStorage.getItem('spec-theme')||'system';var t=s==='system'?(window.matchMedia('(prefers-color-scheme:light)').matches?'light':'dark'):s;if(t==='light')document.documentElement.classList.add('light');})();</script>
+<style>
+/* ==========================================================================
+   Honest Mockument — shared stylesheet
+   Rebrand by editing the tokens in :root and html.light only.
+   ========================================================================== */
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  /* --- brand tokens: swap these --- */
+  --accent:      #6366F1;   /* primary accent            */
+  --accent-2:    #22D3EE;   /* secondary accent          */
+  --font:        'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-mono:   ui-monospace, SFMono-Regular, 'SF Mono', Menlo, monospace;
+
+  /* --- surfaces (dark is the default) --- */
+  --bg:        #0B0F14;
+  --surface:   #111820;
+  --surface2:  #16202B;
+  --surface3:  #1C2836;
+  --rule:      #223142;
+  --rule2:     #2E4257;
+
+  --text1:     #F1F5F9;
+  --text2:     #94A3B8;
+  --text3:     #64748B;
+
+  /* --- marker colours --- */
+  --m-required:   #10B981;
+  --m-proposed:   #F59E0B;
+  --m-unanswered: #F43F5E;
+  --m-observed:   #A855F7;
+  --m-scope:      #64748B;
+
+  --radius: 10px;
+  --shadow: 0 10px 40px rgba(0,0,0,0.35);
+}
+
+html.light {
+  --bg:        #F6F8FB;
+  --surface:   #FFFFFF;
+  --surface2:  #F1F5F9;
+  --surface3:  #E8EEF6;
+  --rule:      #E2E8F0;
+  --rule2:     #CBD5E1;
+  --text1:     #0F172A;
+  --text2:     #475569;
+  --text3:     #7C8899;
+  --accent:    #4F46E5;
+  --accent-2:  #0891B2;
+  --m-required:   #059669;
+  --m-proposed:   #B45309;
+  --m-unanswered: #E11D48;
+  --m-observed:   #7E22CE;
+  --shadow: 0 10px 30px rgba(15,23,42,0.10);
+}
+
+html, body {
+  background: var(--bg); color: var(--text1);
+  font-family: var(--font); font-size: 15px; line-height: 1.65;
+  -webkit-font-smoothing: antialiased; min-height: 100vh;
+}
+a { color: inherit; }
+h1, h2, h3, h4 { line-height: 1.25; letter-spacing: -0.015em; }
+
+/* ── top bar ─────────────────────────────────────────────────────────── */
+.topbar {
+  position: fixed; inset: 0 0 auto 0; height: 54px; z-index: 200;
+  display: flex; align-items: center; gap: 14px; padding: 0 20px;
+  background: color-mix(in srgb, var(--bg) 88%, transparent);
+  backdrop-filter: blur(14px); border-bottom: 1px solid var(--rule);
+}
+.topbar-mark { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+.topbar-dot { width: 10px; height: 10px; border-radius: 3px; background: linear-gradient(135deg, var(--accent), var(--accent-2)); }
+.topbar-app { font-size: 13px; font-weight: 700; letter-spacing: -0.01em; }
+.topbar-kind { font-size: 10px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: var(--text3); }
+.crumbs { font-size: 12px; color: var(--text3); display: flex; gap: 8px; align-items: center; }
+.crumbs a { text-decoration: none; color: var(--text2); }
+.crumbs a:hover { color: var(--text1); }
+.topbar-spacer { flex: 1; }
+.btn {
+  font: inherit; font-size: 12px; font-weight: 600; color: var(--text2);
+  background: transparent; border: 1px solid var(--rule2); border-radius: 7px;
+  padding: 6px 12px; cursor: pointer; text-decoration: none;
+  display: inline-flex; align-items: center; gap: 6px; transition: .15s;
+}
+.btn:hover { color: var(--text1); border-color: var(--accent); }
+.btn--primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+.btn--primary:hover { color: #fff; filter: brightness(1.1); }
+
+.theme-toggle {
+  width: 30px; height: 30px; border-radius: 50%; border: 1px solid var(--rule2);
+  background: transparent; color: var(--text2); cursor: pointer;
+  display: inline-flex; align-items: center; justify-content: center; padding: 0;
+}
+.theme-toggle:hover { border-color: var(--accent); color: var(--text1); }
+.theme-toggle svg { width: 15px; height: 15px; display: none; }
+.theme-toggle .icon-active { display: block; }
+
+/* ── shell ───────────────────────────────────────────────────────────── */
+.shell { display: flex; padding-top: 54px; min-height: 100vh; }
+
+.sidebar {
+  width: 244px; flex-shrink: 0; border-right: 1px solid var(--rule);
+  background: var(--surface); padding: 24px 0 60px;
+  position: sticky; top: 54px; height: calc(100vh - 54px); overflow-y: auto;
+}
+.side-group { padding: 0 18px; margin-bottom: 26px; }
+.side-heading {
+  font-size: 10px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase;
+  color: var(--text3); margin-bottom: 10px; padding: 0 8px;
+}
+.side-link {
+  display: flex; align-items: center; gap: 8px; justify-content: space-between;
+  padding: 7px 10px; border-radius: 7px; font-size: 13.5px; font-weight: 500;
+  color: var(--text2); text-decoration: none; transition: .12s;
+}
+.side-link:hover { background: var(--surface2); color: var(--text1); }
+.side-link.is-active { background: color-mix(in srgb, var(--accent) 16%, transparent); color: var(--text1); font-weight: 600; }
+.side-link.is-unbuilt { color: var(--text3); font-style: italic; }
+.side-note { font-size: 11.5px; color: var(--text3); padding: 6px 10px 0; line-height: 1.55; }
+
+.main { flex: 1; min-width: 0; padding: 34px 44px 90px; max-width: 1180px; }
+
+/* ── page header ─────────────────────────────────────────────────────── */
+.page-eyebrow { font-size: 10px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: var(--accent); margin-bottom: 10px; }
+.page-title { font-size: 34px; font-weight: 800; margin-bottom: 10px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.page-route { font-family: var(--font-mono); font-size: 12px; color: var(--text3); }
+.page-lede { font-size: 15.5px; color: var(--text2); max-width: 74ch; margin-bottom: 22px; }
+
+.meta-strip { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 26px; }
+.meta-chip {
+  font-size: 11.5px; color: var(--text2); background: var(--surface);
+  border: 1px solid var(--rule); border-radius: 20px; padding: 4px 12px;
+  display: inline-flex; align-items: center; gap: 6px; text-decoration: none;
+}
+.meta-chip a, a.meta-chip:hover { color: var(--text1); }
+.meta-chip b { color: var(--text1); font-weight: 600; }
+
+/* ── blocks ──────────────────────────────────────────────────────────── */
+.block { margin: 0 0 38px; scroll-margin-top: 70px; }
+.block-head { display: flex; align-items: baseline; gap: 10px; padding-bottom: 10px; margin-bottom: 14px; border-bottom: 1px solid var(--rule); }
+.block-num { font-family: var(--font-mono); font-size: 11px; color: var(--text3); }
+.block-title { font-size: 12px; font-weight: 700; letter-spacing: 0.13em; text-transform: uppercase; color: var(--text1); }
+.block-for { font-size: 11px; color: var(--text3); margin-left: auto; }
+.block-note { font-size: 13.5px; color: var(--text2); margin-bottom: 12px; max-width: 82ch; }
+
+.card { background: var(--surface); border: 1px solid var(--rule); border-radius: var(--radius); padding: 18px 20px; }
+.card + .card { margin-top: 12px; }
+.card-label { font-size: 10px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent); margin-bottom: 8px; }
+.card-body { font-size: 14px; color: var(--text2); }
+.card-body strong { color: var(--text1); font-weight: 600; }
+.grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 12px; }
+.grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 12px; }
+
+/* ── tables ──────────────────────────────────────────────────────────── */
+.table-wrap { border: 1px solid var(--rule); border-radius: var(--radius); overflow: auto; background: var(--surface); }
+table { border-collapse: collapse; width: 100%; font-size: 13.5px; }
+thead th {
+  text-align: left; font-size: 10px; font-weight: 700; letter-spacing: 0.13em;
+  text-transform: uppercase; color: var(--text3); padding: 11px 14px;
+  border-bottom: 1px solid var(--rule); background: var(--surface2); white-space: nowrap;
+}
+tbody td { padding: 11px 14px; border-bottom: 1px solid var(--rule); color: var(--text2); vertical-align: top; }
+tbody tr:last-child td { border-bottom: none; }
+tbody tr:hover td { background: var(--surface2); }
+tbody td:first-child { color: var(--text1); font-weight: 600; }
+td .sub { display: block; font-size: 12px; color: var(--text3); margin-top: 3px; }
+.id-cell { font-family: var(--font-mono); font-size: 11.5px; color: var(--text3) !important; font-weight: 500 !important; white-space: nowrap; }
+.id-cell a { text-decoration: none; }
+.id-cell a:hover { color: var(--accent); }
+.tbd { color: var(--m-unanswered); font-weight: 600; font-size: 12px; }
+
+/* ── markers ─────────────────────────────────────────────────────────── */
+.marker {
+  font-size: 10px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
+  padding: 2.5px 8px; border-radius: 20px; white-space: nowrap;
+  border: 1px solid currentColor; display: inline-block;
+}
+.marker--required   { color: var(--m-required);   background: color-mix(in srgb, var(--m-required) 12%, transparent); }
+.marker--proposed   { color: var(--m-proposed);   background: color-mix(in srgb, var(--m-proposed) 12%, transparent); }
+.marker--unanswered { color: var(--m-unanswered); background: color-mix(in srgb, var(--m-unanswered) 12%, transparent); }
+.marker--observed   { color: var(--m-observed);   background: color-mix(in srgb, var(--m-observed) 12%, transparent); }
+.marker--scope      { color: var(--m-scope);      background: color-mix(in srgb, var(--m-scope) 14%, transparent); }
+.marker--new        { color: var(--accent-2);     background: color-mix(in srgb, var(--accent-2) 12%, transparent); }
+.marker--modify     { color: var(--m-proposed);   background: color-mix(in srgb, var(--m-proposed) 12%, transparent); }
+.marker--existing   { color: var(--text3);        background: transparent; }
+
+/* ── mock frame ──────────────────────────────────────────────────────── */
+.mock-shell { border: 1px solid var(--rule); border-radius: var(--radius); overflow: hidden; background: var(--surface); }
+.mock-controls {
+  display: flex; flex-wrap: wrap; gap: 14px; align-items: center;
+  padding: 10px 14px; border-bottom: 1px solid var(--rule); background: var(--surface2);
+}
+.ctrl { display: flex; align-items: center; gap: 6px; }
+.ctrl-label { font-size: 10px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text3); }
+.seg { display: flex; background: var(--bg); border: 1px solid var(--rule); border-radius: 7px; padding: 2px; }
+.seg button {
+  font: inherit; font-size: 11.5px; font-weight: 600; color: var(--text3);
+  background: transparent; border: 0; border-radius: 5px; padding: 4px 10px; cursor: pointer;
+}
+.seg button.is-on { background: var(--accent); color: #fff; }
+.seg button:hover:not(.is-on) { color: var(--text1); }
+.switch { display: inline-flex; align-items: center; gap: 7px; cursor: pointer; font-size: 12px; color: var(--text2); }
+.switch input { accent-color: var(--accent); width: 15px; height: 15px; }
+
+.mock-stage { padding: 22px; background: var(--bg); position: relative; }
+.mock-view { display: none; }
+.mock-view.is-on { display: block; }
+.mock-caption { font-size: 12px; color: var(--text3); padding: 10px 14px; border-top: 1px solid var(--rule); background: var(--surface2); }
+
+/* wireframe primitives — deliberately crude */
+.wf { border: 1px solid var(--rule2); border-radius: 8px; background: var(--surface); overflow: hidden; }
+.wf-row { display: flex; gap: 10px; }
+.wf-col { display: flex; flex-direction: column; gap: 10px; flex: 1; min-width: 0; }
+.wf-pad { padding: 12px; }
+.wf-box {
+  border: 1px dashed var(--rule2); border-radius: 6px; background: var(--surface2);
+  padding: 10px 12px; position: relative; min-width: 0;
+}
+.wf-label { font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text3); margin-bottom: 6px; }
+.wf-strong { font-size: 13px; font-weight: 700; color: var(--text1); }
+.wf-text { font-size: 12px; color: var(--text2); }
+.wf-bar { height: 8px; border-radius: 4px; background: var(--surface3); margin: 5px 0; }
+.wf-bar--sm { width: 45%; } .wf-bar--md { width: 70%; } .wf-bar--lg { width: 92%; }
+.wf-tile { flex: 1; border: 1px dashed var(--rule2); border-radius: 6px; padding: 9px 11px; background: var(--surface2); }
+.wf-num { font-size: 20px; font-weight: 800; color: var(--text1); line-height: 1.1; }
+.wf-tabs { display: flex; gap: 6px; }
+.wf-tab { font-size: 11.5px; font-weight: 600; color: var(--text3); border: 1px solid var(--rule2); border-radius: 999px; padding: 3px 12px; }
+.wf-tab.is-on { color: var(--text1); border-color: var(--accent); background: color-mix(in srgb, var(--accent) 14%, transparent); }
+.wf-table { width: 100%; font-size: 11.5px; border-collapse: collapse; }
+.wf-table th { text-align: left; font-size: 9.5px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text3); padding: 4px 6px; border-bottom: 1px solid var(--rule); }
+.wf-table td { padding: 5px 6px; border-bottom: 1px solid var(--rule); color: var(--text2); }
+.wf-chip { display: inline-block; font-size: 10px; font-weight: 700; padding: 1px 7px; border-radius: 999px; border: 1px solid var(--rule2); color: var(--text3); }
+.wf-menu { width: 132px; flex-shrink: 0; border-right: 1px solid var(--rule); padding: 10px 8px; background: var(--surface2); }
+.wf-menu a { display: block; font-size: 11.5px; color: var(--text2); text-decoration: none; padding: 5px 8px; border-radius: 5px; }
+.wf-menu a:hover { background: var(--surface3); color: var(--text1); }
+.wf-menu a.is-on { color: var(--text1); font-weight: 600; background: color-mix(in srgb, var(--accent) 16%, transparent); }
+.wf-phone { max-width: 300px; margin: 0 auto; }
+.wf-voice { font-family: var(--font-mono); font-size: 12.5px; line-height: 1.9; color: var(--text2); }
+.wf-voice b { color: var(--text1); }
+
+/* element hooks */
+[data-el] { cursor: pointer; }
+[data-el]:hover { outline: 1px solid var(--accent); outline-offset: 2px; }
+[data-el].is-selected { outline: 2px solid var(--accent); outline-offset: 2px; }
+[data-el]::after {
+  content: attr(data-el); position: absolute; top: -1px; right: -1px;
+  font-family: var(--font-mono); font-size: 8.5px; padding: 0 4px; border-radius: 0 6px 0 6px;
+  background: var(--rule2); color: var(--text2); opacity: 0; transition: .12s;
+}
+[data-el]:hover::after { opacity: 1; }
+.mock-stage.show-ids [data-el]::after { opacity: .85; }
+
+/* honesty overlay */
+.mock-stage.overlay-on [data-marker="required"]   { box-shadow: inset 0 0 0 2px var(--m-required); }
+.mock-stage.overlay-on [data-marker="proposed"]   { box-shadow: inset 0 0 0 2px var(--m-proposed); }
+.mock-stage.overlay-on [data-marker="unanswered"] { box-shadow: inset 0 0 0 2px var(--m-unanswered); }
+.mock-stage.overlay-on [data-marker="observed"]   { box-shadow: inset 0 0 0 2px var(--m-observed); }
+.mock-stage.overlay-on [data-marker="out of scope"] { opacity: .45; box-shadow: inset 0 0 0 2px var(--m-scope); }
+.mock-stage.overlay-on [data-el]:not([data-marker]) { box-shadow: inset 0 0 0 2px var(--m-unanswered); }
+
+.overlay-legend { display: none; gap: 14px; flex-wrap: wrap; padding: 10px 14px; border-top: 1px solid var(--rule); font-size: 11.5px; color: var(--text3); }
+.mock-shell.overlay-on .overlay-legend { display: flex; }
+.legend-dot { width: 9px; height: 9px; border-radius: 3px; display: inline-block; margin-right: 6px; }
+
+/* role / state filtering */
+.mock-stage [data-hidden-role] { display: none !important; }
+.state-empty-note { font-size: 12.5px; color: var(--text3); padding: 10px 12px; border: 1px dashed var(--rule2); border-radius: 6px; }
+
+/* ── inspector drawer ────────────────────────────────────────────────── */
+.inspector {
+  position: fixed; top: 54px; right: 0; bottom: 0; width: 380px; z-index: 190;
+  background: var(--surface); border-left: 1px solid var(--rule); box-shadow: var(--shadow);
+  transform: translateX(100%); transition: transform .18s ease; overflow-y: auto; padding: 20px 22px 60px;
+}
+.inspector.is-open { transform: none; }
+.inspector-close { position: absolute; top: 14px; right: 16px; }
+.insp-id { font-family: var(--font-mono); font-size: 11px; color: var(--text3); }
+.insp-name { font-size: 18px; font-weight: 700; margin: 4px 0 10px; }
+.insp-row { padding: 10px 0; border-top: 1px solid var(--rule); font-size: 13px; color: var(--text2); }
+.insp-row .k { font-size: 10px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text3); display: block; margin-bottom: 3px; }
+.insp-q { border-left: 2px solid var(--m-unanswered); padding-left: 10px; margin-top: 8px; font-size: 12.5px; }
+
+/* ── gates & meters ──────────────────────────────────────────────────── */
+.gates { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 12px; }
+.gate { background: var(--surface); border: 1px solid var(--rule); border-radius: var(--radius); padding: 14px 16px; }
+.gate-name { font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text3); margin-bottom: 8px; }
+.gate-state { font-size: 15px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+.gate--pass .gate-state { color: var(--m-required); }
+.gate--fail .gate-state { color: var(--m-unanswered); }
+.gate-why { font-size: 12px; color: var(--text3); margin-top: 6px; }
+.gate-why li { margin-left: 16px; }
+
+.bar { height: 7px; border-radius: 4px; background: var(--surface3); overflow: hidden; display: flex; }
+.bar span { display: block; height: 100%; }
+.bar .b-required   { background: var(--m-required); }
+.bar .b-proposed   { background: var(--m-proposed); }
+.bar .b-unanswered { background: var(--m-unanswered); }
+.bar .b-observed   { background: var(--m-observed); }
+.bar .b-scope      { background: var(--m-scope); }
+.bar-key { font-size: 11px; color: var(--text3); margin-top: 6px; display: flex; gap: 12px; flex-wrap: wrap; }
+
+/* ── page cards (index) ──────────────────────────────────────────────── */
+.page-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 14px; }
+.page-card { display: block; background: var(--surface); border: 1px solid var(--rule); border-radius: var(--radius); padding: 18px; text-decoration: none; transition: .15s; }
+.page-card:hover { border-color: var(--accent); transform: translateY(-1px); }
+.page-card-top { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 8px; }
+.page-card-name { font-size: 16px; font-weight: 700; color: var(--text1); }
+.page-card-desc { font-size: 12.5px; color: var(--text2); margin-bottom: 12px; min-height: 34px; }
+.page-card.is-unbuilt { opacity: .55; }
+
+/* ── workflow steps ──────────────────────────────────────────────────── */
+.flow { counter-reset: flow; }
+.flow-step { display: flex; gap: 14px; padding: 16px 0; border-top: 1px solid var(--rule); }
+.flow-step:first-child { border-top: 0; }
+.flow-num {
+  flex-shrink: 0; width: 26px; height: 26px; border-radius: 50%; font-size: 12px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  background: color-mix(in srgb, var(--accent) 18%, transparent); color: var(--text1);
+}
+.flow-step--exception .flow-num { background: color-mix(in srgb, var(--m-unanswered) 18%, transparent); color: var(--m-unanswered); }
+.flow-body { min-width: 0; }
+.flow-title { font-size: 14.5px; font-weight: 700; margin-bottom: 4px; }
+.flow-meta { font-size: 12px; color: var(--text3); }
+.flow-text { font-size: 13.5px; color: var(--text2); margin-top: 4px; }
+
+/* ── misc ────────────────────────────────────────────────────────────── */
+.callout { border-left: 3px solid var(--accent); background: var(--surface); border-radius: 0 var(--radius) var(--radius) 0; padding: 14px 18px; }
+.callout--warn { border-left-color: var(--m-unanswered); }
+.callout-title { font-size: 12px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 6px; }
+.callout-body { font-size: 13.5px; color: var(--text2); }
+pre.contract {
+  font-family: var(--font-mono); font-size: 12px; line-height: 1.7; color: var(--text2);
+  background: var(--surface); border: 1px solid var(--rule); border-radius: var(--radius);
+  padding: 16px 18px; overflow: auto; white-space: pre-wrap;
+}
+.footer { border-top: 1px solid var(--rule); margin-top: 46px; padding-top: 18px; font-size: 12px; color: var(--text3); display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.empty-hint { font-size: 13px; color: var(--text3); font-style: italic; }
+
+@media (max-width: 900px) {
+  .sidebar { display: none; }
+  .main { padding: 26px 20px 70px; }
+  .inspector { width: 100%; }
+}
+@media print {
+  .topbar, .sidebar, .mock-controls, .inspector, .btn { display: none !important; }
+  .shell { padding-top: 0; } .main { padding: 0; max-width: none; }
+  body { background: #fff; color: #000; }
+}
+
+/* wireframe panes (tabs inside a mock) */
+.wf-pane { display: none; }
+.wf-pane.is-on { display: block; }
+[data-el] { position: relative; }
+
+/* ── landing entry cards ─────────────────────────────────────────────── */
+.entry-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(330px, 1fr)); gap: 16px; margin: 6px 0 38px; }
+.entry-card {
+  display: block; background: var(--surface); border: 1px solid var(--rule); border-radius: var(--radius);
+  padding: 26px 26px 22px; text-decoration: none; transition: .15s; position: relative; overflow: hidden;
+}
+.entry-card::before { content: ""; position: absolute; inset: 0 0 auto 0; height: 3px; background: linear-gradient(90deg, var(--accent), var(--accent-2)); }
+.entry-card:hover { border-color: var(--accent); transform: translateY(-2px); box-shadow: var(--shadow); }
+.entry-card .k { font-size: 10px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; color: var(--accent); }
+.entry-card h3 { font-size: 21px; font-weight: 800; color: var(--text1); margin: 10px 0 8px; }
+.entry-card p { font-size: 13.5px; color: var(--text2); margin: 0 0 14px; }
+.entry-card .go { font-size: 12.5px; font-weight: 600; color: var(--accent); }
+.entry-card ul { margin: 0 0 14px 16px; padding: 0; }
+.entry-card li { font-size: 12.5px; color: var(--text3); margin-bottom: 3px; }
+
+/* ── document view ─────────────────────────────────────────────────── */
+.doc-nav { width: 290px; }
+.doc-nav-link { display:block; padding:4px 10px; font-size:12.5px; color:var(--text2); text-decoration:none; border-radius:6px; line-height:1.45; }
+.doc-nav-link:hover { background:var(--surface2); color:var(--text1); }
+.doc-nav-link.is-part { margin-top:14px; font-weight:700; font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--text3); }
+.doc-nav-link.is-active { background:color-mix(in srgb, var(--accent) 16%, transparent); color:var(--text1); }
+html { scroll-behavior: smooth; }
+.doc { max-width: 860px; padding: 40px 56px 120px; }
+/* clicking a contents link must land the heading below the fixed top bar */
+.doc h1, .doc h2, .doc h3 { scroll-margin-top: 78px; }
+/* contents lists keep their own numbering and stack one per line */
+.doc ol { list-style: decimal; }
+.doc ol li { margin-bottom: 4px; }
+.doc ol li a, .doc p strong a { text-decoration: none; }
+.doc ol li a:hover, .doc p strong a:hover { color: var(--accent); }
+.doc h1 { font-size:38px; font-weight:800; margin:52px 0 16px; padding-top:18px; border-top:1px solid var(--rule); }
+.doc h1:first-child { border-top:0; margin-top:0; padding-top:0; }
+.doc h2 { font-size:23px; font-weight:700; margin:38px 0 12px; }
+.doc h3 { font-size:16px; font-weight:700; margin:26px 0 8px; color:var(--text1); }
+.doc p, .doc li { font-size:15px; color:var(--text2); }
+.doc p { margin: 0 0 14px; }
+.doc ul, .doc ol { margin: 0 0 16px 22px; }
+.doc li { margin-bottom: 6px; }
+.doc strong { color: var(--text1); font-weight:600; }
+.doc em { color: var(--text1); }
+.doc hr { border:0; border-top:1px solid var(--rule); margin:44px 0; }
+.doc table { margin: 6px 0 22px; border:1px solid var(--rule); border-radius:var(--radius); overflow:hidden; }
+.doc thead th { background: var(--surface2); }
+.doc code { font-family:var(--font-mono); font-size:12.5px; background:var(--surface2); border:1px solid var(--rule); border-radius:4px; padding:1px 5px; color:var(--text1); }
+.doc pre { background:var(--surface); border:1px solid var(--rule); border-radius:var(--radius); padding:18px 20px; overflow:auto; margin:0 0 22px; }
+.doc pre code { background:none; border:0; padding:0; font-size:12px; line-height:1.65; color:var(--text2); }
+.doc blockquote { border-left:3px solid var(--accent); padding-left:16px; color:var(--text2); margin:0 0 18px; }
+.doc blockquote:first-of-type { border:1px solid var(--rule); border-left:1px solid var(--rule); border-radius:var(--radius);
+  background:var(--surface); padding:22px 18px; text-align:center; margin:0 0 26px; }
+.doc blockquote:first-of-type p { font-family:var(--font-mono); font-size:15px; letter-spacing:.16em; color:var(--text3); margin:0; }
+.doc blockquote:first-of-type strong { color:var(--accent); letter-spacing:.16em; }
+@media (max-width: 900px) { .doc { padding: 26px 20px 80px; } }
+@media print { .doc { padding:0; max-width:none; } .doc h1 { page-break-before: always; } .doc h1:first-child { page-break-before: avoid; } }
+</style>
+</head>
+<body>
+<header class="topbar">
+  <a class="topbar-mark" href="index.html"><span class="topbar-dot"></span>
+    <span><span class="topbar-app">The Honest Mockument</span> <span class="topbar-kind">&nbsp;v1.0</span></span></a>
+  <div class="topbar-spacer"></div>
+  <a class="btn" href="index.html">Back to the sample mockument</a>
+  <button class="btn" onclick="window.print()">Print / PDF</button>
+  <button class="theme-toggle" id="themeToggle" aria-label="Theme">
+    <svg class="icon-system" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2a10 10 0 0 1 0 20z" fill="currentColor"/></svg>
+    <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+    <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.2" y1="4.2" x2="5.6" y2="5.6"/><line x1="18.4" y1="18.4" x2="19.8" y2="19.8"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.2" y1="19.8" x2="5.6" y2="18.4"/><line x1="18.4" y1="5.6" x2="19.8" y2="4.2"/></svg>
+  </button>
+</header>
+<div class="shell">
+  <aside class="sidebar doc-nav">
+    <div class="side-group"><div class="side-heading">Contents</div>
+<a class="doc-nav-link is-part" href="#the-honest-mockument">The Honest Mockument</a>
+<a class="doc-nav-link" href="#the-name">The name</a>
+<a class="doc-nav-link" href="#what-this-document-is">What this document is</a>
+<a class="doc-nav-link" href="#how-to-read-it">How to read it</a>
+<a class="doc-nav-link" href="#contents">Contents</a>
+<a class="doc-nav-link is-part" href="#part-1--why-the-honest-mockument-exists">Part 1 · Why the Honest Mockument exists</a>
+<a class="doc-nav-link" href="#1-what-a-text-specification-loses">1. What a text specification loses</a>
+<a class="doc-nav-link" href="#2-what-a-conventional-mock-up-hides">2. What a conventional mock-up hides</a>
+<a class="doc-nav-link" href="#3-the-invention-problem">3. The invention problem</a>
+<a class="doc-nav-link" href="#4-what-a-mockument-produces">4. What a mockument produces</a>
+<a class="doc-nav-link is-part" href="#part-2--the-model-what-must-be-described">Part 2 · The model: what must be described</a>
+<a class="doc-nav-link" href="#5-who-answers-what">5. Who answers what</a>
+<a class="doc-nav-link" href="#6-the-objects">6. The objects</a>
+<a class="doc-nav-link" href="#7-three-things-about-the-shape">7. Three things about the shape</a>
+<a class="doc-nav-link" href="#8-what-is-deliberately-outside-the-model">8. What is deliberately outside the model</a>
+<a class="doc-nav-link is-part" href="#part-3--the-mockument-how-the-app-is-represented">Part 3 · The mockument: how the app is represented</a>
+<a class="doc-nav-link" href="#9-what-a-person-sees">9. What a person sees</a>
+<a class="doc-nav-link" href="#10-what-a-mockument-is-for">10. What a mockument is for</a>
+<a class="doc-nav-link" href="#11-the-objects-of-representation">11. The objects of representation</a>
+<a class="doc-nav-link" href="#12-fidelity-and-the-five-statuses">12. Fidelity, and the five statuses</a>
+<a class="doc-nav-link" href="#13-what-a-mockument-does-not-settle">13. What a mockument does not settle</a>
+<a class="doc-nav-link is-part" href="#part-4--the-mockument-page">Part 4 · The mockument page</a>
+<a class="doc-nav-link" href="#14-one-page-per-page">14. One page per page</a>
+<a class="doc-nav-link" href="#15-the-twenty-two-blocks">15. The twenty-two blocks</a>
+<a class="doc-nav-link" href="#16-the-mock-frame">16. The mock frame</a>
+<a class="doc-nav-link" href="#17-identity-ids-and-traceability">17. Identity, IDs and traceability</a>
+<a class="doc-nav-link is-part" href="#part-5--the-data-layer">Part 5 · The data layer</a>
+<a class="doc-nav-link" href="#18-which-data-questions-can-change-a-page">18. Which data questions can change a page</a>
+<a class="doc-nav-link" href="#19-the-four-rungs">19. The four rungs</a>
+<a class="doc-nav-link" href="#20-controlled-vocabularies">20. Controlled vocabularies</a>
+<a class="doc-nav-link is-part" href="#part-6--readiness">Part 6 · Readiness</a>
+<a class="doc-nav-link" href="#21-the-three-gates">21. The three gates</a>
+<a class="doc-nav-link" href="#22-what-the-gates-are-not">22. What the gates are not</a>
+<a class="doc-nav-link is-part" href="#part-7--working-with-it">Part 7 · Working with it</a>
+<a class="doc-nav-link" href="#23-the-site-around-the-page">23. The site around the page</a>
+<a class="doc-nav-link" href="#24-running-a-walkthrough">24. Running a walkthrough</a>
+<a class="doc-nav-link" href="#25-filling-a-page-with-an-agent">25. Filling a page with an agent</a>
+<a class="doc-nav-link" href="#26-building-from-a-page">26. Building from a page</a>
+<a class="doc-nav-link" href="#27-change-versioning-and-write-back">27. Change, versioning and write-back</a>
+<a class="doc-nav-link is-part" href="#part-8--reference">Part 8 · Reference</a>
+<a class="doc-nav-link" href="#28-the-minimal-page-record">28. The minimal page record</a>
+<a class="doc-nav-link" href="#29-the-specification-record-field-by-field">29. The specification record, field by field</a>
+<a class="doc-nav-link" href="#30-the-machine-readable-model">30. The machine-readable model</a>
+<a class="doc-nav-link" href="#31-glossary">31. Glossary</a>
+<a class="doc-nav-link is-part" href="#annex--the-translation-bundle">Annex · The translation bundle</a>
+<a class="doc-nav-link" href="#32-what-the-bundle-is">32. What the bundle is</a>
+<a class="doc-nav-link" href="#33-what-it-emits">33. What it emits</a>
+<a class="doc-nav-link" href="#34-how-a-mockument-maps-onto-the-framework">34. How a mockument maps onto the framework</a>
+<a class="doc-nav-link" href="#35-what-the-emitter-infers-and-marks">35. What the emitter infers, and marks</a>
+<a class="doc-nav-link" href="#36-what-it-refuses-to-do">36. What it refuses to do</a>
+<a class="doc-nav-link" href="#37-running-it">37. Running it</a>
+<a class="doc-nav-link" href="#38-two-gates-in-series">38. Two gates in series</a>
+    </div>
+    <div class="side-group"><div class="side-heading">Also here</div>
+      <a class="side-link" href="index.html"><span>Sample mockument</span></a>
+      <a class="side-link" href="data-layer.html"><span>The data layer</span></a>
+    </div>
+  </aside>
+  <main class="main doc"><h1 id="the-honest-mockument">The Honest Mockument</h1><p><strong>Mockument — the app you can walk, with its reasons attached.</strong></p>
+<p>Version 1.0 · 18 August 2026 · Status: working method · Part of the Honest framework</p>
+<hr>
+<h2 id="the-name">The name</h2><blockquote>
+<p>MOCK·UP  +  DOC·UMENT  →  <strong>MOCK·UMENT</strong></p>
+</blockquote>
+<p>A mockument is half mock-up, half document — and so is the word. The front of one, the back of the
+other, joined into a single name where both halves are still visible. That is not decoration. Showing
+what you are made of is the first thing this method asks of everything inside it, and the name goes
+first.</p>
+<p>What you are handed is something you can move through like the app itself, carrying the writing that
+explains what each part means, where it came from, and what nobody has decided yet. It looks like the
+app, and it tells you which parts are real. That tension is the point: convincing enough to walk
+through, honest enough to argue with.</p>
+<p>Saying it makes the thing concrete. &quot;Send me the mockument for the approvals page&quot; names an object with an
+owner, a version and a state of readiness — not a stage of a process or a folder of drafts. Teams walk
+a mockument, question it, mark it up, and build from it.</p>
+<p>It is a new word because it names a new thing. Neither half is subordinate: take away the mock-up and
+it stops being walkable; take away the document and it stops being true.</p>
+<hr>
+<h2 id="what-this-document-is">What this document is</h2><p>The complete method for building a mockument: turning &quot;we need an app that does this&quot; into something a
+business person can walk through, a designer can argue with, and an implementer — human or agent — can
+build from without inventing anything.</p>
+<p>It has three parts:</p>
+<ul>
+<li><strong>The model</strong> — what has to be described about a business app, and who is qualified to answer each
+question.</li>
+<li><strong>The representation</strong> — how that description becomes a navigable, deliberately crude version of the
+app, so it can be experienced rather than read.</li>
+<li><strong>The mockument page</strong> — the structure that holds the two together, one page of the mockument per
+page of the app, with every visible thing carrying its own status, its own source, and the name of
+whoever owes the missing answer.</li>
+</ul>
+<p>The single rule everything else follows from: <strong>a silence must be visible.</strong> Anything nobody has
+decided is marked as undecided and names the person who must decide it. Everything else in here is
+machinery for making that rule survive contact with a deadline.</p>
+<h2 id="how-to-read-it">How to read it</h2><table>
+<thead>
+<tr>
+<th>If you are</th>
+<th>Read</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>A business person about to be interviewed</td>
+<td>Parts 1 and 2, then §24</td>
+</tr>
+<tr>
+<td>Writing a mockument page</td>
+<td>Parts 4 and 5, then Part 8</td>
+</tr>
+<tr>
+<td>Reviewing one</td>
+<td>§21–22 and §24</td>
+</tr>
+<tr>
+<td>Building from one</td>
+<td>§26 and §29–30, plus the build contract on the page itself</td>
+</tr>
+<tr>
+<td>Handing one to a developer or an agent</td>
+<td>the Annex</td>
+</tr>
+<tr>
+<td>Working with an agent on it</td>
+<td>§25 and §26</td>
+</tr>
+<tr>
+<td>Deciding whether to adopt the Honest Mockument</td>
+<td>Part 1 and §21</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="contents">Contents</h2><p><strong><a href="#part-1--why-the-honest-mockument-exists">Part 1 · Why the Honest Mockument exists</a></strong></p>
+<ol>
+<li><a href="#1-what-a-text-specification-loses">What a text specification loses</a></li>
+<li><a href="#2-what-a-conventional-mock-up-hides">What a conventional mock-up hides</a></li>
+<li><a href="#3-the-invention-problem">The invention problem</a></li>
+<li><a href="#4-what-a-mockument-produces">What a mockument produces</a></li>
+</ol>
+<p><strong><a href="#part-2--the-model-what-must-be-described">Part 2 · The model: what must be described</a></strong></p>
+<ol start="5">
+<li><a href="#5-who-answers-what">Who answers what</a></li>
+<li><a href="#6-the-objects">The objects</a></li>
+<li><a href="#7-three-things-about-the-shape">Three things about the shape</a></li>
+<li><a href="#8-what-is-deliberately-outside-the-model">What is deliberately outside the model</a></li>
+</ol>
+<p><strong><a href="#part-3--the-mockument-how-the-app-is-represented">Part 3 · The mockument: how the app is represented</a></strong></p>
+<ol start="9">
+<li><a href="#9-what-a-person-sees">What a person sees</a></li>
+<li><a href="#10-what-a-mockument-is-for">What a mockument is for</a></li>
+<li><a href="#11-the-objects-of-representation">The objects of representation</a></li>
+<li><a href="#12-fidelity-and-the-five-statuses">Fidelity, and the five statuses</a></li>
+<li><a href="#13-what-a-mockument-does-not-settle">What a mockument does not settle</a></li>
+</ol>
+<p><strong><a href="#part-4--the-mockument-page">Part 4 · The mockument page</a></strong></p>
+<ol start="14">
+<li><a href="#14-one-page-per-page">One page per page</a></li>
+<li><a href="#15-the-twenty-two-blocks">The twenty-two blocks</a></li>
+<li><a href="#16-the-mock-frame">The mock frame</a></li>
+<li><a href="#17-identity-ids-and-traceability">Identity, IDs and traceability</a></li>
+</ol>
+<p><strong><a href="#part-5--the-data-layer">Part 5 · The data layer</a></strong></p>
+<ol start="18">
+<li><a href="#18-which-data-questions-can-change-a-page">Which data questions can change a page</a></li>
+<li><a href="#19-the-four-rungs">The four rungs</a></li>
+<li><a href="#20-controlled-vocabularies">Controlled vocabularies</a></li>
+</ol>
+<p><strong><a href="#part-6--readiness">Part 6 · Readiness</a></strong></p>
+<ol start="21">
+<li><a href="#21-the-three-gates">The three gates</a></li>
+<li><a href="#22-what-the-gates-are-not">What the gates are not</a></li>
+</ol>
+<p><strong><a href="#part-7--working-with-it">Part 7 · Working with it</a></strong></p>
+<ol start="23">
+<li><a href="#23-the-site-around-the-page">The site around the page</a></li>
+<li><a href="#24-running-a-walkthrough">Running a walkthrough</a></li>
+<li><a href="#25-filling-a-page-with-an-agent">Filling a page with an agent</a></li>
+<li><a href="#26-building-from-a-page">Building from a page</a></li>
+<li><a href="#27-change-versioning-and-write-back">Change, versioning and write-back</a></li>
+</ol>
+<p><strong><a href="#part-8--reference">Part 8 · Reference</a></strong></p>
+<ol start="28">
+<li><a href="#28-the-minimal-page-record">The minimal page record</a></li>
+<li><a href="#29-the-specification-record-field-by-field">The specification record, field by field</a></li>
+<li><a href="#30-the-machine-readable-model">The machine-readable model</a></li>
+<li><a href="#31-glossary">Glossary</a></li>
+</ol>
+<p><strong>Annex · The translation bundle</strong></p>
+<ol start="32">
+<li><a href="#32-what-the-bundle-is">What the bundle is</a></li>
+<li><a href="#33-what-it-emits">What it emits</a></li>
+<li><a href="#34-how-a-mockument-maps-onto-the-framework">How a mockument maps onto the framework</a></li>
+<li><a href="#35-what-the-emitter-infers-and-marks">What the emitter infers, and marks</a></li>
+<li><a href="#36-what-it-refuses-to-do">What it refuses to do</a></li>
+<li><a href="#37-running-it">Running it</a></li>
+<li><a href="#38-two-gates-in-series">Two gates in series</a></li>
+</ol>
+<hr>
+<h1 id="part-1--why-the-honest-mockument-exists">Part 1 · Why the Honest Mockument exists</h1><h2 id="1-what-a-text-specification-loses">1. What a text specification loses</h2><p>A written specification can be correct and still be unusable. It grows to hundreds of pages, and the
+reader cannot see where any single requirement lands in the app. Requirement 4.7.3 is true, agreed and
+invisible: nobody can tell which screen it governs, whether two requirements contradict each other on
+the same screen, or what a person would actually do with the result.</p>
+<p>Worse, a text specification captures the path where everything works and quietly loses everything else:
+the list that gets too long, the figure that is calculated wrongly, the message that fails to send, the
+person who sees something they should not. None of those are technical details. They are business
+meaning, and only the people doing the work can supply them.</p>
+<h2 id="2-what-a-conventional-mock-up-hides">2. What a conventional mock-up hides</h2><p>An ordinary mock-up has the opposite failure. It looks like the app, so everyone can react to it — but the
+reasons are gone. Looking at a screen, a reader cannot tell whether a given element is:</p>
+<ul>
+<li>a requirement somebody stated;</li>
+<li>a design proposal;</li>
+<li>a placeholder; or</li>
+<li>an invention made while drawing, because the screen looked empty without it.</li>
+</ul>
+<p>All four look identical once rendered. The more convincing the mock-up, the more completely the
+distinction disappears, and the more likely it is that a reviewer nods at something nobody ever asked
+for.</p>
+<h2 id="3-the-invention-problem">3. The invention problem</h2><p>Both failures converge on the same outcome. A question nobody asked still gets an answer during the
+build — by a developer at 4pm, or by an agent filling a gap in a prompt — and by the time anyone looks,
+that answer is indistinguishable from a decision. Nobody can say which parts of the product were
+specified and which were improvised.</p>
+<p>This is now the dominant risk rather than a marginal one. An implementing agent does not ignore a
+specification; it fills every silence in it with something plausible, instantly, and at scale. The
+defence is not a longer document. It is a document in which silence is <em>visible</em> — where an unanswered
+question is a marked object with an owner&#39;s name on it, and a thing invented to make a screen look
+finished is labelled as exactly that.</p>
+<h2 id="4-what-a-mockument-produces">4. What a mockument produces</h2><p>One artefact, readable four ways:</p>
+<ul>
+<li><strong>An app you can walk.</strong> A navigable, low-fidelity version of the proposed app: menu on the left,
+pages that open, links that lead somewhere, states you can switch between.</li>
+<li><strong>A specification you can read.</strong> Beside every represented page, the written meaning of everything on
+it — what it is for, who may see it, what each control does, what happens when things go wrong.</li>
+<li><strong>A register you can chase.</strong> Every open question in the app, by owner, with what it blocks and when
+it is needed.</li>
+<li><strong>A contract a machine can hold.</strong> A structured record per page that a checker validates and a
+builder consumes, with stable identifiers that survive into commits, tickets and tests.</li>
+</ul>
+<p>It is detailed enough to make the app concrete, and not detailed enough to pretend that unanswered
+questions have been settled.</p>
+<hr>
+<h1 id="part-2--the-model-what-must-be-described">Part 2 · The model: what must be described</h1><h2 id="5-who-answers-what">5. Who answers what</h2><p>Most specification pain comes from asking the wrong person. A business user cannot say how a system
+reconnects after a dropped connection, and should never be asked. An implementer cannot decide who is
+allowed to see a customer&#39;s file, and should never be left to.</p>
+<table>
+<thead>
+<tr>
+<th>Question</th>
+<th>Answered by</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>What the work is, and its steps</td>
+<td>Business user</td>
+</tr>
+<tr>
+<td>What data the work involves, and what each piece means</td>
+<td>Business user</td>
+</tr>
+<tr>
+<td>Who may see what, and what differs between them</td>
+<td>Business user</td>
+</tr>
+<tr>
+<td>What the app should remember about you between visits</td>
+<td>Business user</td>
+</tr>
+<tr>
+<td>How a list is ordered, filtered, grouped and selected</td>
+<td>Business user</td>
+</tr>
+<tr>
+<td>What can go wrong, as a person would notice it</td>
+<td>Business user</td>
+</tr>
+<tr>
+<td>What should happen when it does</td>
+<td>Business user</td>
+</tr>
+<tr>
+<td>Which device types the work has to happen on</td>
+<td>Business user</td>
+</tr>
+<tr>
+<td>When a figure is <em>as of</em>, and when a person can see it</td>
+<td>Business user, with the data owner</td>
+</tr>
+<tr>
+<td>What the underlying cause of a failure is</td>
+<td>Implementer</td>
+</tr>
+<tr>
+<td>Reconnecting, retrying, resuming</td>
+<td>Implementer</td>
+</tr>
+<tr>
+<td>Storage, sessions, performance, infrastructure</td>
+<td>Implementer</td>
+</tr>
+</tbody></table>
+<p>Two of these are routinely got wrong.</p>
+<p><strong>&quot;What can go wrong&quot;</strong> means what the person would <em>notice</em> — &quot;the message might not send&quot;, &quot;the
+number on the tile disagrees with the table&quot;. It does not mean the cause — &quot;the queue backed up&quot;. The
+noticeable failure is business meaning and belongs in the specification. The cause belongs to whoever
+builds it.</p>
+<p><strong>&quot;What the app remembers about you between visits&quot;</strong> is invisible to the person answering. Read and
+unread, the last filter used, which tab opens first — these feel like facts about the world rather than
+decisions somebody made. They are decisions, and they will never be volunteered. Ask directly, every
+page, or they get invented in the build.</p>
+<h2 id="6-the-objects">6. The objects</h2><p><strong>A business app</strong> represents one or more business processes in a business domain. It records who uses
+it, including agents as users in their own right.</p>
+<p><strong>A business process</strong> has a data dictionary, a record of what the app remembers about each user
+between visits, and one or more process steps.</p>
+<p><strong>A process step</strong> has a subset of the data dictionary and one or more device types. It records who may
+see it and what differs between them; what can go wrong and what should happen then, as a person would
+notice it; and, for each piece of its data that is a list, how the list is ordered, how it may be
+filtered or grouped, whether items can be selected and what happens then, and how deep it nests.</p>
+<p><strong>A device type</strong> is a desktop, a phone, a voice assistant, or anything else the step has to work on.
+It also records whether anything changes while a person is looking at it — the one live-behaviour
+question that is genuinely a business question.</p>
+<p><strong>A device step</strong> is one screen, or one prompt. It has data output, data input and interactive
+controls.</p>
+<p><strong>An interactive control</strong> does one of three things, and the wording matters because it decides who
+answers the next question: it <em>acts on data</em>, it <em>alters the screen</em>, or <em>both</em>. A control that acts on
+data may also need information only the server holds, which is recorded but not designed here.</p>
+<p><strong>A data field</strong> has a business meaning, holds either one value or a list, is <em>as of</em> some point in
+time, becomes visible to users some interval after that point, and comes from somewhere — held by us,
+supplied by a provider, entered by the user, or computed. Part 5 covers how far this is taken, and when.</p>
+<p><strong>Any part of any of these may be marked &quot;nobody has answered this yet&quot;,</strong> naming who must answer it.
+That marker is not an administrative nicety; it is the mechanism the whole method rests on.</p>
+<h2 id="7-three-things-about-the-shape">7. Three things about the shape</h2><p><strong>The step is what stays the same across devices.</strong> It holds the data and the business meaning. The
+device type is where that meaning becomes something a person looks at or listens to, and the
+decomposition changes with it: one desktop screen may be four phone screens or twenty-six spoken
+prompts. If a step becomes twenty-six prompts, either the step is too big or voice is the wrong device
+for it — and that is worth discovering before anyone builds it, not after.</p>
+<p><strong>Lists are split across two levels on purpose.</strong> How a list is ordered and filtered is business
+meaning, so it belongs to the step and is the same everywhere. What appears when it holds nothing, one
+item, or more than fits is a device question, so it belongs to the device type: twenty rows on a
+desktop, five on a phone, the first three and then a question on voice.</p>
+<p><strong>The unanswered marker is the part most likely to be dropped as bureaucracy, and it is the reason the
+rest works.</strong> A question nobody asked still gets answered during the build, and by then it looks like a
+decision. Marking it costs one line and keeps the difference visible for as long as the difference
+matters.</p>
+<h2 id="8-what-is-deliberately-outside-the-model">8. What is deliberately outside the model</h2><p>Reconnecting, retrying and resuming after a failure. Session handling. Storage. Caching. Performance.
+Infrastructure. Every one of these belongs to whoever builds the app, and none of them improves by
+being guessed at in a business conversation.</p>
+<p>The single exception is whether a screen changes while somebody is looking at it. That is a business
+question about the experience — somebody watching a queue that reorders under their cursor has a
+business problem, not a technical one — so it sits on the device type and gets asked with the rest.</p>
+<p>When an implementation constraint does change the business experience — a figure that cannot be
+produced more often than monthly, a permission that cannot be enforced at the row level — the
+constraint and its consequence come back into the specification as something to discuss, not as a
+footnote in a technical document nobody reads.</p>
+<hr>
+<h1 id="part-3--the-mockument-how-the-app-is-represented">Part 3 · The mockument: how the app is represented</h1><h2 id="9-what-a-person-sees">9. What a person sees</h2><p>A mockument is a set of web pages. On the left is the proposed menu of the real app; selecting an item
+opens the page the real app would open. Destinations nobody has drawn yet stay in the menu, marked as
+undrawn, because a gap you can see is worth more than a tidy diagram.</p>
+<p>The page itself is not a visual design. It is a high-level representation showing the parts that carry
+meaning: headings, information, lists, inputs, actions, states and links. Elements that would lead
+somewhere in the real app lead somewhere here too. A person can click from an item in a queue to the record that
+closes it, exactly as they would at work, and discover that the two live on different pages and that
+every walkthrough participant tried to do both in one place.</p>
+<p>Beside and beneath the representation is its written specification: what work the page supports, who
+may see it, what each element shows, what each control means, what the app remembers, what may change
+while it is open, what a person notices when something fails, and what nobody has answered yet.</p>
+<p>The result is simultaneously a document and an app. It can be read in order, explored through the menu,
+or followed as a piece of work from beginning to end.</p>
+<h2 id="10-what-a-mockument-is-for">10. What a mockument is for</h2><ul>
+<li>Testing whether the menu and page structure match the way people think about their work.</li>
+<li>Walking real work from beginning to end, including the paths where things go wrong.</li>
+<li>Connecting every visible element to a business requirement — or exposing that it has none.</li>
+<li>Revealing requirements that are missing, contradictory or impossible to represent.</li>
+<li>Comparing what different people see, by switching role rather than by reading a table.</li>
+<li>Exploring how one step lands differently on desktop, phone or voice.</li>
+<li>Recording observations and unanswered questions where they arise, in context.</li>
+<li>Giving business users, designers, implementers and agents one shared object to argue about.</li>
+<li>Producing a starting point for the build that does not require anybody to invent.</li>
+</ul>
+<p>It is not for deciding infrastructure, storage, session handling, retry behaviour or any other matter
+that belongs to the implementer.</p>
+<h2 id="11-the-objects-of-representation">11. The objects of representation</h2><p><strong>A mockument</strong> represents one business app and one version of its description. It has a navigation
+structure, represented pages or prompts, workflows, observations, unanswered questions, and a record of
+the assumptions and proposals that were needed to make it navigable.</p>
+<p><strong>The navigation structure</strong> is the proposed menu and the other routes through the app: what a person
+can open, from where, and as which kind of user. Unrepresented destinations are shown and marked.</p>
+<p><strong>A represented page</strong> is the high-level form of one page of the proposed app. It names the step or
+steps it represents, who may see it, and the device type. It contains representations of outputs,
+inputs, controls, messages and links, together with the written explanation of each.</p>
+<p><strong>A represented prompt</strong> is the same thing for a voice assistant or any other device not organised as
+visual pages.</p>
+<p><strong>A represented element</strong> is anything a person can see, hear, enter, select or activate. It is
+deliberately low fidelity: it communicates meaning, hierarchy and behaviour without settling
+typography, colour, spacing or final wording — unless one of those is itself a requirement, in which
+case it is recorded as one.</p>
+<p><strong>A workflow</strong> is a path through the mockument representing a real piece of work. It names its starting
+point, the people involved, the sequence of pages or prompts, the decisions taken along the way, its
+possible endings, and the exceptional paths people need to be able to discuss.</p>
+<p><strong>An observation</strong> records something learned by looking at or walking through the mockument. It is not
+automatically a decision and never automatically a requirement. It may expose a conflict, an awkward
+transition, a missing state, an unnecessary step, or a question worth asking.</p>
+<p><strong>A proposal</strong> is a representational choice made so the mockument can be experienced at all. It stays
+visibly a proposal until the appropriate person accepts it. Acceptance updates the description when the
+decision concerns business meaning.</p>
+<p><strong>An unanswered question</strong> states what is unknown, where it matters, who must answer it, and by when.
+It is visible both in the written material and at the affected place in the mockument.</p>
+<h2 id="12-fidelity-and-the-five-statuses">12. Fidelity, and the five statuses</h2><p>A mockument may behave like an app, and it must say where the resemblance ends. It uses example data,
+predetermined outcomes and simulated state changes. It does not prove that an integration works, that
+rules are complete, that permissions are enforced, that calculations are correct, that anything
+persists, or that performance is acceptable.</p>
+<p>Every meaningful part carries exactly one status:</p>
+<table>
+<thead>
+<tr>
+<th>Status</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>required</strong></td>
+<td>An answered requirement supports it.</td>
+</tr>
+<tr>
+<td><strong>proposed</strong></td>
+<td>Introduced to make the representation concrete. Nobody has accepted it.</td>
+</tr>
+<tr>
+<td><strong>unanswered</strong></td>
+<td>A decision is still needed. The marker names who must make it.</td>
+</tr>
+<tr>
+<td><strong>observed</strong></td>
+<td>Learned during review. Not yet a decision, and not a requirement.</td>
+</tr>
+<tr>
+<td><strong>out of scope</strong></td>
+<td>Deliberately not represented here.</td>
+</tr>
+</tbody></table>
+<p>Two disciplines make the statuses more than decoration.</p>
+<p><strong>The overlay.</strong> One control tints the whole mock by status, so a reviewer sees at a glance how much of
+the screen in front of them is actually agreed. The first run of this on a finished-looking page is
+usually uncomfortable. That discomfort is the mockument working.</p>
+<p><strong>No unmarked elements.</strong> An element drawn without a status fails the readiness check. Silence about
+provenance is treated as a defect, not as a default.</p>
+<p>Visual polish must never disguise uncertainty. A convincing screen is not evidence that its contents or
+its behaviour have been agreed.</p>
+<h2 id="13-what-a-mockument-does-not-settle">13. What a mockument does not settle</h2><ul>
+<li>Final visual design, typography, colour or wording — except where wording is itself a requirement.</li>
+<li>Backend architecture and data model.</li>
+<li>Whether an integration is technically possible.</li>
+<li>Production permission enforcement and security.</li>
+<li>Reconnection, retrying, resuming, sessions, storage.</li>
+<li>Performance, accessibility compliance, browser support.</li>
+<li>Cost and schedule.</li>
+</ul>
+<p>These are investigated elsewhere. Where one of them constrains the business experience, the constraint
+returns here as something to discuss.</p>
+<hr>
+<h1 id="part-4--the-mockument-page">Part 4 · The mockument page</h1><p>This part is the addition the Honest Mockument makes to both practices: a fixed anatomy that carries
+the model and the representation together, page by page, in a form that is equally legible to a business reviewer and to a machine.</p>
+<h2 id="14-one-page-per-page">14. One page per page</h2><p><strong>One page of the app is one page of the mockument.</strong> Not one long document with sections, and not
+one screen per section of a scrolling page.</p>
+<p>The reason is not tidiness. A specification that scrolls cannot be walked: every reader arrives at the
+top and travels downward, which is nothing like using an app. When each page of the app is its own
+page of the mockument, the mockument&#39;s own navigation <em>is</em> the app&#39;s proposed menu, and reviewing the
+structure of the app becomes the same act as reading the document. Questions like &quot;can I get back from
+here?&quot; and &quot;why is this three clicks away?&quot; answer themselves.</p>
+<p>The consequences are practical:</p>
+<ul>
+<li>Every page has one owner, one version and one readiness state.</li>
+<li>Two people can work on two pages without conflict.</li>
+<li>A page can be sent to somebody on its own and still make sense.</li>
+<li>The register pages — questions, fields, routes — can be assembled mechanically from the set.</li>
+</ul>
+<h2 id="15-the-twenty-two-blocks">15. The twenty-two blocks</h2><p>Every page carries the same twenty-two blocks in the same order. Blocks 1–4 are identity, 5–6 are the
+mock, 7–16 are the specification, 17–22 are the honesty apparatus. Each block names who answers it.</p>
+<h3 id="identity">Identity</h3><p><strong>1 · Page header.</strong> Name, route, build status (new / modify / existing), version, date, owner, the
+three readiness gates, and the share of elements that are actually required. <em>Answered by the page
+owner.</em></p>
+<p><strong>2 · Represents.</strong> The process and step this page belongs to, and the device types it covers, as links
+into the app map. Where one step needs several pages, each of them says so. <em>Business user.</em></p>
+<p><strong>3 · Available to.</strong> Every role that may reach the page, what differs between them, and what each must
+<em>not</em> see. <em>Business user.</em></p>
+<p><strong>4 · Purpose.</strong> Three or four sentences: what work this supports, why somebody opens it, what they
+leave with. Not a feature list. <em>Business user.</em></p>
+<h3 id="the-mock">The mock</h3><p><strong>5 · The mock frame.</strong> The navigable representation, with four controls above it — device type, role,
+state and the honesty overlay — and an inspector that opens when any element is clicked. See §16.</p>
+<p><strong>6 · Fidelity note.</strong> One standing line: structure only, example data, nothing here is proof.</p>
+<h3 id="the-specification">The specification</h3><p><strong>7 · Elements.</strong> ID, element, what it shows or accepts, where it comes from, status, and what it
+traces to. This is the spine: anything visible appears here or it should not be visible. <em>Business user
+with the data owner.</em></p>
+<p><strong>8 · Controls and actions.</strong> ID, control, business effect (<em>acts on data</em> / <em>alters the screen</em> /
+<em>both</em>), whether it needs information only the server holds, where it leads, what confirmation or undo
+exists, status. <em>Business user.</em></p>
+<p><strong>9 · Data and fields.</strong> Field, meaning, one value or a list, unit, what it is <em>as of</em>, when a user can
+see it, where it comes from, how it is calculated and from what, and the sample value used in the mock.
+Climbed as a ladder — see Part 5. <em>Business user for meaning and timing; data owner for source and
+calculation.</em></p>
+<p><strong>10 · Lists.</strong> Per list: order, filtering and grouping, whether items can be selected and what then
+happens, nesting depth — then, per device, what appears when the list holds nothing, exactly one item,
+or more than fits. <em>Business user.</em></p>
+<p><strong>11 · States.</strong> Default, empty, one item, more than fits, loading, error, restricted: when each
+happens, what the person sees, and what they can do next. Every state listed here is selectable in the
+mock. <em>Business user.</em></p>
+<p><strong>12 · What can go wrong.</strong> Described as the person notices it, never as a cause; what should happen;
+who is told. <em>Business user.</em></p>
+<p><strong>13 · Remembered between visits.</strong> What the app remembers about this person, for how long, and whether
+they can clear it. Asked directly because it is never volunteered. <em>Business user.</em></p>
+<p><strong>14 · Changes while being looked at.</strong> What may update under the person&#39;s eyes, how they are told, and
+what happens if they are mid-action. <em>Business user.</em></p>
+<p><strong>15 · Connections.</strong> Where a person arrives from, where they can go, and which shared components this
+page uses. Rendered as links, so the graph is walkable in both directions.</p>
+<p><strong>16 · Workflows.</strong> The named pieces of work this page takes part in, and where in each it sits.</p>
+<h3 id="the-honesty-apparatus">The honesty apparatus</h3><p><strong>17 · Copy register.</strong> Every user-visible string, each marked <em>required wording</em> or <em>placeholder</em>.
+Wording is where an unattended builder invents most freely; a placeholder that is labelled is safe,
+an unlabelled one becomes product.</p>
+<p><strong>18 · Decisions.</strong> What was decided, by whom, on what date. A decision with no name on it is a rumour.</p>
+<p><strong>19 · Observations.</strong> What walking through revealed. Explicitly not decisions and not requirements.</p>
+<p><strong>20 · Open questions.</strong> Question, why it matters, what it blocks, who must answer, needed by. Each is
+anchored to the element it affects and mirrored in the app-wide register.</p>
+<p><strong>21 · Out of scope, and what this does not settle.</strong> What this page deliberately does not answer, plus
+the standing list from §13.</p>
+<p><strong>22 · Build contract and machine-readable record.</strong> The instruction block handed to whoever builds
+this page — what to build, what not to invent, what to ask about first, what done means — and the
+structured record that the checker validates and the builder consumes.</p>
+<h2 id="16-the-mock-frame">16. The mock frame</h2><p>The frame is what turns a picture into an instrument. Four controls sit above every mock.</p>
+<p><strong>Device type.</strong> Desktop, phone, voice — whatever the step has to work on. Switching device shows how
+the same step decomposes, and makes the twenty-six-prompts problem visible rather than theoretical.</p>
+<p><strong>Role.</strong> Switching role hides and reveals elements according to the permissions block, so &quot;what does a
+supervisor see?&quot; is answered by looking rather than by reading. What a role must <em>not</em> see is stated
+beside it.</p>
+<p><strong>State.</strong> Default, empty, one item, more than fits, loading, error, restricted. Where a state has its
+own sketch, selecting it shows that sketch; where it does not, the frame says so and quotes what the
+specification says should happen — which is itself a useful admission.</p>
+<p><strong>Honesty overlay.</strong> Tints every element by its status. Amber is proposed, pink is unanswered, green is
+required, grey is out of scope. An element with no status shows as unanswered, because that is what it
+is.</p>
+<p><strong>The inspector.</strong> Clicking any element opens its full record: status, what it shows, where it comes
+from, where it leads, what it traces to, and every open question attached to it. Clicking an element
+that has no record is the most useful outcome of all — it means somebody drew a thing nobody asked for,
+and the frame says so plainly.</p>
+<p>Links inside the mock frame navigate. That is the difference between an app that can be walked and a
+picture of one.</p>
+<h2 id="17-identity-ids-and-traceability">17. Identity, IDs and traceability</h2><p>Every element, control, question and requirement carries a stable identifier: <code>EL-07</code>, <code>CTL-03</code>,
+<code>Q-02</code>, <code>REQ-MON-11</code>. This is not bureaucracy; it is what makes the specification addressable.</p>
+<ul>
+<li>In a review: &quot;EL-07 is wrong&quot; rather than &quot;the table thing on the second tab&quot;.</li>
+<li>In a ticket: the ID travels with the work.</li>
+<li>In the build: the same ID becomes the test identifier, so a page can be checked against its spec
+mechanically.</li>
+<li>In the register: one query answers &quot;where does this requirement appear?&quot; and another answers &quot;what
+justifies this element?&quot;</li>
+</ul>
+<p>Traceability runs both ways. From a requirement you can find every place it appears in the mockument.
+From an element you can find the requirement, proposal, observation or unanswered question that
+accounts for it. When an element traces to nothing, that is not a gap in the paperwork — it is an
+element nobody asked for, and it should either acquire a requirement or leave the page.</p>
+<hr>
+<h1 id="part-5--the-data-layer">Part 5 · The data layer</h1><h2 id="18-which-data-questions-can-change-a-page">18. Which data questions can change a page</h2><p>Field-level work is the most expensive part of any specification and the easiest to do too early. The
+way out is to notice that data questions divide cleanly into two kinds.</p>
+<p><strong>Questions that can invalidate a page.</strong> Does this number exist at all? Who supplies it? What point in
+time is it <em>as of</em>, and how long after that can a person see it? Is it a stored fact or something we
+compute? — If a figure is only produced at month end and only lands several business days later, then a
+screen offering &quot;today&#39;s number&quot; is dead, and no amount of layout review will reveal that. These are design questions wearing a data costume. They cost about thirty seconds each,
+they are answered by the business, and they belong in the mockument from the first day.</p>
+<p><strong>Questions that can only change the code.</strong> Which provider field, which database column, the exact
+formula, the display format and decimals, the routing when the same figure comes from two providers,
+the reconciled value for a known example. None of these can invalidate a screen. They are also the bulk
+of the work — in a typical dictionary, most fields are calculated rather than copied — so doing them
+for a page that later gets cut is pure waste.</p>
+<p>The Honest Mockument therefore does not treat field detail as a phase. It treats it as a <strong>ladder, climbed per
+page</strong>, so nothing above the bottom rung is ever paid for on a page that does not survive review.</p>
+<h2 id="19-the-four-rungs">19. The four rungs</h2><table>
+<thead>
+<tr>
+<th>Rung</th>
+<th>What is answered</th>
+<th>When</th>
+<th>Recorded as</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>L0 · exists</strong></td>
+<td>What the field means in business words · one value or a list · what it is <em>as of</em> · when a person can see it · who supplies it (held by us, a provider, the user, computed, or nobody knows)</td>
+<td>With the mockument. <strong>Required to pass the business-review gate.</strong></td>
+<td><code>means</code> <code>holds</code> <code>periodicity</code> <code>visibleWhen</code> <code>provenance</code></td>
+</tr>
+<tr>
+<td><strong>L1 · display</strong></td>
+<td>Unit or format · what an empty value shows · what a <em>stale</em> value shows</td>
+<td>After the page passes business review</td>
+<td><code>unit</code> <code>nullRule</code> <code>staleRule</code></td>
+</tr>
+<tr>
+<td><strong>L2 · sourced</strong></td>
+<td>Provider or system · the feed, table or field · whether it is calculated · the calculation · which fields it derives from · sensitivity</td>
+<td>Before this page is built. <strong>Required to pass the implementation gate.</strong></td>
+<td><code>source</code> <code>calculated</code> <code>calculation</code> <code>derivedFrom</code> <code>sensitivity</code></td>
+</tr>
+<tr>
+<td><strong>L3 · verified</strong></td>
+<td>Evidence the lineage was traced · the tolerance a test may use</td>
+<td>At QA, before release</td>
+<td><code>evidence</code> <code>tolerance</code></td>
+</tr>
+</tbody></table>
+<p>Three rules keep the ladder honest.</p>
+<p><strong>Promotion is per page, not per project.</strong> A field climbs when a page that uses it needs it to. The
+same field may sit at L2 because one page is being built and be irrelevant everywhere else.</p>
+<p><strong>A field defined once is referenced everywhere.</strong> Fields carry a shared identifier, so a figure that
+appears on nine screens has one definition, one source and one calculation. Where two pages describe
+the same field differently, the register shows the disagreement instead of averaging it away.</p>
+<p><strong>Hero fields go to L2 immediately.</strong> Some numbers <em>are</em> the product: a score, a ranking, a
+a figure somebody would have to defend under scrutiny. Validating pages that display
+a wrong number proves nothing, so a field marked as hero must reach L2 while the mockument is still being
+drawn. Expect five to ten of these in an app, not fifty.</p>
+<p><strong>The stale rule is not the null rule.</strong> &quot;Empty&quot; and &quot;older than it should be&quot; are different business
+situations with different answers, and the second one is the one that actually happens in production.</p>
+<h2 id="20-controlled-vocabularies">20. Controlled vocabularies</h2><p>Three fields use fixed vocabularies. Free text in these columns cannot be counted, filtered, tested or
+trusted, and drifts into dozens of near-synonyms within a few months.</p>
+<p><strong>Periodicity — what point in time the value is <em>as of</em>:</strong></p>
+<ul>
+<li>live</li>
+<li>end of previous business day</li>
+<li>end of previous month</li>
+<li>latest closed period</li>
+<li>on demand</li>
+<li>reference / on change</li>
+</ul>
+<p>A project may extend this list with a period its own work actually uses — a trading day, a filing, a
+shift, a billing cycle — but it extends the list deliberately, in one place, and does not free-text the
+column.</p>
+<p>Two things that are not periodicities. A <em>derived rate</em> is not one: a figure expressed per year is a
+calculation, computed as of a point that is itself one of the values above. And a <em>refresh cadence</em> is
+not one either: a weekly job that reloads figures published quarterly does not make the data weekly.</p>
+<p><strong>Visibility — how long after that point a person can see it:</strong> stated as a business interval
+(&quot;next business day&quot;, &quot;second to fourth business day of the month&quot;, &quot;immediately on save&quot;), never as a
+job name.</p>
+<p><strong>Provenance — who supplies it:</strong> held by us · a provider · the user · computed · nobody knows.</p>
+<p>Nuance that does not fit the vocabulary goes in an adjacent note, never in the vocabulary field itself.</p>
+<hr>
+<h1 id="part-6--readiness">Part 6 · Readiness</h1><h2 id="21-the-three-gates">21. The three gates</h2><p>Readiness is computed from the specification, not asserted in a meeting. Each page reports three gates
+and, when one fails, exactly what is in the way.</p>
+<h3 id="gate-1-ready-to-walk-through">Gate 1 — ready to walk through</h3><ul>
+<li>Every page names the step it represents.</li>
+<li>Every element and control carries a status.</li>
+<li>Every open question names who must answer it.</li>
+<li>Every page has a purpose written in business words.</li>
+<li>The menu and the workflows navigate.</li>
+</ul>
+<p><em>Meaning: somebody can be shown this without a guide.</em></p>
+<h3 id="gate-2-ready-for-a-business-review">Gate 2 — ready for a business review</h3><p>Everything in gate 1, plus:</p>
+<ul>
+<li>Who may reach the page, and what differs between roles, is recorded.</li>
+<li>The empty, error and restricted states are described, and every described state says what a person
+sees.</li>
+<li>What can go wrong is recorded as a person would notice it.</li>
+<li>Every field is at least at <strong>L0</strong>, and every hero field is at <strong>L2</strong>.</li>
+</ul>
+<p><em>Meaning: the ordinary path, the important alternatives, the role differences and the user-visible
+failures can all be inspected. A business person can approve or reject this and be right either way.</em></p>
+<h3 id="gate-3-ready-to-inform-implementation">Gate 3 — ready to inform implementation</h3><p>Everything in gates 1 and 2, plus:</p>
+<ul>
+<li>No question that blocks the build remains open.</li>
+<li>No element remains unanswered.</li>
+<li>Every element traces to a requirement, or is explicitly marked as having none.</li>
+<li>What the app remembers between visits, and what changes while it is looked at, are both settled.</li>
+<li>No user-visible string is still a placeholder.</li>
+<li>Every field on the page is at least at <strong>L2</strong>.</li>
+<li>Accepted proposals have been written back into the description.</li>
+</ul>
+<p><em>Meaning: an implementer — human or agent — can start without inventing anything, and without asking
+the same question twice.</em></p>
+<h2 id="22-what-the-gates-are-not">22. What the gates are not</h2><p><strong>Gate 3 is not &quot;the implementation is designed&quot;.</strong> Architecture, storage and integration remain
+untouched by it. It says only that the business questions are closed.</p>
+<p><strong>Gates are not permission to skip review.</strong> A page can pass every mechanical check and still be the
+wrong page. The gates detect silence, not error.</p>
+<p><strong>Gates must never be satisfied by editing the data.</strong> Marking an unanswered element as required to
+turn a light green is the one act that destroys the mockument. If a gate is inconvenient, the honest moves
+are to answer the question or to accept that the page is not ready.</p>
+<p><strong>A failing gate is not a failure.</strong> Early on, every page fails gate 3 and should. The useful reading
+is the trend and the reason list, not the colour.</p>
+<hr>
+<h1 id="part-7--working-with-it">Part 7 · Working with it</h1><h2 id="23-the-site-around-the-page">23. The site around the page</h2><table>
+<thead>
+<tr>
+<th>Page</th>
+<th>What it holds</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Overview</strong></td>
+<td>The app: who uses it, including agents; its processes and steps; the page grid with each page&#39;s status and coverage; the readiness dashboard.</td>
+</tr>
+<tr>
+<td><strong>App map</strong></td>
+<td>The proposed menu including undrawn destinations; the step → device decomposition; routes between pages; the shared component register.</td>
+</tr>
+<tr>
+<td><strong>One page per app page</strong></td>
+<td>The twenty-two blocks.</td>
+</tr>
+<tr>
+<td><strong>Workflow pages</strong></td>
+<td>One walkable path each: start, actors, sequence, decisions, endings, exceptional paths.</td>
+</tr>
+<tr>
+<td><strong>Open questions</strong></td>
+<td>Every question in the app, grouped by owner, with what it blocks and when it is needed — plus the silences nobody wrote down as questions.</td>
+</tr>
+<tr>
+<td><strong>Data dictionary</strong></td>
+<td>Every field once, with the pages that use it, its rung, and any disagreement between pages.</td>
+</tr>
+<tr>
+<td><strong>Blank template</strong></td>
+<td>The page to copy, carrying the questions that are otherwise never asked.</td>
+</tr>
+<tr>
+<td><strong>Checker</strong></td>
+<td>Reads every page and reports the gates. Runs by hand or in continuous integration.</td>
+</tr>
+</tbody></table>
+<p>Two principles hold the set together. <strong>The structured record on each page is the single source of
+truth</strong> — everything a reader sees is rendered from it, so the human view and the machine view cannot
+drift apart. And <strong>the registers are assembled, never maintained</strong>: no one edits the questions page;
+it is a view over the pages.</p>
+<h2 id="24-running-a-walkthrough">24. Running a walkthrough</h2><p>A walkthrough is a working session, not a presentation. One person drives the mock; the business
+participants do the talking; somebody records observations and questions <em>in the page</em> as they arise
+rather than in a separate notebook that is never reconciled.</p>
+<p><strong>The agenda — nine questions a mockument exists to provoke:</strong></p>
+<ol>
+<li>Does the menu describe the way people actually think about their work?</li>
+<li>Can each person reach what they need without seeing what they should not?</li>
+<li>Does one step require several pages here — and if so, is the step too big?</li>
+<li>Can a person tell where they are, what just happened, and what they can do next?</li>
+<li>What happens when a list is empty, holds exactly one item, or holds more than fits?</li>
+<li>What happens when a person cannot complete what they came to do?</li>
+<li>Does each workflow have a beginning, a useful ending, and understandable exceptional paths?</li>
+<li>Is every visible element backed by a requirement, or was it invented to complete the picture?</li>
+<li>What business decision has this session exposed that nobody had made?</li>
+</ol>
+<p><strong>The questions to ask a business user</strong>, in the order that works. Ask them as written; the wording is
+doing work.</p>
+<ul>
+<li>What is the work, and what are its steps?</li>
+<li>What data does this work involve, and what does each piece mean?</li>
+<li>Who may see this, and what differs between them? What must somebody <em>not</em> see?</li>
+<li>What should the app remember about you between visits?</li>
+<li>What order does this list appear in? How may it be filtered or grouped? Can items be picked out, and
+what happens then? Does anything sit inside anything else, and how deep?</li>
+<li>What appears when this list holds nothing? When it holds only one? When it holds more than fits here?</li>
+<li>What can go wrong, as <em>you</em> would notice it — and what should happen when it does?</li>
+<li>Which device types does this have to work on?</li>
+<li>Does anything change while somebody is looking at it?</li>
+<li>What is this number <em>as of</em>, and how long after that can somebody see it?</li>
+</ul>
+<p><strong>During the session:</strong> switch role and state on the mock frame rather than describing them; turn the honesty
+overlay on at least once; and when somebody says &quot;obviously it would…&quot;, stop and record it as a
+question, because that sentence is the single most reliable indicator of an unexamined assumption.</p>
+<p><strong>After the session:</strong> every observation is filed as an observation, not promoted to a requirement;
+every question gets an owner and a date before the meeting ends; and any decision taken in the room is
+recorded with the name of the person who took it.</p>
+<h2 id="25-filling-a-page-with-an-agent">25. Filling a page with an agent</h2><p>The structured record makes it safe to have an agent draft a mockument page, provided the instruction makes
+silence illegal. The rules, in order of importance:</p>
+<ol>
+<li>Never invent an answer to make the page look finished. If nobody has stated it, mark it
+<strong>unanswered</strong> and add a question naming who must answer it and by when.</li>
+<li>Anything drawn to make the mock concrete is <strong>proposed</strong>, with a note saying why it was drawn.</li>
+<li>Describe what can go wrong as the person would notice it, never as a technical cause.</li>
+<li>Ask, explicitly, the two things nobody volunteers: what the app remembers between visits, and what
+changes while somebody is looking at the page.</li>
+<li>For every list: order, filtering, selection and nesting on the step; empty, one and more-than-fits
+per device.</li>
+<li>Every element in the mock needs a row with a stable ID; every row needs either a trace to a
+requirement or a status admitting it has none.</li>
+<li>A string is <em>required wording</em> only if somebody confirmed the exact words. Otherwise it is a
+placeholder.</li>
+<li>Fields answer L0 only, unless the field is a hero field, in which case take it to L2.</li>
+<li>When finished, run the checker, report which gates pass, and list what would have to be answered —
+and by whom — to pass the next one. Never adjust the data to make a gate pass.</li>
+</ol>
+<h2 id="26-building-from-a-page">26. Building from a page</h2><p>Each page ends with a build contract, addressed to whoever implements it:</p>
+<ul>
+<li><strong>Build exactly this</strong> — the elements, controls, states and wording that are required.</li>
+<li><strong>Do not invent</strong> — the specific things that are drawn but unspecified, named individually.</li>
+<li><strong>Stop and ask first</strong> — the open questions that touch this page, with their owners.</li>
+<li><strong>Done means</strong> — the acceptance checks, including that every element identifier survives into the
+built page as a test identifier.</li>
+</ul>
+<p>Most of that contract can be handed over mechanically rather than retyped: see the Annex.</p>
+<p>That last point is what keeps the specification alive after the build starts. When <code>EL-07</code> exists in
+the spec, in the ticket and in the test, a change to any of the three is visible in the others. When it
+exists only in prose, the specification becomes historical within a fortnight.</p>
+<h2 id="27-change-versioning-and-write-back">27. Change, versioning and write-back</h2><p><strong>Every page carries a version, a date and an owner.</strong> A review is repeatable only if a reader can see
+what moved since last time.</p>
+<p><strong>Accepted proposals are written back.</strong> When somebody accepts a proposal that concerns business
+meaning, the status changes from <em>proposed</em> to <em>required</em> and the underlying description is updated.
+A proposal that is accepted in a meeting but left marked <em>proposed</em> is worse than one nobody discussed,
+because it now looks examined.</p>
+<p><strong>Observations are not silently promoted.</strong> An observation becomes a requirement only by somebody
+deciding it, on a date, under their name.</p>
+<p><strong>Questions close by being answered, not by expiring.</strong> A question whose date passes is escalated, not
+deleted. If it is genuinely no longer relevant, it is closed with a note saying why.</p>
+<p><strong>The description leads the representation.</strong> Where the two disagree, the description wins and the
+mockument is corrected — never the reverse, and never silently.</p>
+<hr>
+<h1 id="part-8--reference">Part 8 · Reference</h1><h2 id="28-the-minimal-page-record">28. The minimal page record</h2><p>If nothing else is captured for a page, capture these ten things. Everything in §15 is an expansion of
+this list.</p>
+<ol>
+<li><strong>Name and route</strong> — how the page is reached.</li>
+<li><strong>Represents</strong> — the process step and device step it corresponds to.</li>
+<li><strong>Available to</strong> — who may reach it, and what differs between them.</li>
+<li><strong>Representation</strong> — the high-level page or prompt, with navigable elements.</li>
+<li><strong>Explanation</strong> — what the page is for and what each important part means.</li>
+<li><strong>States</strong> — the conditions a reviewer can inspect.</li>
+<li><strong>Links and actions</strong> — where they lead, and what business effect they represent.</li>
+<li><strong>Traceability</strong> — the requirement behind each meaningful element.</li>
+<li><strong>Proposals and assumptions</strong> — what was added to make the representation concrete.</li>
+<li><strong>Observations and unanswered questions</strong> — what the walkthrough revealed, and who must respond.</li>
+</ol>
+<h2 id="29-the-specification-record-field-by-field">29. The specification record, field by field</h2><p>Each page carries one structured record. It is the source of truth for that page; the readable
+specification is rendered from it.</p>
+<table>
+<thead>
+<tr>
+<th>Group</th>
+<th>Fields</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>page</code></td>
+<td><code>id</code> <code>name</code> <code>route</code> <code>buildStatus</code> (new / modify / existing) <code>version</code> <code>updated</code> <code>owner</code></td>
+</tr>
+<tr>
+<td><code>represents</code></td>
+<td><code>process</code> <code>step</code> <code>stepId</code> <code>deviceTypes[]</code></td>
+</tr>
+<tr>
+<td><code>purpose</code></td>
+<td>free text, business words</td>
+</tr>
+<tr>
+<td><code>availableTo[]</code></td>
+<td><code>role</code> <code>mayReach</code> <code>differs</code> <code>mustNotSee</code></td>
+</tr>
+<tr>
+<td><code>elements[]</code></td>
+<td><code>id</code> <code>name</code> <code>shows</code> <code>source</code> <code>status</code> <code>trace</code> <code>note</code> <code>questions[]</code> <code>roles[]</code></td>
+</tr>
+<tr>
+<td><code>controls[]</code></td>
+<td><code>id</code> <code>name</code> <code>effect</code> (acts on data / alters the screen / both) <code>serverData</code> <code>leadsTo</code> <code>href</code> <code>confirm</code> <code>status</code> <code>trace</code></td>
+</tr>
+<tr>
+<td><code>data[]</code></td>
+<td><code>field</code> <code>fieldId</code> <code>means</code> <code>holds</code> <code>periodicity</code> <code>visibleWhen</code> <code>provenance</code> <code>hero</code> <code>unit</code> <code>nullRule</code> <code>staleRule</code> <code>source</code> <code>calculated</code> <code>calculation</code> <code>derivedFrom[]</code> <code>sensitivity</code> <code>tolerance</code> <code>evidence</code> <code>sample</code></td>
+</tr>
+<tr>
+<td><code>lists[]</code></td>
+<td><code>name</code> <code>ordering</code> <code>filtering</code> <code>selection</code> <code>nesting</code> · <code>device[]</code> → <code>device</code> <code>empty</code> <code>one</code> <code>overflow</code></td>
+</tr>
+<tr>
+<td><code>states[]</code></td>
+<td><code>key</code> <code>label</code> <code>when</code> <code>sees</code> <code>next</code></td>
+</tr>
+<tr>
+<td><code>failures[]</code></td>
+<td><code>noticed</code> <code>thenWhat</code> <code>whoIsTold</code></td>
+</tr>
+<tr>
+<td><code>remembered</code></td>
+<td><code>answer</code> <code>status</code> <code>duration</code> <code>clearable</code> <code>whoMustAnswer</code></td>
+</tr>
+<tr>
+<td><code>liveChange</code></td>
+<td><code>answer</code> <code>status</code> <code>howTold</code> <code>midAction</code> <code>whoMustAnswer</code></td>
+</tr>
+<tr>
+<td><code>connections</code></td>
+<td><code>from[]</code> <code>to[]</code> <code>components[]</code></td>
+</tr>
+<tr>
+<td><code>workflows[]</code></td>
+<td><code>id</code> <code>name</code> <code>href</code> <code>position</code></td>
+</tr>
+<tr>
+<td><code>copy[]</code></td>
+<td><code>key</code> <code>string</code> <code>status</code> (required wording / placeholder) <code>note</code></td>
+</tr>
+<tr>
+<td><code>decisions[]</code></td>
+<td><code>what</code> <code>who</code> <code>when</code></td>
+</tr>
+<tr>
+<td><code>observations[]</code></td>
+<td><code>what</code> <code>raisedBy</code> <code>when</code></td>
+</tr>
+<tr>
+<td><code>questions[]</code></td>
+<td><code>id</code> <code>question</code> <code>whyItMatters</code> <code>blocks</code> <code>blocksBuild</code> <code>whoMustAnswer</code> <code>neededBy</code> <code>affects[]</code></td>
+</tr>
+<tr>
+<td><code>outOfScope[]</code></td>
+<td><code>what</code> <code>why</code></td>
+</tr>
+<tr>
+<td><code>contract</code></td>
+<td><code>must[]</code> <code>mustNotInvent[]</code> <code>askFirst[]</code> <code>acceptance[]</code></td>
+</tr>
+</tbody></table>
+<h2 id="30-the-machine-readable-model">30. The machine-readable model</h2><p>The same model as a JSON Schema, so a description can be validated, an interview can be generated from
+it, and a checker can compute the gates. Where this schema and any prose disagree, the schema is the
+contract.</p>
+<pre><code class="language-json">{
+  &quot;$schema&quot;: &quot;https://json-schema.org/draft/2020-12/schema&quot;,
+  &quot;$id&quot;: &quot;urn:honest-mockument:v1&quot;,
+  &quot;title&quot;: &quot;A business app, described from the user&#39;s point of view, with its mockument&quot;,
+  &quot;type&quot;: &quot;object&quot;,
+  &quot;required&quot;: [&quot;name&quot;, &quot;domain&quot;, &quot;used_by&quot;, &quot;processes&quot;],
+  &quot;properties&quot;: {
+    &quot;name&quot;: { &quot;type&quot;: &quot;string&quot; },
+    &quot;domain&quot;: { &quot;type&quot;: &quot;string&quot; },
+    &quot;used_by&quot;: {
+      &quot;description&quot;: &quot;Who uses it, including agents?&quot;,
+      &quot;type&quot;: &quot;array&quot;, &quot;minItems&quot;: 1,
+      &quot;items&quot;: {
+        &quot;type&quot;: &quot;object&quot;,
+        &quot;required&quot;: [&quot;name&quot;, &quot;is_agent&quot;],
+        &quot;properties&quot;: {
+          &quot;name&quot;: { &quot;type&quot;: &quot;string&quot; },
+          &quot;is_agent&quot;: { &quot;type&quot;: &quot;boolean&quot; },
+          &quot;note&quot;: { &quot;type&quot;: &quot;string&quot; }
+        }
+      }
+    },
+    &quot;processes&quot;: { &quot;type&quot;: &quot;array&quot;, &quot;minItems&quot;: 1, &quot;items&quot;: { &quot;$ref&quot;: &quot;#/$defs/process&quot; } },
+    &quot;pages&quot;: { &quot;type&quot;: &quot;array&quot;, &quot;items&quot;: { &quot;$ref&quot;: &quot;#/$defs/page_spec&quot; } }
+  },
+
+  &quot;$defs&quot;: {
+
+    &quot;status&quot;: {
+      &quot;description&quot;: &quot;What backs this?&quot;,
+      &quot;enum&quot;: [&quot;required&quot;, &quot;proposed&quot;, &quot;unanswered&quot;, &quot;observed&quot;, &quot;out of scope&quot;]
+    },
+
+    &quot;answerable&quot;: {
+      &quot;description&quot;: &quot;An answer, or an explicit record that nobody has answered it yet.&quot;,
+      &quot;type&quot;: &quot;object&quot;,
+      &quot;required&quot;: [&quot;status&quot;],
+      &quot;oneOf&quot;: [
+        { &quot;properties&quot;: { &quot;status&quot;: { &quot;const&quot;: &quot;answered&quot; }, &quot;value&quot;: {} }, &quot;required&quot;: [&quot;value&quot;] },
+        { &quot;properties&quot;: { &quot;status&quot;: { &quot;const&quot;: &quot;unanswered&quot; }, &quot;who_must_answer&quot;: { &quot;type&quot;: &quot;string&quot; },
+                          &quot;needed_by&quot;: { &quot;type&quot;: &quot;string&quot; }, &quot;note&quot;: { &quot;type&quot;: &quot;string&quot; } },
+          &quot;required&quot;: [&quot;who_must_answer&quot;] }
+      ]
+    },
+
+    &quot;process&quot;: {
+      &quot;type&quot;: &quot;object&quot;,
+      &quot;required&quot;: [&quot;name&quot;, &quot;data_dictionary&quot;, &quot;remembered_between_visits&quot;, &quot;steps&quot;],
+      &quot;properties&quot;: {
+        &quot;name&quot;: { &quot;type&quot;: &quot;string&quot; },
+        &quot;data_dictionary&quot;: { &quot;type&quot;: &quot;array&quot;, &quot;items&quot;: { &quot;$ref&quot;: &quot;#/$defs/data_field&quot; } },
+        &quot;remembered_between_visits&quot;: {
+          &quot;description&quot;: &quot;What should the app remember about you between visits?&quot;,
+          &quot;$ref&quot;: &quot;#/$defs/answerable&quot;
+        },
+        &quot;steps&quot;: { &quot;type&quot;: &quot;array&quot;, &quot;minItems&quot;: 1, &quot;items&quot;: { &quot;$ref&quot;: &quot;#/$defs/step&quot; } }
+      }
+    },
+
+    &quot;data_field&quot;: {
+      &quot;type&quot;: &quot;object&quot;,
+      &quot;required&quot;: [&quot;name&quot;, &quot;holds&quot;],
+      &quot;properties&quot;: {
+        &quot;name&quot;: { &quot;type&quot;: &quot;string&quot; },
+        &quot;field_id&quot;: { &quot;type&quot;: &quot;string&quot; },
+        &quot;means&quot;: { &quot;description&quot;: &quot;What does this mean, in the words you would use to a client?&quot;, &quot;type&quot;: &quot;string&quot; },
+        &quot;holds&quot;: { &quot;enum&quot;: [&quot;one value&quot;, &quot;a list&quot;] },
+        &quot;periodicity&quot;: {
+          &quot;description&quot;: &quot;What point in time is this value as of?&quot;,
+          &quot;enum&quot;: [&quot;live&quot;, &quot;end of previous business day&quot;, &quot;end of previous month&quot;,
+                   &quot;latest closed period&quot;, &quot;on demand&quot;, &quot;reference / on change&quot;]
+        },
+        &quot;visible_when&quot;: { &quot;description&quot;: &quot;How long after that point can somebody see it?&quot;, &quot;type&quot;: &quot;string&quot; },
+        &quot;provenance&quot;: {
+          &quot;description&quot;: &quot;Who supplies it?&quot;,
+          &quot;enum&quot;: [&quot;held by us&quot;, &quot;a provider&quot;, &quot;the user&quot;, &quot;computed&quot;, &quot;nobody knows&quot;]
+        },
+        &quot;hero&quot;: { &quot;description&quot;: &quot;Is this number itself the product?&quot;, &quot;type&quot;: &quot;boolean&quot;, &quot;default&quot;: false },
+        &quot;unit&quot;: { &quot;type&quot;: &quot;string&quot; },
+        &quot;null_rule&quot;: { &quot;description&quot;: &quot;What appears when there is no value?&quot;, &quot;type&quot;: &quot;string&quot; },
+        &quot;stale_rule&quot;: { &quot;description&quot;: &quot;What appears when the value is older than it should be?&quot;, &quot;type&quot;: &quot;string&quot; },
+        &quot;source&quot;: { &quot;type&quot;: &quot;string&quot; },
+        &quot;calculated&quot;: { &quot;type&quot;: [&quot;boolean&quot;, &quot;null&quot;] },
+        &quot;calculation&quot;: { &quot;type&quot;: &quot;string&quot; },
+        &quot;derived_from&quot;: { &quot;type&quot;: &quot;array&quot;, &quot;items&quot;: { &quot;type&quot;: &quot;string&quot; } },
+        &quot;sensitivity&quot;: { &quot;type&quot;: &quot;string&quot; },
+        &quot;tolerance&quot;: { &quot;type&quot;: &quot;string&quot; },
+        &quot;evidence&quot;: { &quot;type&quot;: &quot;string&quot; },
+        &quot;sample&quot;: { &quot;type&quot;: &quot;string&quot; },
+        &quot;rung&quot;: { &quot;enum&quot;: [&quot;L0&quot;, &quot;L1&quot;, &quot;L2&quot;, &quot;L3&quot;] }
+      }
+    },
+
+    &quot;step&quot;: {
+      &quot;type&quot;: &quot;object&quot;,
+      &quot;required&quot;: [&quot;name&quot;, &quot;data&quot;, &quot;who_may_see_it&quot;, &quot;what_can_go_wrong&quot;, &quot;device_types&quot;],
+      &quot;properties&quot;: {
+        &quot;name&quot;: { &quot;type&quot;: &quot;string&quot; },
+        &quot;id&quot;: { &quot;type&quot;: &quot;string&quot; },
+        &quot;data&quot;: { &quot;description&quot;: &quot;Names from the data dictionary that this step uses.&quot;,
+                  &quot;type&quot;: &quot;array&quot;, &quot;items&quot;: { &quot;type&quot;: &quot;string&quot; } },
+        &quot;who_may_see_it&quot;: { &quot;description&quot;: &quot;Who may see this step, and what differs between them?&quot;,
+                            &quot;$ref&quot;: &quot;#/$defs/answerable&quot; },
+        &quot;what_can_go_wrong&quot;: {
+          &quot;description&quot;: &quot;What can go wrong, and what should happen then? Answer as you would notice it, not as causes.&quot;,
+          &quot;oneOf&quot;: [
+            { &quot;$ref&quot;: &quot;#/$defs/answerable&quot; },
+            { &quot;type&quot;: &quot;array&quot;, &quot;items&quot;: {
+                &quot;type&quot;: &quot;object&quot;,
+                &quot;required&quot;: [&quot;what_can_go_wrong&quot;, &quot;what_to_do_if_it_does&quot;],
+                &quot;properties&quot;: {
+                  &quot;what_can_go_wrong&quot;: { &quot;type&quot;: &quot;string&quot; },
+                  &quot;what_to_do_if_it_does&quot;: { &quot;type&quot;: &quot;string&quot; },
+                  &quot;who_is_told&quot;: { &quot;type&quot;: &quot;string&quot; }
+                } } }
+          ]
+        },
+        &quot;lists&quot;: {
+          &quot;description&quot;: &quot;One entry per piece of this step&#39;s data that holds a list.&quot;,
+          &quot;type&quot;: &quot;array&quot;,
+          &quot;items&quot;: {
+            &quot;type&quot;: &quot;object&quot;,
+            &quot;required&quot;: [&quot;data_name&quot;],
+            &quot;properties&quot;: {
+              &quot;data_name&quot;: { &quot;type&quot;: &quot;string&quot; },
+              &quot;ordering&quot;: { &quot;description&quot;: &quot;What order does this list appear in?&quot;, &quot;$ref&quot;: &quot;#/$defs/answerable&quot; },
+              &quot;filtering_and_grouping&quot;: { &quot;description&quot;: &quot;How may it be filtered or grouped?&quot;, &quot;$ref&quot;: &quot;#/$defs/answerable&quot; },
+              &quot;items_can_be_selected&quot;: { &quot;description&quot;: &quot;Can items be picked out, and what happens then?&quot;, &quot;$ref&quot;: &quot;#/$defs/answerable&quot; },
+              &quot;how_deep_it_nests&quot;: { &quot;description&quot;: &quot;Does anything sit inside anything else, and how deep?&quot;, &quot;$ref&quot;: &quot;#/$defs/answerable&quot; }
+            }
+          }
+        },
+        &quot;device_types&quot;: { &quot;type&quot;: &quot;array&quot;, &quot;minItems&quot;: 1, &quot;items&quot;: { &quot;$ref&quot;: &quot;#/$defs/device_type&quot; } }
+      }
+    },
+
+    &quot;device_type&quot;: {
+      &quot;description&quot;: &quot;Desktop, phone, voice assistant, or anything else this step has to work on.&quot;,
+      &quot;type&quot;: &quot;object&quot;,
+      &quot;required&quot;: [&quot;name&quot;, &quot;changes_while_being_looked_at&quot;, &quot;device_steps&quot;],
+      &quot;properties&quot;: {
+        &quot;name&quot;: { &quot;type&quot;: &quot;string&quot; },
+        &quot;changes_while_being_looked_at&quot;: {
+          &quot;description&quot;: &quot;Does anything change while somebody is looking at it, how are they told, and what if they are mid-action?&quot;,
+          &quot;$ref&quot;: &quot;#/$defs/answerable&quot;
+        },
+        &quot;list_behaviour&quot;: {
+          &quot;type&quot;: &quot;array&quot;,
+          &quot;items&quot;: {
+            &quot;type&quot;: &quot;object&quot;,
+            &quot;required&quot;: [&quot;data_name&quot;],
+            &quot;properties&quot;: {
+              &quot;data_name&quot;: { &quot;type&quot;: &quot;string&quot; },
+              &quot;when_it_holds_nothing&quot;: { &quot;description&quot;: &quot;What appears when the list is empty?&quot;, &quot;$ref&quot;: &quot;#/$defs/answerable&quot; },
+              &quot;when_it_holds_one_thing&quot;: { &quot;description&quot;: &quot;What appears when there is only one?&quot;, &quot;$ref&quot;: &quot;#/$defs/answerable&quot; },
+              &quot;when_it_holds_more_than_fits&quot;: { &quot;description&quot;: &quot;What appears when there are more than fit here?&quot;, &quot;$ref&quot;: &quot;#/$defs/answerable&quot; }
+            }
+          }
+        },
+        &quot;device_steps&quot;: { &quot;type&quot;: &quot;array&quot;, &quot;minItems&quot;: 1, &quot;items&quot;: { &quot;$ref&quot;: &quot;#/$defs/device_step&quot; } }
+      }
+    },
+
+    &quot;device_step&quot;: {
+      &quot;description&quot;: &quot;One screen, or one prompt.&quot;,
+      &quot;type&quot;: &quot;object&quot;,
+      &quot;required&quot;: [&quot;name&quot;],
+      &quot;properties&quot;: {
+        &quot;name&quot;: { &quot;type&quot;: &quot;string&quot; },
+        &quot;page_id&quot;: { &quot;description&quot;: &quot;The mockument page representing this device step.&quot;, &quot;type&quot;: &quot;string&quot; },
+        &quot;output_fields&quot;: { &quot;type&quot;: &quot;array&quot;, &quot;items&quot;: { &quot;type&quot;: &quot;string&quot; } },
+        &quot;input_fields&quot;: { &quot;type&quot;: &quot;array&quot;, &quot;items&quot;: { &quot;type&quot;: &quot;string&quot; } },
+        &quot;controls&quot;: { &quot;type&quot;: &quot;array&quot;, &quot;items&quot;: { &quot;$ref&quot;: &quot;#/$defs/control&quot; } }
+      }
+    },
+
+    &quot;control&quot;: {
+      &quot;type&quot;: &quot;object&quot;,
+      &quot;required&quot;: [&quot;name&quot;, &quot;effect&quot;],
+      &quot;properties&quot;: {
+        &quot;id&quot;: { &quot;type&quot;: &quot;string&quot; },
+        &quot;name&quot;: { &quot;type&quot;: &quot;string&quot; },
+        &quot;effect&quot;: { &quot;enum&quot;: [&quot;acts on data&quot;, &quot;alters the device-step&quot;, &quot;both&quot;] },
+        &quot;uses_data_only_the_server_knows&quot;: { &quot;type&quot;: &quot;boolean&quot; },
+        &quot;leads_to&quot;: { &quot;type&quot;: &quot;string&quot; },
+        &quot;confirm_or_undo&quot;: { &quot;type&quot;: &quot;string&quot; },
+        &quot;status&quot;: { &quot;$ref&quot;: &quot;#/$defs/status&quot; },
+        &quot;trace&quot;: { &quot;type&quot;: &quot;string&quot; }
+      }
+    },
+
+    &quot;question&quot;: {
+      &quot;type&quot;: &quot;object&quot;,
+      &quot;required&quot;: [&quot;id&quot;, &quot;question&quot;, &quot;who_must_answer&quot;],
+      &quot;properties&quot;: {
+        &quot;id&quot;: { &quot;type&quot;: &quot;string&quot; },
+        &quot;question&quot;: { &quot;type&quot;: &quot;string&quot; },
+        &quot;why_it_matters&quot;: { &quot;type&quot;: &quot;string&quot; },
+        &quot;blocks&quot;: { &quot;type&quot;: &quot;string&quot; },
+        &quot;blocks_build&quot;: { &quot;type&quot;: &quot;boolean&quot;, &quot;default&quot;: false },
+        &quot;who_must_answer&quot;: { &quot;type&quot;: &quot;string&quot; },
+        &quot;needed_by&quot;: { &quot;type&quot;: &quot;string&quot; },
+        &quot;affects&quot;: { &quot;type&quot;: &quot;array&quot;, &quot;items&quot;: { &quot;type&quot;: &quot;string&quot; } }
+      }
+    },
+
+    &quot;page_spec&quot;: {
+      &quot;description&quot;: &quot;One page of the app, represented and specified.&quot;,
+      &quot;type&quot;: &quot;object&quot;,
+      &quot;required&quot;: [&quot;id&quot;, &quot;name&quot;, &quot;represents&quot;, &quot;purpose&quot;, &quot;available_to&quot;, &quot;elements&quot;],
+      &quot;properties&quot;: {
+        &quot;id&quot;: { &quot;type&quot;: &quot;string&quot; },
+        &quot;name&quot;: { &quot;type&quot;: &quot;string&quot; },
+        &quot;route&quot;: { &quot;type&quot;: &quot;string&quot; },
+        &quot;build_status&quot;: { &quot;enum&quot;: [&quot;new&quot;, &quot;modify&quot;, &quot;existing&quot;] },
+        &quot;version&quot;: { &quot;type&quot;: &quot;string&quot; },
+        &quot;updated&quot;: { &quot;type&quot;: &quot;string&quot; },
+        &quot;owner&quot;: { &quot;type&quot;: &quot;string&quot; },
+        &quot;represents&quot;: {
+          &quot;type&quot;: &quot;object&quot;,
+          &quot;required&quot;: [&quot;process&quot;, &quot;step&quot;],
+          &quot;properties&quot;: {
+            &quot;process&quot;: { &quot;type&quot;: &quot;string&quot; },
+            &quot;step&quot;: { &quot;type&quot;: &quot;string&quot; },
+            &quot;step_id&quot;: { &quot;type&quot;: &quot;string&quot; },
+            &quot;device_types&quot;: { &quot;type&quot;: &quot;array&quot;, &quot;items&quot;: { &quot;type&quot;: &quot;string&quot; } }
+          }
+        },
+        &quot;purpose&quot;: { &quot;type&quot;: &quot;string&quot; },
+        &quot;available_to&quot;: {
+          &quot;type&quot;: &quot;array&quot;, &quot;minItems&quot;: 1,
+          &quot;items&quot;: {
+            &quot;type&quot;: &quot;object&quot;,
+            &quot;required&quot;: [&quot;role&quot;],
+            &quot;properties&quot;: {
+              &quot;role&quot;: { &quot;type&quot;: &quot;string&quot; },
+              &quot;may_reach&quot;: { &quot;type&quot;: &quot;boolean&quot;, &quot;default&quot;: true },
+              &quot;differs&quot;: { &quot;type&quot;: &quot;string&quot; },
+              &quot;must_not_see&quot;: { &quot;type&quot;: &quot;string&quot; }
+            }
+          }
+        },
+        &quot;elements&quot;: {
+          &quot;type&quot;: &quot;array&quot;,
+          &quot;items&quot;: {
+            &quot;type&quot;: &quot;object&quot;,
+            &quot;required&quot;: [&quot;id&quot;, &quot;name&quot;, &quot;status&quot;],
+            &quot;properties&quot;: {
+              &quot;id&quot;: { &quot;type&quot;: &quot;string&quot; },
+              &quot;name&quot;: { &quot;type&quot;: &quot;string&quot; },
+              &quot;shows&quot;: { &quot;type&quot;: &quot;string&quot; },
+              &quot;source&quot;: { &quot;type&quot;: &quot;string&quot; },
+              &quot;status&quot;: { &quot;$ref&quot;: &quot;#/$defs/status&quot; },
+              &quot;trace&quot;: { &quot;type&quot;: &quot;string&quot; },
+              &quot;note&quot;: { &quot;type&quot;: &quot;string&quot; },
+              &quot;roles&quot;: { &quot;type&quot;: &quot;array&quot;, &quot;items&quot;: { &quot;type&quot;: &quot;string&quot; } },
+              &quot;questions&quot;: { &quot;type&quot;: &quot;array&quot;, &quot;items&quot;: { &quot;type&quot;: &quot;string&quot; } }
+            }
+          }
+        },
+        &quot;controls&quot;: { &quot;type&quot;: &quot;array&quot;, &quot;items&quot;: { &quot;$ref&quot;: &quot;#/$defs/control&quot; } },
+        &quot;data&quot;: { &quot;type&quot;: &quot;array&quot;, &quot;items&quot;: { &quot;$ref&quot;: &quot;#/$defs/data_field&quot; } },
+        &quot;states&quot;: {
+          &quot;type&quot;: &quot;array&quot;,
+          &quot;items&quot;: {
+            &quot;type&quot;: &quot;object&quot;,
+            &quot;required&quot;: [&quot;key&quot;],
+            &quot;properties&quot;: {
+              &quot;key&quot;: { &quot;enum&quot;: [&quot;default&quot;, &quot;empty&quot;, &quot;one&quot;, &quot;overflow&quot;, &quot;loading&quot;, &quot;error&quot;, &quot;restricted&quot;] },
+              &quot;label&quot;: { &quot;type&quot;: &quot;string&quot; },
+              &quot;when&quot;: { &quot;type&quot;: &quot;string&quot; },
+              &quot;sees&quot;: { &quot;type&quot;: &quot;string&quot; },
+              &quot;next&quot;: { &quot;type&quot;: &quot;string&quot; }
+            }
+          }
+        },
+        &quot;failures&quot;: {
+          &quot;type&quot;: &quot;array&quot;,
+          &quot;items&quot;: {
+            &quot;type&quot;: &quot;object&quot;,
+            &quot;required&quot;: [&quot;noticed&quot;],
+            &quot;properties&quot;: {
+              &quot;noticed&quot;: { &quot;description&quot;: &quot;What can go wrong, as the person would notice it?&quot;, &quot;type&quot;: &quot;string&quot; },
+              &quot;then_what&quot;: { &quot;type&quot;: &quot;string&quot; },
+              &quot;who_is_told&quot;: { &quot;type&quot;: &quot;string&quot; }
+            }
+          }
+        },
+        &quot;remembered&quot;: { &quot;$ref&quot;: &quot;#/$defs/answerable&quot; },
+        &quot;live_change&quot;: { &quot;$ref&quot;: &quot;#/$defs/answerable&quot; },
+        &quot;copy&quot;: {
+          &quot;type&quot;: &quot;array&quot;,
+          &quot;items&quot;: {
+            &quot;type&quot;: &quot;object&quot;,
+            &quot;required&quot;: [&quot;key&quot;, &quot;string&quot;, &quot;status&quot;],
+            &quot;properties&quot;: {
+              &quot;key&quot;: { &quot;type&quot;: &quot;string&quot; },
+              &quot;string&quot;: { &quot;type&quot;: &quot;string&quot; },
+              &quot;status&quot;: { &quot;enum&quot;: [&quot;required wording&quot;, &quot;placeholder&quot;] },
+              &quot;note&quot;: { &quot;type&quot;: &quot;string&quot; }
+            }
+          }
+        },
+        &quot;decisions&quot;: {
+          &quot;type&quot;: &quot;array&quot;,
+          &quot;items&quot;: {
+            &quot;type&quot;: &quot;object&quot;,
+            &quot;required&quot;: [&quot;what&quot;, &quot;who&quot;, &quot;when&quot;],
+            &quot;properties&quot;: { &quot;what&quot;: { &quot;type&quot;: &quot;string&quot; }, &quot;who&quot;: { &quot;type&quot;: &quot;string&quot; }, &quot;when&quot;: { &quot;type&quot;: &quot;string&quot; } }
+          }
+        },
+        &quot;observations&quot;: {
+          &quot;type&quot;: &quot;array&quot;,
+          &quot;items&quot;: {
+            &quot;type&quot;: &quot;object&quot;,
+            &quot;required&quot;: [&quot;what&quot;],
+            &quot;properties&quot;: { &quot;what&quot;: { &quot;type&quot;: &quot;string&quot; }, &quot;raised_by&quot;: { &quot;type&quot;: &quot;string&quot; }, &quot;when&quot;: { &quot;type&quot;: &quot;string&quot; } }
+          }
+        },
+        &quot;questions&quot;: { &quot;type&quot;: &quot;array&quot;, &quot;items&quot;: { &quot;$ref&quot;: &quot;#/$defs/question&quot; } },
+        &quot;out_of_scope&quot;: {
+          &quot;type&quot;: &quot;array&quot;,
+          &quot;items&quot;: {
+            &quot;type&quot;: &quot;object&quot;,
+            &quot;required&quot;: [&quot;what&quot;],
+            &quot;properties&quot;: { &quot;what&quot;: { &quot;type&quot;: &quot;string&quot; }, &quot;why&quot;: { &quot;type&quot;: &quot;string&quot; } }
+          }
+        },
+        &quot;contract&quot;: {
+          &quot;type&quot;: &quot;object&quot;,
+          &quot;properties&quot;: {
+            &quot;must&quot;: { &quot;type&quot;: &quot;array&quot;, &quot;items&quot;: { &quot;type&quot;: &quot;string&quot; } },
+            &quot;must_not_invent&quot;: { &quot;type&quot;: &quot;array&quot;, &quot;items&quot;: { &quot;type&quot;: &quot;string&quot; } },
+            &quot;ask_first&quot;: { &quot;type&quot;: &quot;array&quot;, &quot;items&quot;: { &quot;type&quot;: &quot;string&quot; } },
+            &quot;acceptance&quot;: { &quot;type&quot;: &quot;array&quot;, &quot;items&quot;: { &quot;type&quot;: &quot;string&quot; } }
+          }
+        }
+      }
+    }
+  }
+}
+</code></pre>
+<h3 id="the-gates-expressed-as-checks">The gates, expressed as checks</h3><table>
+<thead>
+<tr>
+<th>Gate</th>
+<th>Fails when</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1</td>
+<td><code>represents.step</code> empty · any element or control without <code>status</code> · any question without <code>who_must_answer</code> · empty <code>purpose</code></td>
+</tr>
+<tr>
+<td>2</td>
+<td>anything in gate 1 · empty <code>available_to</code> · <code>empty</code> / <code>error</code> / <code>restricted</code> missing from <code>states</code> · any state without <code>sees</code> · empty <code>failures</code> · any data field below <strong>L0</strong> · any <code>hero</code> field below <strong>L2</strong> · any <code>periodicity</code> outside the vocabulary</td>
+</tr>
+<tr>
+<td>3</td>
+<td>anything in gates 1 and 2 · any question with <code>blocks_build</code> still open · any element with status <code>unanswered</code> · any element without <code>trace</code> · <code>remembered</code> or <code>live_change</code> not answered · any copy entry still <code>placeholder</code> · any data field below <strong>L2</strong></td>
+</tr>
+</tbody></table>
+<h2 id="31-glossary">31. Glossary</h2><p><strong>As of</strong> — the point in time a value describes, as distinct from when it was fetched or displayed.</p>
+<p><strong>Build contract</strong> — the instruction block on each page telling an implementer what to build, what not
+to invent, what to ask about first, and what done means.</p>
+<p><strong>Device step</strong> — one screen or one prompt: how a step appears on one device type.</p>
+<p><strong>Device type</strong> — desktop, phone, voice assistant, or anything else a step has to work on.</p>
+<p><strong>Gate</strong> — a computed readiness check. Three of them: walk-through, business review, implementation.</p>
+<p><strong>Hero field</strong> — a number that is itself the product, and must be defined to L2 while the mockument is
+still being drawn.</p>
+<p><strong>Honesty overlay</strong> — a control that tints the mock frame by status, showing at a glance how much of a
+screen is actually agreed.</p>
+<p><strong>Mock frame</strong> — the navigable representation of one page inside a mockument page, with its device,
+role, state and overlay controls.</p>
+<p><strong>Mockument</strong> — half mock-up, half document: a navigable representation of an app in which every
+visible thing carries what backs it, who owes the missing answer, and whether it is ready to build.</p>
+<p><strong>Observation</strong> — something learned by walking through. Not a decision and not a requirement.</p>
+<p><strong>Periodicity</strong> — which of the agreed fixed answers describes what a value is <em>as of</em>.</p>
+<p><strong>Proposal</strong> — a representational choice made so the mockument can be experienced, awaiting acceptance.</p>
+<p><strong>Provenance</strong> — who supplies a field: held by us, a provider, the user, computed, or nobody knows.</p>
+<p><strong>Represented element</strong> — anything in a mockument a person can see, hear, enter, select or activate.</p>
+<p><strong>Rung</strong> — how far a field has been taken: L0 exists, L1 display, L2 sourced, L3 verified.</p>
+<p><strong>Stale rule</strong> — what a screen shows when a value is older than it should be. Distinct from the null
+rule.</p>
+<p><strong>Status</strong> — one of: required, proposed, unanswered, observed, out of scope.</p>
+<p><strong>Step</strong> — a unit of work that stays the same across devices; the thing that holds business meaning.</p>
+<p><strong>Translation bundle</strong> — the set of files generated from a mockument page in the shapes the target
+framework expects. A translator, never a designer. See the Annex.</p>
+<p><strong>Unanswered</strong> — a decision that has not been made, recorded with the name of whoever must make it.</p>
+<hr>
+<hr>
+<h1 id="annex--the-translation-bundle">Annex · The translation bundle</h1><h2 id="32-what-the-bundle-is">32. What the bundle is</h2><p>The method stops at the third gate: the business questions are closed, and an implementer can start.
+The bundle is what makes that last step mechanical rather than a retyping exercise. One command reads a
+mockument page and writes out the same content in the shapes the target framework expects — components,
+page surfaces, wiring, display formats, test scenarios and fixtures.</p>
+<p>It is a <strong>translator, not a designer</strong>. It adds nothing. Every line it writes is either already in the
+page&#39;s structured record, or an explicit note that the record does not answer it, naming the person who
+must. A silence stays a silence, in the builder&#39;s own file format.</p>
+<p>That distinction is the whole reason it can be trusted to run unattended. A generator that fills gaps
+with plausible defaults would undo the method in a single command.</p>
+<h2 id="33-what-it-emits">33. What it emits</h2><p>Per page, into a <code>handoff/&lt;page&gt;/</code> folder:</p>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>What it holds</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>components/…/manifest.json</code></td>
+<td>One folder per element: its name, tier, <code>data-component</code> value and parameters, in the framework&#39;s component format.</td>
+</tr>
+<tr>
+<td><code>components/…/&lt;block&gt;.html</code> · <code>&lt;block&gt;.css</code></td>
+<td>The template and the namespaced stylesheet, carrying the element&#39;s ID and status as comments so the origin travels with the code.</td>
+</tr>
+<tr>
+<td><code>components/…/style.json</code></td>
+<td>For organisms: the CSS custom properties the component references, <strong>declared with descriptions and no values</strong> — values belong to the theme, not to the component.</td>
+</tr>
+<tr>
+<td><code>components/…/provenance.json</code></td>
+<td>Which element the component came from, its status, what it traces to, its open questions, and which parts of the manifest were inferred rather than specified.</td>
+</tr>
+<tr>
+<td><code>page/page.py</code> · <code>page/page.html</code></td>
+<td>The page scaffold: declared surfaces including the notification zone, the role list, the state list, and the includes and wiring the page emits.</td>
+</tr>
+<tr>
+<td><code>page/routes.py</code></td>
+<td>A stub for every control that needs data only the server knows.</td>
+</tr>
+<tr>
+<td><code>wiring.md</code></td>
+<td>Every control, what it becomes, what it targets, and whether its destination exists.</td>
+</tr>
+<tr>
+<td><code>format.md</code></td>
+<td>Display attributes derived from the data ladder&#39;s L1 rung, and the fields still below it.</td>
+</tr>
+<tr>
+<td><code>features/&lt;page&gt;.feature</code></td>
+<td>Scenarios generated from states × roles, plus one per user-noticed failure.</td>
+</tr>
+<tr>
+<td><code>fixtures.json</code></td>
+<td>The sample values the mock draws, so the built page can boot showing the same data.</td>
+</tr>
+<tr>
+<td><code>contract.md</code></td>
+<td>The build contract from the page, verbatim.</td>
+</tr>
+<tr>
+<td><code>unresolved.md</code></td>
+<td>Everything a builder may not invent. The first file to read.</td>
+</tr>
+</tbody></table>
+<p>Two of these earn their place immediately. <strong><code>wiring.md</code></strong> predicts, before any code exists, which
+controls point at destinations that do not: a control whose target page has not been drawn is a wire
+that reaches nowhere, and the framework&#39;s own gate will refuse it. <strong><code>unresolved.md</code></strong> is the page&#39;s
+silences collected in one place — blocking questions with owners and dates, elements that are proposed
+or unanswered, fields below the sourced rung, and copy still marked placeholder.</p>
+<h2 id="34-how-a-mockument-maps-onto-the-framework">34. How a mockument maps onto the framework</h2><table>
+<thead>
+<tr>
+<th>The mockument answers</th>
+<th>The framework consumes it as</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Elements, and the shared component register</td>
+<td>Components — atoms, molecules and organisms, each owning its own prefix and <code>data-component</code> name</td>
+</tr>
+<tr>
+<td>A control&#39;s business effect</td>
+<td>Page wiring. <em>Acts on data</em> → a route on an organism. <em>Alters the screen</em> → client state functions, no route. <em>Both</em> → both</td>
+</tr>
+<tr>
+<td>Whether a control needs data only the server knows</td>
+<td>The tier itself: it cannot be an atom or a molecule</td>
+</tr>
+<tr>
+<td>The <strong>L1</strong> rung — unit, null rule, stale rule</td>
+<td>Display attributes on the element that holds the value, which is the single place its display is decided</td>
+</tr>
+<tr>
+<td>The <strong>L2</strong> rung — source, calculation, dependencies</td>
+<td>The typed boundary where raw request values are classified, and the persistence behind it</td>
+</tr>
+<tr>
+<td>States × roles, and the failures table</td>
+<td>Generated test scenarios</td>
+</tr>
+<tr>
+<td>&quot;Who is told&quot; in the failures table</td>
+<td>Messages routed to the page&#39;s notification surface</td>
+</tr>
+<tr>
+<td>Who may see it</td>
+<td>The authorisation layer</td>
+</tr>
+<tr>
+<td>The copy register</td>
+<td>Template strings, with <em>placeholder</em> as a lint rather than a shipped decision</td>
+</tr>
+</tbody></table>
+<p>The mapping is what changes between ecosystems; the content being mapped does not. A mockument written
+once can be emitted for whichever stack the project actually uses.</p>
+<h2 id="35-what-the-emitter-infers-and-marks">35. What the emitter infers, and marks</h2><p>Three things cannot be read directly from the page, so the emitter proposes them and records that it
+did — each one appears in <code>unresolved.md</code> and in each component&#39;s <code>provenance.json</code>:</p>
+<ol>
+<li><strong>Component tier.</strong> Inferred from whether an element carries a collection and whether it needs a
+source. Confirm before building.</li>
+<li><strong>Route paths and ownership.</strong> Paths are proposed from the control&#39;s name. Which organism owns which
+route is genuinely not answered by the mockument, and is left open rather than assigned.</li>
+<li><strong>Style token names.</strong> A small standard set per component. The values are absent by design.</li>
+</ol>
+<p>Nothing else is inferred. If a fourth guess ever becomes necessary, it belongs in this list before it
+belongs in the output.</p>
+<h2 id="36-what-it-refuses-to-do">36. What it refuses to do</h2><p>It will not choose a colour or a density. It will not invent a display format for a field that has not
+reached the display rung. It will not name a currency or a date format nobody has chosen. It will not
+decide whether a page updates while somebody is looking at it. It will not turn a placeholder string
+into product copy.</p>
+<p>Each of those refusals appears in the output as a marked gap with an owner, which is the same behaviour
+the method asks of a person drawing a page.</p>
+<h2 id="37-running-it">37. Running it</h2><p>One command writes the whole bundle; a flag limits it to a single page. <strong>Regenerate it; never edit
+it.</strong> The bundle is a projection of the mockument, in the same way the readable specification is a
+projection of the structured record — editing the projection puts the two out of step and quietly
+recreates the problem the method exists to remove.</p>
+<p>Where a project has adopted a design language, the only human input the bundle needs before code is
+written is the set of values for the custom properties each component declares. That is a values file,
+not a design phase, and it is written once per product rather than once per page.</p>
+<h2 id="38-two-gates-in-series">38. Two gates in series</h2><p>The result is two checks that ask different questions of the same work.</p>
+<p>The <strong>mockument gate</strong> asks <em>did anybody decide this</em> — is every element backed, does every question
+have an owner, has the data reached the rung this stage requires. It is about silence.</p>
+<p>The <strong>framework gate</strong> asks <em>does this resolve</em> — does every reference the page emits point at
+something that exists, does every chain type-check, does every dispatch resolve. It is about structure.</p>
+<p>Neither can answer the other&#39;s question, and a project needs both. A screen can be perfectly wired and
+built entirely out of things nobody asked for; a page can be fully agreed and wired to a route that was
+never mounted. Run them in that order — decide, then resolve — and there is no gap between the two
+where an invention can hide.</p>
+<p><em>A mockument is finished when the difference between what was required, what was proposed, what was
+observed and what nobody has answered survives all the way from the first interview to the built
+product. Nothing else in this document matters more than that.</em></p>
+</main>
+</div>
+<script>
+(function(){
+  var CYCLE=['system','dark','light'], html=document.documentElement, btn=document.getElementById('themeToggle');
+  function sys(){return window.matchMedia('(prefers-color-scheme: light)').matches?'light':'dark';}
+  function apply(m){var e=m==='system'?sys():m;html.classList.toggle('light',e==='light');
+    btn.querySelectorAll('svg').forEach(function(s){s.classList.remove('icon-active');});
+    var map={system:'icon-system',dark:'icon-moon',light:'icon-sun'};
+    var i=btn.querySelector('.'+map[m]); if(i) i.classList.add('icon-active'); btn.title='Theme: '+m;}
+  var st=localStorage.getItem('spec-theme')||'system'; apply(st);
+  btn.addEventListener('click',function(){var c=localStorage.getItem('spec-theme')||'system';
+    var n=CYCLE[(CYCLE.indexOf(c)+1)%CYCLE.length];
+    n==='system'?localStorage.removeItem('spec-theme'):localStorage.setItem('spec-theme',n); apply(n);});
+  var links=[].slice.call(document.querySelectorAll('.doc-nav-link'));
+  var heads=links.map(function(l){return document.getElementById(l.getAttribute('href').slice(1));}).filter(Boolean);
+  window.addEventListener('scroll',function(){
+    var y=window.scrollY+90, cur=0;
+    heads.forEach(function(h,i){ if(h.offsetTop<=y) cur=i; });
+    links.forEach(function(l,i){ l.classList.toggle('is-active', i===cur); });
+  },{passive:true});
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Approvals — mockument page</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="assets/spec.css" />
+<script>(function(){var s=localStorage.getItem('spec-theme')||'system';var t=s==='system'?(window.matchMedia('(prefers-color-scheme:light)').matches?'light':'dark'):s;if(t==='light')document.documentElement.classList.add('light');})();</script>
+</head>
+<body>
+<header class="topbar" id="topbar"></header>
+
+<div class="shell">
+  <aside class="sidebar" id="sidebar"></aside>
+
+  <main class="main">
+    <div id="page-head"></div>
+
+    <!-- ═══ BLOCK 05–06 · THE MOCK FRAME ═════════════════════════════════ -->
+    <section class="block" id="mock-block">
+      <div class="block-head">
+        <span class="block-num">05</span>
+        <span class="block-title">The mock frame</span>
+        <span class="block-for">walk it — do not read it</span>
+      </div>
+      <p class="block-note">Click any part to see what backs it. Switch device, role and state above. Turn on the
+        honesty overlay to see, in one glance, how much of this screen is actually agreed. Links inside the frame go
+        where they would go in the real app.</p>
+
+      <div class="mock-shell" id="mock">
+        <div class="mock-controls"></div>
+        <div class="mock-stage" data-device="desktop">
+          <div id="role-note"></div>
+          <div id="state-note"></div>
+
+          <!-- ── desktop · default ───────────────────────────────────── -->
+          <div class="mock-view is-on" data-device="desktop" data-state="default">
+            <div class="wf">
+              <div class="wf-row">
+                <nav class="wf-menu">
+                  <a href="page-home.html">Home</a>
+                  <a href="page-requests.html">Requests</a>
+                  <a class="is-on" href="page-approvals.html">Approvals</a>
+                  <a href="page-reports.html">Reports</a>
+                  <a href="page-settings.html">Settings</a>
+                </nav>
+
+                <div class="wf-col wf-pad">
+                  <div class="wf-box" data-el="EL-01">
+                    <div class="wf-label">Page header</div>
+                    <div class="wf-strong">A. Rivera · Operations queue</div>
+                  </div>
+
+                  <div class="wf-box" data-el="EL-10" data-roles="Team lead, Auditor">
+                    <div class="wf-label">Queue switcher</div>
+                    <div class="wf-text">▾ Operations · A. Rivera &nbsp;&nbsp; <span class="wf-chip">team view</span></div>
+                  </div>
+
+                  <div class="wf-box" data-el="EL-02">
+                    <div class="wf-label">Stat strip · shared component CMP-01</div>
+                    <div class="wf-row">
+                      <div class="wf-tile"><div class="wf-label">Overdue</div><div class="wf-num">12</div><div class="wf-text">$1.3M waiting</div></div>
+                      <div class="wf-tile"><div class="wf-label">Due today</div><div class="wf-num">27</div><div class="wf-text">$2.6M waiting</div></div>
+                      <div class="wf-tile"><div class="wf-label">With someone else</div><div class="wf-num">43</div><div class="wf-text">$0.9M waiting</div></div>
+                      <div class="wf-tile"><div class="wf-label">All waiting</div><div class="wf-num">82</div><div class="wf-text">$4.8M · 6 queues</div></div>
+                    </div>
+                  </div>
+
+                  <div class="wf-row">
+                    <span class="wf-tab is-on" data-el="CTL-01" data-mock-tab="pane-queue">Queue</span>
+                    <span class="wf-tab" data-el="CTL-02" data-mock-tab="pane-rules">Rules</span>
+                  </div>
+
+                  <!-- pane: queue -->
+                  <div class="wf-pane is-on" id="pane-queue">
+                    <div class="wf-box">
+                      <div class="wf-row" style="gap:8px;align-items:center">
+                        <span class="wf-chip" data-el="CTL-07">search</span>
+                        <span class="wf-chip" data-el="CTL-06">Waiting · All · Decided</span>
+                        <span class="wf-chip" data-el="CTL-11">Saved views ▾</span>
+                        <span class="wf-chip" data-el="CTL-10" data-roles="Auditor">Export</span>
+                      </div>
+                    </div>
+                    <div class="wf-box" data-el="EL-07" style="margin-top:10px">
+                      <div class="wf-label">Waiting for a decision</div>
+                      <table class="wf-table">
+                        <thead><tr><th>Priority</th><th>Request</th><th>Raised by</th><th>Waiting</th><th>Amount</th><th></th></tr></thead>
+                        <tbody>
+                          <tr><td>High</td><td>New supplier — Halden Ltd</td><td>K. Adeyemi</td><td>3 days</td><td>$412,000</td><td><span class="wf-chip" data-el="CTL-08">open</span></td></tr>
+                          <tr><td>Medium</td><td>Contract renewal — Sable</td><td>M. Duarte</td><td>5 days</td><td>$88,400</td><td><span class="wf-chip">open</span></td></tr>
+                          <tr><td>Low</td><td>Equipment — 12 units</td><td>P. Lindqvist</td><td>9 days</td><td>$14,900</td><td><span class="wf-chip">open</span></td></tr>
+                        </tbody>
+                      </table>
+                    </div>
+                    <div class="wf-box" data-el="EL-08" style="margin-top:10px">
+                      <div class="wf-label">Request panel · opens over the list</div>
+                      <div class="wf-strong">High · New supplier — Halden Ltd · $412,000</div>
+                      <div class="wf-bar wf-bar--lg"></div>
+                      <div class="wf-bar wf-bar--md"></div>
+                      <div class="wf-box" data-el="EL-09" style="margin-top:8px"><div class="wf-label">Decision note (required)</div><div class="wf-bar wf-bar--lg"></div></div>
+                      <div class="wf-box" data-el="EL-11" style="margin-top:8px"><div class="wf-label">Auto note when a second approval completes</div><div class="wf-text">“Second approval recorded” — exact wording not decided</div></div>
+                      <div class="wf-row" style="gap:8px;margin-top:8px;align-items:center">
+                        <span class="wf-chip" data-el="CTL-09" data-roles="Approver, Team lead">Record decision</span>
+                        <a class="wf-chip" href="page-requests.html" data-el="EL-12">→ second approval record</a>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- pane: rules -->
+                  <div class="wf-pane" id="pane-rules">
+                    <div class="wf-row">
+                      <div class="wf-col" style="max-width:300px">
+                        <div class="wf-box" data-el="CTL-03">
+                          <div class="wf-label">Search rules</div><div class="wf-bar wf-bar--lg"></div>
+                        </div>
+                        <div class="wf-box" data-el="EL-03">
+                          <div class="wf-label">Routing rules · grouped by priority</div>
+                          <div class="wf-text"><b>High</b></div>
+                          <div class="wf-row" style="align-items:center;gap:6px;margin:4px 0">
+                            <span class="wf-chip" data-el="CTL-04">on</span><span class="wf-bar wf-bar--md" style="flex:1"></span>
+                          </div>
+                          <div class="wf-row" style="align-items:center;gap:6px;margin:4px 0">
+                            <span class="wf-chip">locked</span><span class="wf-bar wf-bar--lg" style="flex:1"></span>
+                          </div>
+                          <div class="wf-text" style="margin-top:8px"><b>Medium</b></div>
+                          <div class="wf-bar wf-bar--md"></div>
+                          <div class="wf-bar wf-bar--sm"></div>
+                          <div class="wf-box" data-el="EL-04" style="margin-top:8px">
+                            <div class="wf-label">Selected rule</div>
+                            <div class="wf-text">Applies to: <span class="wf-chip" data-el="CTL-05">Purchases ▾</span> · Threshold: $250k · Second approval: yes · Matched 6× in 90 days</div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div class="wf-col">
+                        <div class="wf-box" data-el="EL-05">
+                          <div class="wf-label">What this rule does</div>
+                          <div class="wf-strong">Anything above $250,000 needs a second approval before it can be decided</div>
+                        </div>
+                        <div class="wf-box" data-el="EL-06">
+                          <div class="wf-label">Requests matched, largest first · heat map over 90 days</div>
+                          <table class="wf-table">
+                            <thead><tr><th>Requester</th><th>Amount</th><th>Trailing 90 days</th></tr></thead>
+                            <tbody>
+                              <tr><td>K. Adeyemi</td><td>$412,000</td><td>▯▯▮▯▯▮▯▯▯▯▯▯</td></tr>
+                              <tr><td>M. Duarte</td><td>$268,000</td><td>▯▯▯▯▯▯▯▮▯▯▯▯</td></tr>
+                              <tr><td>S. Bianchi</td><td>$251,500</td><td>▯▯▯▯▯▯▯▯▯▯▯▯</td></tr>
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ── desktop · empty ─────────────────────────────────────── -->
+          <div class="mock-view" data-device="desktop" data-state="empty">
+            <div class="wf wf-pad">
+              <div class="wf-box" data-el="EL-01"><div class="wf-label">Page header</div><div class="wf-strong">A. Rivera · Operations queue</div></div>
+              <div class="wf-box" data-el="EL-02" style="margin-top:10px">
+                <div class="wf-row">
+                  <div class="wf-tile"><div class="wf-label">Overdue</div><div class="wf-num">0</div></div>
+                  <div class="wf-tile"><div class="wf-label">Due today</div><div class="wf-num">0</div></div>
+                  <div class="wf-tile"><div class="wf-label">With someone else</div><div class="wf-num">0</div></div>
+                  <div class="wf-tile"><div class="wf-label">All waiting</div><div class="wf-num">0</div></div>
+                </div>
+              </div>
+              <div class="wf-box" data-el="EL-07" style="margin-top:10px">
+                <div class="wf-label">Waiting for a decision</div>
+                <div class="wf-strong">Nothing is waiting on you.</div>
+                <div class="wf-text">Six rules are routing requests to this queue, and the last one arrived yesterday at 16:40.
+                  <a href="page-approvals.html">Review the rules</a>.</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ── desktop · restricted ────────────────────────────────── -->
+          <div class="mock-view" data-device="desktop" data-state="restricted">
+            <div class="wf wf-pad">
+              <div class="wf-box" data-el="EL-01"><div class="wf-label">Page header</div><div class="wf-strong">Finance queue · not yours</div></div>
+              <div class="wf-box" style="margin-top:10px">
+                <div class="wf-label">Restricted</div>
+                <div class="wf-strong">This queue belongs to another team.</div>
+                <div class="wf-text">The counts are hidden, not zeroed — a zero would read as “nothing waiting here”.
+                  Ask that team's lead for access.</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ── phone ───────────────────────────────────────────────── -->
+          <div class="mock-view" data-device="phone" data-state="default">
+            <div class="wf wf-phone wf-pad">
+              <div class="wf-box" data-el="EL-01"><div class="wf-strong">A. Rivera</div><div class="wf-text">Operations queue</div></div>
+              <div class="wf-box" data-el="EL-02" style="margin-top:8px">
+                <div class="wf-row"><div class="wf-tile"><div class="wf-label">Overdue</div><div class="wf-num">12</div></div>
+                <div class="wf-tile"><div class="wf-label">Today</div><div class="wf-num">27</div></div></div>
+                <div class="wf-text" style="margin-top:6px">The other two tiles sit one swipe down.</div>
+              </div>
+              <div class="wf-box" data-el="EL-07" style="margin-top:8px">
+                <div class="wf-label">Waiting · most urgent first</div>
+                <div class="wf-bar wf-bar--lg"></div><div class="wf-bar wf-bar--md"></div><div class="wf-bar wf-bar--lg"></div>
+                <div class="wf-text" style="margin-top:6px">Five per screen, then “show 5 more”.</div>
+              </div>
+              <div class="wf-box" style="margin-top:8px">
+                <div class="wf-label">Not on the phone</div>
+                <div class="wf-text">The rules list and the heat map. One step becomes three phone screens: see what is waiting →
+                  read one request → note and decide. Editing a rule is desktop-only.</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ── voice ───────────────────────────────────────────────── -->
+          <div class="mock-view" data-device="voice" data-state="default">
+            <div class="wf wf-pad wf-voice">
+              <div><b>Person:</b> What is waiting on me?</div>
+              <div><b>App:</b> Twelve overdue, twenty-seven due today. The largest is a new supplier request for four hundred and twelve thousand, raised three days ago. Do you want the overdue list?</div>
+              <div><b>Person:</b> Yes.</div>
+              <div><b>App:</b> Reading the first three of twelve. Say “next three”, or say a requester's name.</div>
+              <div class="wf-box" style="margin-top:10px">
+                <div class="wf-label">What voice cannot do here</div>
+                <div class="wf-text">Recording a decision needs a note, and above the threshold it needs a second approval.
+                  Dictating that has not been agreed, so voice stops at reading. If this step ever needs twenty-six prompts,
+                  the step is too big — that is the test, and it is why the device tabs exist.</div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+        <div class="mock-caption">Structure only — not a visual design, not real data, nothing here is proof that anything works.
+          Sample values are listed in <a href="#data">Data and fields</a> and are examples, never requirements.</div>
+      </div>
+    </section>
+
+    <div id="spec-body"></div>
+
+    <footer class="footer">
+      <span>Honest Mockument · mockument page</span>
+      <span>Walk it, question it, then build it.</span>
+    </footer>
+  </main>
+</div>
+
+<aside class="inspector" id="inspector"></aside>
+
+<!-- ═══ THE SPECIFICATION ITSELF · edit this, the page re-renders ═══════ -->
+<script type="application/json" id="spec">
+{
+  "kit": "honest-mockument/v1",
+  "page": {
+    "id": "approvals", "name": "Approvals", "route": "/approvals",
+    "buildStatus": "modify", "version": "0.3", "updated": "2026-08-18", "owner": "Product"
+  },
+  "represents": {
+    "process": "Getting a request decided",
+    "step": "Decide what is waiting",
+    "stepId": "STEP-02",
+    "deviceTypes": [{ "name": "desktop" }, { "name": "phone" }, { "name": "voice" }]
+  },
+  "purpose": "The page somebody opens when other people are waiting on them. It answers three questions in one place: what is waiting, what the rules are doing to the flow, and what has to be recorded before a request can be set down. An approver should leave it with every overdue request either decided with a note or consciously left waiting.",
+
+  "availableTo": [
+    { "role": "Approver", "mayReach": true, "differs": "Own queue only. Can turn a rule on or off unless policy has locked it.", "mustNotSee": "Another team's requests, amounts or decision notes." },
+    { "role": "Team lead", "mayReach": true, "differs": "Any queue in the team, chosen from a switcher. Can reassign a request; cannot decide on somebody else's behalf.", "mustNotSee": "Queues outside the team." },
+    { "role": "Auditor", "mayReach": true, "differs": "Read-only across the organisation, with export. Cannot decide or change a rule.", "mustNotSee": "Nothing withheld — but every view is logged." }
+  ],
+
+  "elements": [
+    { "id": "EL-01", "name": "Page header", "shows": "Whose queue is on screen, and which team it belongs to", "source": "People directory", "marker": "required", "trace": "REQ-APP-01" },
+    { "id": "EL-02", "name": "Stat strip", "shows": "Count and total amount waiting, split into overdue, due today and with someone else, plus a combined total and the number of queues", "source": "Request store", "marker": "required", "trace": "REQ-APP-02", "note": "Shared component CMP-01, specified once on Home. Selecting a tile filters the list below it." },
+    { "id": "EL-03", "name": "Rules list", "shows": "Every routing rule pointing at this queue, grouped by priority, with its on/off state and whether policy has locked it", "source": "Rule definitions", "marker": "required", "trace": "REQ-APP-04" },
+    { "id": "EL-04", "name": "Selected rule detail", "shows": "What the rule applies to, its threshold, whether it forces a second approval, and how many requests it matched in the trailing 90 days", "source": "Rule definitions + match history", "marker": "required", "trace": "REQ-APP-05" },
+    { "id": "EL-05", "name": "What this rule does", "shows": "The rule in plain words, as somebody would explain it to a requester", "source": "Rule definitions", "marker": "required", "trace": "REQ-APP-06" },
+    { "id": "EL-06", "name": "Matched requests with heat map", "shows": "Requests the rule matched, largest first, with a trailing-90-day column marking matches and near misses", "source": "Requests + match history", "marker": "required", "trace": "REQ-APP-07", "note": "Near-miss shading is drawn but undefined — see Q-02.", "questions": ["Q-02"] },
+    { "id": "EL-07", "name": "Queue list", "shows": "One row per waiting request: priority, what it is, who raised it, how long it has waited, and the amount", "source": "Request store", "marker": "required", "trace": "REQ-APP-08" },
+    { "id": "EL-08", "name": "Request panel", "shows": "One request in full: what was asked for, by whom, against which rule, with the notes so far", "source": "Request store", "marker": "required", "trace": "REQ-APP-09" },
+    { "id": "EL-09", "name": "Decision note", "shows": "Free text the approver types; required before a decision can be recorded", "source": "Typed by the approver", "marker": "required", "trace": "REQ-APP-10" },
+    { "id": "EL-10", "name": "Queue switcher", "shows": "Which queue is being viewed", "source": "Team directory", "marker": "proposed", "trace": "", "note": "Invented to make the team-lead view walkable. Nobody has asked for it in this form.", "questions": ["Q-05"] },
+    { "id": "EL-11", "name": "Auto note on second approval", "shows": "A note written by the app when a second approval is recorded against a request", "source": "Approval record", "marker": "unanswered", "trace": "REQ-APP-14", "questions": ["Q-01"] },
+    { "id": "EL-12", "name": "Link to the second approval", "shows": "A jump from the request's notes straight to the approval that released it", "source": "Approval record", "marker": "unanswered", "trace": "", "note": "Asked for as “ideally”, which is not a requirement. See Q-03.", "questions": ["Q-03"] }
+  ],
+
+  "controls": [
+    { "id": "CTL-01", "name": "Queue tab", "effect": "alters the screen", "serverData": false, "leadsTo": "The waiting list", "confirm": "None", "marker": "required", "trace": "REQ-APP-03" },
+    { "id": "CTL-02", "name": "Rules tab", "effect": "alters the screen", "serverData": false, "leadsTo": "Rules and their effect", "confirm": "None", "marker": "required", "trace": "REQ-APP-03" },
+    { "id": "CTL-03", "name": "Rule search", "effect": "alters the screen", "serverData": false, "confirm": "None", "marker": "required", "trace": "REQ-APP-04" },
+    { "id": "CTL-04", "name": "Rule on / off toggle", "effect": "acts on data", "serverData": true, "confirm": "No confirmation. A locked rule cannot be switched at all, and says why.", "marker": "required", "trace": "REQ-APP-11" },
+    { "id": "CTL-05", "name": "What a rule applies to", "effect": "both", "serverData": true, "confirm": "None", "marker": "required", "trace": "REQ-APP-11" },
+    { "id": "CTL-06", "name": "State filter", "effect": "alters the screen", "serverData": false, "confirm": "None", "marker": "required", "trace": "REQ-APP-12", "note": "Waiting / All / Decided. Renamed after the two-state decision." },
+    { "id": "CTL-07", "name": "Queue search", "effect": "alters the screen", "serverData": false, "confirm": "None", "marker": "required", "trace": "REQ-APP-12" },
+    { "id": "CTL-08", "name": "Open request", "effect": "alters the screen", "serverData": true, "leadsTo": "Request panel (EL-08)", "confirm": "None", "marker": "required", "trace": "REQ-APP-09" },
+    { "id": "CTL-09", "name": "Record decision", "effect": "both", "serverData": true, "leadsTo": "The requester is told", "href": "page-requests.html", "confirm": "A note is required. Above the threshold a second approval must already be recorded. No undo — a reversal is a new request.", "marker": "required", "trace": "REQ-APP-13" },
+    { "id": "CTL-10", "name": "Export", "effect": "acts on data", "serverData": true, "confirm": "None", "marker": "proposed", "trace": "", "note": "Audit asked for evidence; the export itself has never been specified." },
+    { "id": "CTL-11", "name": "Saved views", "effect": "alters the screen", "serverData": true, "confirm": "None", "marker": "proposed", "trace": "", "note": "Drawn to make the toolbar look plausible. Delete it or specify it — do not build it by accident." }
+  ],
+
+  "data": [
+    { "field": "Approver name", "metricId": "F-APPROVER", "means": "The person whose queue is on screen", "holds": "one value",
+      "unit": "text", "nullRule": "never empty", "periodicity": "reference / on change", "visibleWhen": "immediately on change",
+      "provenance": "held by us", "source": "People directory", "calculated": false, "sample": "A. Rivera" },
+
+    { "field": "Team", "metricId": "F-TEAM", "means": "The team the queue belongs to", "holds": "one value",
+      "unit": "text", "nullRule": "never empty", "periodicity": "reference / on change", "visibleWhen": "immediately on change",
+      "provenance": "held by us", "source": "People directory", "calculated": false, "sample": "Operations" },
+
+    { "field": "Requests waiting", "metricId": "F-WAITING", "means": "How many requests are waiting on this queue right now", "holds": "one value",
+      "unit": "integer", "nullRule": "zero shows as 0, never as a dash — zero is meaningful here", "periodicity": "live", "visibleWhen": "immediately",
+      "provenance": "computed", "source": "Request store", "calculated": true,
+      "calculation": "count of requests in state Waiting for this queue, split by overdue / due today / with someone else",
+      "derivedFrom": ["Request", "Request state"], "sample": "12 / 27 / 43" },
+
+    { "field": "Value waiting", "metricId": "F-VALUE", "hero": true,
+      "means": "The money sitting behind the waiting requests — the number a team is actually judged on", "holds": "one value",
+      "unit": "currency, 0dp", "nullRule": "none or zero shows as --", "staleRule": "if the amount is older than the request record, show the request's own amount and say when it was last confirmed",
+      "periodicity": "live", "visibleWhen": "immediately",
+      "provenance": "computed", "source": "Request store", "calculated": true,
+      "calculation": "sum of request amount for requests in state Waiting, grouped the same way as the counts",
+      "derivedFrom": ["Request", "Request amount"], "sample": "$4.8M" },
+
+    { "field": "Average time to decide", "metricId": "F-TTD", "means": "How long a request waited before it was decided, on average, last month", "holds": "one value",
+      "periodicity": "end of previous month", "provenance": "computed", "sample": "3.4 days",
+      "note": "Reported monthly, so it can never answer “how are we doing today” — worth knowing before a tile promises that." },
+
+    { "field": "Rule", "metricId": "F-RULE", "means": "A statement of what has to happen before a kind of request can be decided", "holds": "a list",
+      "unit": "text", "nullRule": "a queue always has at least the policy-set rules", "periodicity": "reference / on change", "visibleWhen": "immediately on save",
+      "provenance": "held by us", "source": "Rule definitions", "calculated": false, "sample": "Above $250,000 needs a second approval" },
+
+    { "field": "Match history", "metricId": "F-MATCHES", "means": "When a rule matched a request", "holds": "a list",
+      "unit": "count over a trailing window", "nullRule": "no matches draws an empty row, not a zero", "periodicity": "end of previous business day", "visibleWhen": "next business day",
+      "provenance": "computed", "source": "Overnight routing run", "calculated": true,
+      "calculation": "matches per requester per rule over the trailing 90 days", "derivedFrom": ["Rule", "Request"], "sample": "6 matches / 90 days" },
+
+    { "field": "Request", "metricId": "F-REQUEST", "means": "One thing somebody has asked for, waiting on one queue", "holds": "a list",
+      "unit": "record", "nullRule": "an empty list is a real answer and gets the empty state", "periodicity": "live", "visibleWhen": "immediately",
+      "provenance": "held by us", "source": "Request store", "calculated": false, "sample": "New supplier — Halden Ltd" },
+
+    { "field": "Request state", "metricId": "F-STATE", "means": "Waiting or Decided. There is no third state.", "holds": "one value",
+      "unit": "Waiting | Decided", "nullRule": "never empty", "periodicity": "live", "visibleWhen": "immediately on save",
+      "provenance": "held by us", "source": "Request store", "calculated": false, "sample": "Waiting" },
+
+    { "field": "Decision note", "metricId": "F-NOTE", "means": "What the approver recorded when they decided", "holds": "a list",
+      "unit": "text", "nullRule": "a request with no note cannot be decided", "periodicity": "on demand", "visibleWhen": "immediately on save",
+      "provenance": "the user", "source": "Typed by the approver", "calculated": false, "sensitivity": "may name a person or a supplier — restricted to the team and audit",
+      "sample": "Checked against last year's spend; approved with a 6-month review." },
+
+    { "field": "Near-miss threshold", "metricId": "F-NEARMISS", "means": "", "holds": "",
+      "periodicity": "", "provenance": "", "sample": "",
+      "note": "Drawn on the heat map, defined by nobody. Below L0 — see Q-02." }
+  ],
+
+  "lists": [
+    {
+      "name": "Rules",
+      "ordering": "Grouped High → Low priority, then alphabetically inside a group",
+      "filtering": "Free text over rule names; what it applies to; on/off",
+      "selection": "Selecting one loads its effect on the right; nothing is submitted",
+      "nesting": "One level — priority group, then rule",
+      "device": [
+        { "device": "desktop", "empty": "Cannot be empty — every queue has the policy-set rules", "one": "Same layout, its effect opens automatically", "overflow": "Scrolls inside the column; groups stay pinned" },
+        { "device": "phone", "empty": "n/a", "one": "n/a", "overflow": "Not shown on the phone at all — desktop only" }
+      ]
+    },
+    {
+      "name": "Queue",
+      "ordering": "Overdue first, then by how long it has waited",
+      "filtering": "Waiting / All / Decided, plus free text over the request, the requester and the amount",
+      "selection": "Selecting opens the request panel over the list",
+      "nesting": "None",
+      "device": [
+        { "device": "desktop", "empty": "“Nothing is waiting on you”, plus when the last request arrived and how many rules are routing here", "one": "List with one row — not auto-opened, so deciding stays a deliberate act", "overflow": "25 rows, then paging; the tiles always describe all of them, not the page" },
+        { "device": "phone", "empty": "Same sentence, no table chrome", "one": "One card", "overflow": "5 cards, then “show 5 more”" },
+        { "device": "voice", "empty": "“Nothing is waiting on you.”", "one": "Reads it in full", "overflow": "Reads the first three, then offers next three" }
+      ]
+    }
+  ],
+
+  "states": [
+    { "key": "default", "label": "Default", "when": "Requests are waiting and the person owns the queue", "sees": "Queue tab, the waiting list, the stat strip above it", "next": "Open the first overdue request" },
+    { "key": "empty", "label": "Empty", "when": "Nothing is waiting on this queue", "sees": "Zeroed strip, a plain sentence, when the last request arrived, and how many rules route here", "next": "Review the rules, or leave" },
+    { "key": "one", "label": "One item", "when": "Exactly one request is waiting", "sees": "The list with a single row; the panel does not auto-open", "next": "Open it deliberately" },
+    { "key": "overflow", "label": "More than fits", "when": "More than 25 requests are waiting", "sees": "First 25, paging below, tiles still describing the whole queue", "next": "Page, or filter by priority" },
+    { "key": "loading", "label": "Loading", "when": "The overnight routing run is still finishing when the page opens", "sees": "The strip shows last night's numbers with the timestamp visible, not a spinner over everything", "next": "Wait, or work yesterday's list" },
+    { "key": "error", "label": "Error", "when": "The routing run did not complete", "sees": "A banner saying when the queue was last routed, and that today's run is missing", "next": "Work the older list knowingly; the banner stays until a run succeeds" },
+    { "key": "restricted", "label": "Restricted", "when": "Somebody opens a queue outside their team", "sees": "Counts hidden rather than zeroed, and who to ask", "next": "Request access" }
+  ],
+
+  "failures": [
+    { "noticed": "A request I decided is still showing as waiting", "thenWhat": "The row states when it was last updated, so a stale list is visible instead of silent", "whoIsTold": "Approver on the page; team lead in the daily summary" },
+    { "noticed": "A request appeared in my queue that is nothing to do with me", "thenWhat": "The request names the rule that routed it here, and offers to send it back", "whoIsTold": "Approver, and the rule's owner" },
+    { "noticed": "The tiles and the list disagree", "thenWhat": "Both carry the same as-at time; if they differ, the page says so rather than picking one", "whoIsTold": "Approver, and the support queue" },
+    { "noticed": "I cannot turn a rule off", "thenWhat": "The rule says it is set by policy and names who can change it", "whoIsTold": "Approver" }
+  ],
+
+  "remembered": {
+    "answer": "Which requests have been read, and the last queue a team lead was looking at. The open tab is deliberately not remembered — the queue always opens first.",
+    "marker": "required",
+    "duration": "Read state does not expire. The team lead's last queue is kept for the working day.",
+    "clearable": "Read state can be reset from the queue toolbar — proposed, not yet confirmed."
+  },
+  "liveChange": {
+    "answer": "",
+    "marker": "unanswered",
+    "whoMustAnswer": "Product owner",
+    "howTold": "",
+    "midAction": ""
+  },
+
+  "connections": {
+    "from": [
+      { "label": "Home — the waiting tiles and the overdue list", "href": "page-home.html" },
+      { "label": "Requests — a request row links to the queue it is waiting on", "href": "page-requests.html" }
+    ],
+    "to": [
+      { "label": "Requests — a decision returns to the request and its requester", "href": "page-requests.html" },
+      { "label": "Reports — how long decisions are taking", "href": "page-reports.html" }
+    ],
+    "components": [
+      { "id": "CMP-01", "label": "Stat strip" },
+      { "id": "CMP-02", "label": "Priority badge" },
+      { "id": "CMP-03", "label": "Filter toolbar" }
+    ]
+  },
+  "workflows": [
+    { "id": "WF-01", "name": "Decide a high-value request", "href": "workflow-decide-request.html", "position": "Steps 2 to 5 happen on this page" }
+  ],
+
+  "copy": [
+    { "key": "Tab labels", "string": "Queue · Rules", "status": "required wording", "note": "Confirmed twice, despite the echo with the page name." },
+    { "key": "State filter", "string": "Waiting · All · Decided", "status": "required wording", "note": "Replaces the earlier Open / Closed wording." },
+    { "key": "Empty state", "string": "Nothing is waiting on you.", "status": "placeholder", "note": "Tone not agreed; must not read as congratulation." },
+    { "key": "Auto note", "string": "Second approval recorded", "status": "placeholder", "note": "This string is audit evidence — see Q-01." },
+    { "key": "Decision button", "string": "Record decision", "status": "placeholder", "note": "“Approve” was used in the workshop, but the same control also declines. Pick one." },
+    { "key": "Locked rule", "string": "Set by policy. Ask the policy owner to change it.", "status": "placeholder" }
+  ],
+
+  "decisions": [
+    { "what": "The queue leads over the rules as a fixed default, not one that switches when nothing is waiting", "who": "Product owner", "when": "2026-06-12" },
+    { "what": "A request has exactly two states, Waiting and Decided", "who": "Product owner", "when": "2026-06-12" },
+    { "what": "Policy-set rules are locked; an approver cannot switch them off", "who": "Policy owner", "when": "2026-05-28" },
+    { "what": "Anything above the threshold cannot be decided without a second approval already recorded", "who": "Policy owner", "when": "2026-05-28" }
+  ],
+
+  "observations": [
+    { "what": "The page and its default tab share a name in conversation — “go to the queue” was ambiguous three times in a ten-minute walkthrough.", "raisedBy": "Walkthrough", "when": "2026-08-14" },
+    { "what": "A team lead with forty approvers has no way to find the worst queue — the switcher assumes you already know whose queue to open.", "raisedBy": "Walkthrough", "when": "2026-08-14" },
+    { "what": "Deciding and telling the requester live on two pages. Every participant tried to do both in one place.", "raisedBy": "Walkthrough", "when": "2026-08-14" }
+  ],
+
+  "questions": [
+    { "id": "Q-01", "question": "What exactly does the note say when a second approval is recorded, and does it name the approver and time inline?", "whyItMatters": "It is the sentence an auditor reads years later", "blocks": "the build", "blocksBuild": true, "whoMustAnswer": "Policy owner", "neededBy": "2026-08-29", "affects": ["EL-11"] },
+    { "id": "Q-02", "question": "What counts as a near miss on the heat map, and who sets the threshold?", "whyItMatters": "Half the column is meaningless until it is defined, and people will read it as fact", "blocks": "the build", "blocksBuild": true, "whoMustAnswer": "Product owner", "neededBy": "2026-08-29", "affects": ["EL-06"] },
+    { "id": "Q-03", "question": "Does the decision note link straight to the second approval, or is naming it enough for the first build?", "whyItMatters": "Asked for as “ideally”, which is not a requirement — and a link across pages is not free", "blocks": "business review", "blocksBuild": false, "whoMustAnswer": "Product owner", "neededBy": "2026-09-05", "affects": ["EL-12"] },
+    { "id": "Q-04", "question": "Does the queue update while somebody is looking at it, and what happens if a request arrives while a note is half typed?", "whyItMatters": "In a queue product this is close to the whole product", "blocks": "the build", "blocksBuild": true, "whoMustAnswer": "Product owner", "neededBy": "2026-08-29", "affects": ["EL-07", "EL-09"] },
+    { "id": "Q-05", "question": "Can a team lead see the decision notes of somebody who has moved team?", "whyItMatters": "Decides whether the switcher filters by team today or by team at the time", "blocks": "business review", "blocksBuild": false, "whoMustAnswer": "Policy owner", "neededBy": "2026-09-05", "affects": ["EL-10"] }
+  ],
+
+  "outOfScope": [
+    { "what": "Who a request routes to when nobody in the team is available, and how escalation works", "why": "Confirmed out of scope for this build; real later content, kept rather than deleted" },
+    { "what": "Mobile app and push notifications", "why": "Out of scope for this build. The phone device tab here describes the web view on a phone, not an app." },
+    { "what": "How the overnight routing run is scheduled, retried or resumed", "why": "Implementer's, not the business's" }
+  ],
+
+  "contract": {
+    "must": [
+      "Every element and control listed in this file, with the IDs used here",
+      "The queue as the fixed default tab, and Waiting / All / Decided as the state filter wording",
+      "A note required to record any decision; a second approval additionally required above the threshold",
+      "The empty state states when the last request arrived — a bare “nothing waiting” is wrong"
+    ],
+    "mustNotInvent": [
+      "Near-miss thresholds or their shading (Q-02)",
+      "The wording of the auto-generated second-approval note (Q-01)",
+      "Any third request state; Waiting and Decided are the only two",
+      "Saved views (CTL-11) and Export (CTL-10) — both drawn, neither specified"
+    ],
+    "askFirst": [
+      "Whether the queue live-updates (Q-04) — do not choose polling or sockets to fill the silence",
+      "Whether the decision note links to the second approval (Q-03)",
+      "Anything about leads seeing queues across teams (Q-05)"
+    ],
+    "acceptance": [
+      "Every state in the States block can be produced with example data",
+      "Each role sees exactly what the Who may see it block says, and nothing more",
+      "No string ships that is marked placeholder here without being confirmed first",
+      "Every EL/CTL ID appears in the built page's test IDs, so the mockument and the build stay addressable"
+    ]
+  }
+}
+</script>
+
+<script src="assets/app-config.js"></script>
+<script src="assets/spec.js"></script>
+<script>SpecKit.boot("page-approvals.html");</script>
+</body>
+</html>

@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<!--
+  ╔════════════════════════════════════════════════════════════════════════╗
+  ║  BLANK MOCKUMENT PAGE — copy this file to page-<something>.html         ║
+  ║                                                                        ║
+  ║  1. Add the page to assets/app-config.js (menu + specPages).           ║
+  ║  2. Draw the mock below: crude boxes, real links, data-el on anything   ║
+  ║     a person can see, read, type or press.                             ║
+  ║  3. Fill the JSON island at the bottom. It is the source of truth —     ║
+  ║     everything under the mock is rendered from it.                      ║
+  ║  4. Leave nothing silent: every unknown gets marker "unanswered" and    ║
+  ║     a question that names who must answer it.                           ║
+  ║  5. Run `node check.mjs` (or read the gates at the top of the page).    ║
+  ╚════════════════════════════════════════════════════════════════════════╝
+-->
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>New page — mockument page</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="assets/spec.css" />
+<script>(function(){var s=localStorage.getItem('spec-theme')||'system';var t=s==='system'?(window.matchMedia('(prefers-color-scheme:light)').matches?'light':'dark'):s;if(t==='light')document.documentElement.classList.add('light');})();</script>
+</head>
+<body>
+<header class="topbar" id="topbar"></header>
+<div class="shell">
+  <aside class="sidebar" id="sidebar"></aside>
+  <main class="main">
+    <div id="page-head"></div>
+
+    <section class="block" id="mock-block">
+      <div class="block-head"><span class="block-num">05</span><span class="block-title">The mock</span>
+        <span class="block-for">walk it — do not read it</span></div>
+      <p class="block-note">Crude on purpose. Boxes, labels, real links. Put <code>data-el="EL-01"</code> on anything a person
+        can see, read, type or press, and give it a row in the island below. Anything drawn without a row shows up as
+        “not in the spec” when you click it — which is exactly what you want to find out.</p>
+
+      <div class="mock-shell" id="mock">
+        <div class="mock-controls"></div>
+        <div class="mock-stage" data-device="desktop">
+          <div id="role-note"></div>
+          <div id="state-note"></div>
+
+          <div class="mock-view is-on" data-device="desktop" data-state="default">
+            <div class="wf">
+              <div class="wf-row">
+                <nav class="wf-menu">
+                  <!-- keep the app's real menu here so the page can be walked into and out of -->
+                  <a href="page-home.html">Home</a>
+                  <a href="page-approvals.html">Approvals</a>
+                  <a class="is-on" href="page-template.html">This page</a>
+                </nav>
+                <div class="wf-col wf-pad">
+                  <div class="wf-box" data-el="EL-01">
+                    <div class="wf-label">Page header</div>
+                    <div class="wf-strong">What the person is looking at</div>
+                  </div>
+                  <div class="wf-box" data-el="EL-02">
+                    <div class="wf-label">The main thing on the page</div>
+                    <div class="wf-bar wf-bar--lg"></div><div class="wf-bar wf-bar--md"></div>
+                    <div class="wf-text">Replace with the list, form or figure this page exists for.</div>
+                  </div>
+                  <div class="wf-row" style="gap:8px">
+                    <span class="wf-chip" data-el="CTL-01">Primary action</span>
+                    <a class="wf-chip" href="page-approvals.html" data-el="CTL-02">Go somewhere real</a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- copy this view per state that changes the business conversation -->
+          <div class="mock-view" data-device="desktop" data-state="empty">
+            <div class="wf wf-pad">
+              <div class="wf-box" data-el="EL-02">
+                <div class="wf-label">Empty</div>
+                <div class="wf-strong">What does a person see when there is nothing here?</div>
+                <div class="wf-text">Not “no data”. Say what it means and what they can do next.</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="mock-view" data-device="phone" data-state="default">
+            <div class="wf wf-phone wf-pad">
+              <div class="wf-box" data-el="EL-01"><div class="wf-strong">Same step, smaller</div>
+                <div class="wf-text">How many phone screens does this one step become? If the answer is “a lot”, say so here.</div></div>
+            </div>
+          </div>
+        </div>
+        <div class="mock-caption">Structure only — not a visual design, not real data, nothing here is proof that anything works.</div>
+      </div>
+    </section>
+
+    <div id="spec-body"></div>
+    <footer class="footer"><span>Honest Mockument · blank template</span><span>An empty block is a question nobody asked.</span></footer>
+  </main>
+</div>
+<aside class="inspector" id="inspector"></aside>
+
+<!-- ═══ FILL THIS IN ══════════════════════════════════════════════════════
+     Markers: required · proposed · unanswered · observed · out of scope
+     Every "unanswered" needs a question below that names who must answer.
+     ═══════════════════════════════════════════════════════════════════════ -->
+<script type="application/json" id="spec">
+{
+  "kit": "honest-mockument/v1",
+  "page": {
+    "id": "new-page", "name": "New page", "route": "/route",
+    "buildStatus": "new", "version": "0.1", "updated": "YYYY-MM-DD", "owner": "who keeps this page current"
+  },
+  "represents": {
+    "process": "which process this belongs to",
+    "step": "",
+    "stepId": "",
+    "deviceTypes": [{ "name": "desktop" }, { "name": "phone" }]
+  },
+  "purpose": "Three or four sentences. What work does this support, why does someone open it, what do they leave with? Not a feature list.",
+
+  "availableTo": [
+    { "role": "", "mayReach": true, "differs": "", "mustNotSee": "" }
+  ],
+
+  "elements": [
+    { "id": "EL-01", "name": "Page header", "shows": "", "source": "", "marker": "unanswered", "trace": "", "questions": ["Q-01"] },
+    { "id": "EL-02", "name": "The main thing on the page", "shows": "", "source": "", "marker": "unanswered", "trace": "", "questions": ["Q-01"] }
+  ],
+
+  "controls": [
+    { "id": "CTL-01", "name": "Primary action", "effect": "acts on data", "serverData": null, "leadsTo": "", "confirm": "", "marker": "unanswered", "trace": "" },
+    { "id": "CTL-02", "name": "Go somewhere real", "effect": "alters the screen", "serverData": false, "leadsTo": "Approvals", "href": "page-approvals.html", "confirm": "None", "marker": "proposed", "trace": "", "note": "drawn so the page can be walked out of" }
+  ],
+
+  "data": [
+    { "field": "", "metricId": "", "means": "", "holds": "one value",
+      "periodicity": "one of: end of previous trading day · end of previous month · latest quarterly filing (TTM) · latest fiscal year · on demand · reference / on change",
+      "visibleWhen": "how long after that period closes can a user see it?",
+      "provenance": "we hold it | a provider | the user | computed | nobody knows",
+      "hero": false,
+      "unit": "", "nullRule": "", "staleRule": "", "source": "", "calculated": null, "calculation": "", "derivedFrom": [],
+      "sensitivity": "", "tolerance": "", "evidence": "", "sample": "" }
+  ],
+
+  "lists": [
+    {
+      "name": "",
+      "ordering": "", "filtering": "", "selection": "", "nesting": "",
+      "device": [
+        { "device": "desktop", "empty": "", "one": "", "overflow": "" },
+        { "device": "phone", "empty": "", "one": "", "overflow": "" }
+      ]
+    }
+  ],
+
+  "states": [
+    { "key": "default", "label": "Default", "when": "", "sees": "", "next": "" },
+    { "key": "empty", "label": "Empty", "when": "", "sees": "", "next": "" },
+    { "key": "one", "label": "One item", "when": "", "sees": "", "next": "" },
+    { "key": "overflow", "label": "More than fits", "when": "", "sees": "", "next": "" },
+    { "key": "loading", "label": "Loading", "when": "", "sees": "", "next": "" },
+    { "key": "error", "label": "Error", "when": "", "sees": "", "next": "" },
+    { "key": "restricted", "label": "Restricted", "when": "", "sees": "", "next": "" }
+  ],
+
+  "failures": [
+    { "noticed": "Describe it as the person would notice it, never as a cause", "thenWhat": "", "whoIsTold": "" }
+  ],
+
+  "remembered": {
+    "answer": "",
+    "marker": "unanswered",
+    "whoMustAnswer": "name someone — this is never volunteered",
+    "duration": "",
+    "clearable": ""
+  },
+  "liveChange": {
+    "answer": "",
+    "marker": "unanswered",
+    "whoMustAnswer": "name someone — this is never volunteered either",
+    "howTold": "",
+    "midAction": ""
+  },
+
+  "connections": {
+    "from": [{ "label": "", "href": "" }],
+    "to": [{ "label": "", "href": "" }],
+    "components": [{ "id": "CMP-01", "label": "Stat strip" }]
+  },
+  "workflows": [{ "id": "", "name": "", "href": "", "position": "" }],
+
+  "copy": [
+    { "key": "Empty state", "string": "", "status": "placeholder", "note": "" }
+  ],
+
+  "decisions": [
+    { "what": "", "who": "", "when": "" }
+  ],
+
+  "observations": [
+    { "what": "", "raisedBy": "", "when": "" }
+  ],
+
+  "questions": [
+    { "id": "Q-01", "question": "What is actually on this page, and who asked for it?", "whyItMatters": "Nothing here is backed by a requirement yet", "blocks": "the build", "blocksBuild": true, "whoMustAnswer": "name a person", "neededBy": "YYYY-MM-DD", "affects": ["EL-01", "EL-02"] }
+  ],
+
+  "outOfScope": [
+    { "what": "", "why": "" }
+  ],
+
+  "contract": {
+    "must": [],
+    "mustNotInvent": [],
+    "askFirst": [],
+    "acceptance": []
+  }
+}
+</script>
+
+<script src="assets/app-config.js"></script>
+<script src="assets/spec.js"></script>
+<script>SpecKit.boot("page-template.html");</script>
+</body>
+</html>

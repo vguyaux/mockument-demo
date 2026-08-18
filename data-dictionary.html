@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Data dictionary — honest mockument</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="assets/spec.css" />
+<script>(function(){var s=localStorage.getItem('spec-theme')||'system';var t=s==='system'?(window.matchMedia('(prefers-color-scheme:light)').matches?'light':'dark'):s;if(t==='light')document.documentElement.classList.add('light');})();</script>
+</head>
+<body>
+<header class="topbar" id="topbar"></header>
+<div class="shell">
+  <aside class="sidebar" id="sidebar"></aside>
+  <main class="main">
+    <div class="page-eyebrow">Register</div>
+    <h1 class="page-title">Data dictionary</h1>
+    <p class="page-lede">Every field the app shows, collected from the pages that use it. One field, one meaning — where two
+      pages disagree about where a number comes from or how fresh it is, that disagreement is shown rather than averaged away.</p>
+    <div id="summary"></div>
+    <section class="block"><div class="block-head"><span class="block-num">01</span><span class="block-title">Fields</span></div><div id="fields"></div></section>
+    <section class="block"><div class="block-head"><span class="block-num">02</span><span class="block-title">Disagreements</span>
+      <span class="block-for">found by the checker</span></div>
+      <p class="block-note">The same field, described differently on two pages. Each one is a decision waiting to be made once.</p>
+      <div id="conflicts"></div></section>
+    <footer class="footer"><span>Honest Mockument</span><span>One field, one meaning.</span></footer>
+  </main>
+</div>
+<aside class="inspector" id="inspector"></aside>
+
+<script src="assets/app-config.js"></script>
+<script src="assets/spec.js"></script>
+<script>
+(async function () {
+  const app = window.SPEC_APP;
+  SpecKit.chrome("data-dictionary.html");
+  const esc = SpecKit.esc, val = SpecKit.val;
+  const specs = (await SpecKit.loadSpecs(app.specPages || [])).filter(s => !s._error);
+  if (!specs.length) {
+    document.getElementById("summary").innerHTML = `<div class="callout callout--warn"><div class="callout-title">Cannot read the pages from here</div>
+      <div class="callout-body">Serve the folder (<code>python3 -m http.server</code>) or open the published site.</div></div>`;
+    return;
+  }
+  const fields = {};
+  specs.forEach(s => (s.data || []).forEach(d => {
+    const k = (d.field || "").toLowerCase();
+    (fields[k] = fields[k] || []).push(Object.assign({}, d, { page: s.page.name, file: s._file }));
+  }));
+  const keys = Object.keys(fields).sort();
+  const incomplete = keys.filter(k => fields[k].some(d => SpecKit.rung(d) < 0));
+  const ladder = [0,0,0,0,0];
+  keys.forEach(k => ladder[Math.max(SpecKit.rung(fields[k][0]), -1) + 1]++);
+
+  document.getElementById("summary").innerHTML = `<div class="meta-strip">
+    <span class="meta-chip">Fields <b>${keys.length}</b></span>
+    <span class="meta-chip">Pages read <b>${specs.length}</b></span>
+    <span class="meta-chip">Below L0 <b>${ladder[0]}</b></span>
+    <span class="meta-chip">L0 <b>${ladder[1]}</b></span>
+    <span class="meta-chip">L1 <b>${ladder[2]}</b></span>
+    <span class="meta-chip">L2 <b>${ladder[3]}</b></span>
+    <span class="meta-chip">L3 <b>${ladder[4]}</b></span></div>
+    <p class="block-note">A field climbs the ladder when its page needs it to: <b>L0 exists</b> with the mock,
+    <b>L1 display</b> after business review, <b>L2 sourced</b> before build, <b>L3 verified</b> at QA. Fields
+    for pages that never get built never cost anything above L0.</p>`;
+
+  document.getElementById("fields").innerHTML = SpecKit.table(
+    ["Field", "What it means", "Holds", "As of", "Visible when", "Comes from", "Rung", "Used on"],
+    keys.map(k => {
+      const d = fields[k][0];
+      return [
+        `${esc(d.field)}${d.metricId ? `<span class="sub id-cell">${esc(d.metricId)}</span>` : ""}${d.hero ? `<span class="sub"><span class="marker marker--observed">hero</span></span>` : ""}`,
+        val(d.means), val(d.holds), val(d.periodicity), val(d.visibleWhen),
+        `${val(d.provenance)}${d.source ? `<span class="sub">${esc(d.source)}</span>` : ""}`,
+        SpecKit.rungChip(SpecKit.rung(d)),
+        fields[k].map(x => `<a href="${esc(x.file)}#data">${esc(x.page)}</a>`).join(", ")];
+    }));
+
+  const conflicts = [];
+  keys.forEach(k => {
+    const set = fields[k];
+    ["means", "source", "periodicity", "visibleWhen", "holds", "unit", "calculation"].forEach(prop => {
+      const distinct = Array.from(new Set(set.map(d => d[prop] || "")));
+      if (distinct.filter(Boolean).length > 1)
+        conflicts.push([set[0].field, prop, distinct.map((v, i) => `<b>${esc(set[i] && set[i].page || "")}</b>: ${esc(v || "—")}`).join("<br>")]);
+    });
+  });
+  document.getElementById("conflicts").innerHTML = conflicts.length
+    ? SpecKit.table(["Field", "What differs", "Who says what"], conflicts.map(c => [esc(c[0]), esc(c[1]), c[2]]))
+    : `<p class="empty-hint">No disagreements between the pages read so far.</p>`;
+})();
+</script>
+</body>
+</html>
