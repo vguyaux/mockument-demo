@@ -58,8 +58,8 @@
           <p><strong>Question it.</strong> Turn on the honesty overlay. Everything outlined in amber or pink is not yet agreed.</p>
           <p><strong>Build from it.</strong> Each page ends with a build contract and a machine-readable island. Hand that to
              whoever — or whatever — writes the code.</p>
-          <p><strong>Or read the method.</strong> <a href="honest-mockument.html">The Honest Mockument</a> ·
-             <a href="data-layer.html">The data layer</a></p>
+          <p><strong>Or read the method.</strong> <a href="../honest-mockument.html">The Honest Mockument</a> ·
+             <a href="../data-layer.html">The data layer</a></p>
         </div></div>
       </div>
     </section>
@@ -78,28 +78,29 @@
   const esc = SpecKit.esc;
 
   document.getElementById("head").innerHTML = `
-    <div class="page-eyebrow">Half mock-up, half document</div>
-    <h1 class="page-title">The Honest Mockument</h1>
-    <p class="page-lede">Two things to look at. First, a worked example you can walk: a proposed app drawn crudely, where
-      every visible thing says what backs it, who owes the missing answer, and whether it is ready to build. Second, the
-      method that produced it.</p>
+    <div class="page-eyebrow">A real specification, converted</div>
+    <h1 class="page-title">${esc(app.name)}</h1>
+    <p class="page-lede">An existing page-by-page functional specification, re-expressed as a mockument. It exists so the
+      format can be judged against real material rather than a tidy example — every page says what the source settles,
+      what it leaves open, and who owes the answer. Nothing here was invented to make the conversion look finished.</p>
 
     <div class="entry-grid">
-      <a class="entry-card" href="page-approvals.html">
+      <a class="entry-card" href="page-home.html">
         <div class="k">Walk it</div>
-        <h3>The sample mockument</h3>
-        <p>${esc(app.name)} — ${esc(app.domain)}. Deliberately generic; swap it for your own app and the structure holds.</p>
+        <h3>Five pages and a workflow</h3>
+        <p>${esc(app.domain)}. Start on the landing page and use the menu as if it were the app.</p>
         <ul>
           <li>Switch device, role and state on any page</li>
-          <li>Turn on the honesty overlay to see what is actually agreed</li>
+          <li>Turn on the honesty overlay to see what the source actually settles</li>
           <li>Click any element for its record, its source and its open questions</li>
         </ul>
-        <div class="go">Open the worked page →</div>
+        <div class="go">Open the landing page →</div>
       </a>
-      <a class="entry-card" href="honest-mockument.html">
+      <a class="entry-card" href="../honest-mockument.html">
         <div class="k">Read it</div>
-        <h3>The method</h3>
-        <p>The Honest Mockument in full: the model, the representation, the twenty-two blocks, the data ladder and the gates.</p>
+        <h3>The method behind it</h3>
+        <p>The Honest Mockument in full: the model, the representation, the twenty-two blocks, the data ladder and the
+          gates. Entirely generic — this conversion is one use of it, not part of it.</p>
         <ul>
           <li>Eight parts, thirty-one sections, with a contents sidebar</li>
           <li>A companion document on the data layer</li>
