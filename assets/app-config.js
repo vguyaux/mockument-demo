@@ -51,9 +51,7 @@ window.SPEC_APP = {
      can see is worth more than a tidy diagram.                           */
   menu: [
     { id: "home",      name: "Home",      href: "page-home.html",      built: false },
-    { id: "requests",  name: "Requests",  href: "page-requests.html",  built: false },
     { id: "approvals", name: "Approvals", href: "page-approvals.html", built: true  },
-    { id: "reports",   name: "Reports",   href: "page-reports.html",   built: false },
     { id: "settings",  name: "Settings",  href: "page-settings.html",  built: false }
   ],
 
