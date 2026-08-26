@@ -906,55 +906,55 @@ here?&quot; and &quot;why is this three clicks away?&quot; answer themselves.</p
 <li>A page can be sent to somebody on its own and still make sense.</li>
 <li>The register pages — questions, fields, routes — can be assembled mechanically from the set.</li>
 </ul>
-<h2 id="15-the-twenty-two-blocks">15. The twenty-two blocks</h2><p>Every page carries the same twenty-two blocks in the same order. Blocks 1–4 are identity, 5–6 are the
-mock, 7–16 are the specification, 17–22 are the honesty apparatus. Each block names who answers it.</p>
-<h3 id="identity">Identity</h3><p><strong>1 · Page header.</strong> Name, route, build status (new / modify / existing), version, date, owner, the
+<h2 id="15-the-twenty-two-blocks">15. The twenty-two blocks</h2><p>Every page carries the same twenty-two blocks in the same order. Blocks B01–B04 are identity, B05–B06 are the
+mock, B07–B16 are the specification, B17–B22 are the honesty apparatus. Each block names who answers it.</p>
+<h3 id="identity">Identity</h3><p><strong>B01 · Page header.</strong> Name, route, build status (new / modify / existing), version, date, owner, the
 three readiness gates, and the share of elements that are actually required. <em>Answered by the page
 owner.</em></p>
-<p><strong>2 · Represents.</strong> The process and step this page belongs to, and the device types it covers, as links
+<p><strong>B02 · Represents.</strong> The process and step this page belongs to, and the device types it covers, as links
 into the app map. Where one step needs several pages, each of them says so. <em>Business user.</em></p>
-<p><strong>3 · Available to.</strong> Every role that may reach the page, what differs between them, and what each must
+<p><strong>B03 · Available to.</strong> Every role that may reach the page, what differs between them, and what each must
 <em>not</em> see. <em>Business user.</em></p>
-<p><strong>4 · Purpose.</strong> Three or four sentences: what work this supports, why somebody opens it, what they
+<p><strong>B04 · Purpose.</strong> Three or four sentences: what work this supports, why somebody opens it, what they
 leave with. Not a feature list. <em>Business user.</em></p>
-<h3 id="the-mock">The mock</h3><p><strong>5 · The mock frame.</strong> The navigable representation, with four controls above it — device type, role,
+<h3 id="the-mock">The mock</h3><p><strong>B05 · The mock frame.</strong> The navigable representation, with four controls above it — device type, role,
 state and the honesty overlay — and an inspector that opens when any element is clicked. See §16.</p>
-<p><strong>6 · Fidelity note.</strong> One standing line: structure only, example data, nothing here is proof.</p>
-<h3 id="the-specification">The specification</h3><p><strong>7 · Elements.</strong> ID, element, what it shows or accepts, where it comes from, status, and what it
+<p><strong>B06 · Fidelity note.</strong> One standing line: structure only, example data, nothing here is proof.</p>
+<h3 id="the-specification">The specification</h3><p><strong>B07 · Elements.</strong> ID, element, what it shows or accepts, where it comes from, status, and what it
 traces to. This is the spine: anything visible appears here or it should not be visible. <em>Business user
 with the data owner.</em></p>
-<p><strong>8 · Controls and actions.</strong> ID, control, business effect (<em>acts on data</em> / <em>alters the screen</em> /
+<p><strong>B08 · Controls and actions.</strong> ID, control, business effect (<em>acts on data</em> / <em>alters the screen</em> /
 <em>both</em>), whether it needs information only the server holds, where it leads, what confirmation or undo
 exists, status. <em>Business user.</em></p>
-<p><strong>9 · Data and fields.</strong> Field, meaning, one value or a list, unit, what it is <em>as of</em>, when a user can
+<p><strong>B09 · Data and fields.</strong> Field, meaning, one value or a list, unit, what it is <em>as of</em>, when a user can
 see it, where it comes from, how it is calculated and from what, and the sample value used in the mock.
 Climbed as a ladder — see Part 5. <em>Business user for meaning and timing; data owner for source and
 calculation.</em></p>
-<p><strong>10 · Lists.</strong> Per list: order, filtering and grouping, whether items can be selected and what then
+<p><strong>B10 · Lists.</strong> Per list: order, filtering and grouping, whether items can be selected and what then
 happens, nesting depth — then, per device, what appears when the list holds nothing, exactly one item,
 or more than fits. <em>Business user.</em></p>
-<p><strong>11 · States.</strong> Default, empty, one item, more than fits, loading, error, restricted: when each
+<p><strong>B11 · States.</strong> Default, empty, one item, more than fits, loading, error, restricted: when each
 happens, what the person sees, and what they can do next. Every state listed here is selectable in the
 mock. <em>Business user.</em></p>
-<p><strong>12 · What can go wrong.</strong> Described as the person notices it, never as a cause; what should happen;
+<p><strong>B12 · What can go wrong.</strong> Described as the person notices it, never as a cause; what should happen;
 who is told. <em>Business user.</em></p>
-<p><strong>13 · Remembered between visits.</strong> What the app remembers about this person, for how long, and whether
+<p><strong>B13 · Remembered between visits.</strong> What the app remembers about this person, for how long, and whether
 they can clear it. Asked directly because it is never volunteered. <em>Business user.</em></p>
-<p><strong>14 · Changes while being looked at.</strong> What may update under the person&#39;s eyes, how they are told, and
+<p><strong>B14 · Changes while being looked at.</strong> What may update under the person&#39;s eyes, how they are told, and
 what happens if they are mid-action. <em>Business user.</em></p>
-<p><strong>15 · Connections.</strong> Where a person arrives from, where they can go, and which shared components this
+<p><strong>B15 · Connections.</strong> Where a person arrives from, where they can go, and which shared components this
 page uses. Rendered as links, so the graph is walkable in both directions.</p>
-<p><strong>16 · Workflows.</strong> The named pieces of work this page takes part in, and where in each it sits.</p>
-<h3 id="the-honesty-apparatus">The honesty apparatus</h3><p><strong>17 · Copy register.</strong> Every user-visible string, each marked <em>required wording</em> or <em>placeholder</em>.
+<p><strong>B16 · Workflows.</strong> The named pieces of work this page takes part in, and where in each it sits.</p>
+<h3 id="the-honesty-apparatus">The honesty apparatus</h3><p><strong>B17 · Copy register.</strong> Every user-visible string, each marked <em>required wording</em> or <em>placeholder</em>.
 Wording is where an unattended builder invents most freely; a placeholder that is labelled is safe,
 an unlabelled one becomes product.</p>
-<p><strong>18 · Decisions.</strong> What was decided, by whom, on what date. A decision with no name on it is a rumour.</p>
-<p><strong>19 · Observations.</strong> What walking through revealed. Explicitly not decisions and not requirements.</p>
-<p><strong>20 · Open questions.</strong> Question, why it matters, what it blocks, who must answer, needed by. Each is
+<p><strong>B18 · Decisions.</strong> What was decided, by whom, on what date. A decision with no name on it is a rumour.</p>
+<p><strong>B19 · Observations.</strong> What walking through revealed. Explicitly not decisions and not requirements.</p>
+<p><strong>B20 · Open questions.</strong> Question, why it matters, what it blocks, who must answer, needed by. Each is
 anchored to the element it affects and mirrored in the app-wide register.</p>
-<p><strong>21 · Out of scope, and what this does not settle.</strong> What this page deliberately does not answer, plus
+<p><strong>B21 · Out of scope, and what this does not settle.</strong> What this page deliberately does not answer, plus
 the standing list from §13.</p>
-<p><strong>22 · Build contract and machine-readable record.</strong> The instruction block handed to whoever builds
+<p><strong>B22 · Build contract and machine-readable record.</strong> The instruction block handed to whoever builds
 this page — what to build, what not to invent, what to ask about first, what done means — and the
 structured record that the checker validates and the builder consumes.</p>
 <h2 id="16-the-mock-frame">16. The mock frame</h2><p>The frame is what turns a picture into an instrument. Four controls sit above every mock.</p>
