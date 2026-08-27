@@ -3,8 +3,8 @@
 
   const BLOCKS = window.MOCKUMENT_BLOCKS || [];
   const STORAGE_KEY = "honest-mockument-template-state";
-  const SCHEMA_VERSION = 25;
-  const TEMPLATE_VERSION = "0.26.0";
+  const SCHEMA_VERSION = 28;
+  const TEMPLATE_VERSION = "0.29.0";
   const FIDELITY_NOTE = "Structure only, example data, nothing here is proof that the application works.";
   const THEME_KEY = "mockument-theme";
   const THEME_CYCLE = ["system", "dark", "light"];
@@ -20,8 +20,10 @@
   const initialHashBlock = window.location && /^#B\d{2}$/.test(window.location.hash || "") && BLOCKS.some(block => `#${block.id}` === window.location.hash) ? window.location.hash.slice(1) : "B01";
   let selection = { kind: "block", blockId: initialHashBlock };
   let showAllBlocks = false;
+  let previewMode = false;
   let mockChoice = { role: "default role", state: "default", reviewMode: "clean" };
   let activeGateFilter = null;
+  let activeResize = null;
   let toastTimer;
 
   function updateBlockHash() {
@@ -70,6 +72,12 @@
     return field.default || "";
   }
 
+  function clampPercent(value, minimum = 5) {
+    const number = Number(value);
+    if (!Number.isFinite(number)) return null;
+    return Math.max(minimum, Math.min(100, Math.round(number * 10) / 10));
+  }
+
   function initialBlock(definition) {
     const values = {};
     definition.fields.forEach(field => { values[field.key] = initialFieldValue(field); });
@@ -89,7 +97,8 @@
   }
 
   function nextRecordId(page, prefix) {
-    const rows = prefix === "PNL" ? page.blocks.B04.values.panels : prefix === "CTL" ? page.blocks.B04.values.controls : page.blocks.B04.values.elements;
+    const mock = page.blocks.B04.values;
+    const rows = prefix === "PNL" ? mock.panels : prefix === "ROW" ? mock.rows : prefix === "CTL" ? mock.controls : mock.elements;
     const highest = rows.reduce((max, row) => {
       const match = String(row.id || row._id || "").match(new RegExp(`^${prefix}-(\\d+)$`));
       return match ? Math.max(max, Number(match[1])) : max;
@@ -99,10 +108,67 @@
 
   function ensureLayout(page) {
     const mock = page.blocks.B04.values;
+    if (!Array.isArray(mock.rows)) mock.rows = [];
     if (!Array.isArray(mock.panels)) mock.panels = [];
     if (!Array.isArray(mock.elements)) mock.elements = [];
     if (!Array.isArray(mock.controls)) mock.controls = [];
     if (!Array.isArray(mock.layout)) mock.layout = [];
+    mock.layout.forEach(node => {
+      if (!node.type) node.type = String(node.recordId || "").startsWith("PNL-") ? "panel" : String(node.recordId || "").startsWith("ROW-") ? "row" : "section";
+      if (!node.parentId) node.parentId = node.panelId || "canvas";
+      if (!Array.isArray(node.items)) node.items = [];
+      if (["row", "panel"].includes(node.type) && node.sizePercent != null) node.sizePercent = clampPercent(node.sizePercent);
+      if (node.type === "section" && !node.columns) node.columns = 1;
+    });
+  }
+
+  function layoutChildren(page, parentId) {
+    return (page.blocks.B04.values.layout || []).filter(node => (node.parentId || node.panelId || "canvas") === parentId);
+  }
+
+  function panelWidthBasis(page, node) {
+    const panel = (page.blocks.B04.values.panels || []).find(row => (row.id || row._id) === node.recordId) || {};
+    return Math.max(1, Number(panel.width) || 1);
+  }
+
+  function normalizeLayoutSizes(page, nodes, fallbackType = "panel") {
+    const sizeable = nodes.filter(node => node && ["row", "panel"].includes(node.type || fallbackType));
+    if (!sizeable.length) return;
+    const existingTotal = sizeable.reduce((total, node) => total + (Number(node.sizePercent) || 0), 0);
+    if (existingTotal > 0) {
+      sizeable.forEach(node => { node.sizePercent = clampPercent((Number(node.sizePercent) || 0) / existingTotal * 100); });
+    } else if ((sizeable[0].type || fallbackType) === "panel") {
+      const basisTotal = sizeable.reduce((total, node) => total + panelWidthBasis(page, node), 0) || sizeable.length;
+      sizeable.forEach(node => { node.sizePercent = clampPercent(panelWidthBasis(page, node) / basisTotal * 100); });
+    } else {
+      const equal = Math.round((100 / sizeable.length) * 10) / 10;
+      sizeable.forEach(node => { node.sizePercent = equal; });
+    }
+    const roundedTotal = sizeable.reduce((total, node) => total + (Number(node.sizePercent) || 0), 0);
+    const last = sizeable[sizeable.length - 1];
+    if (last && roundedTotal !== 100) last.sizePercent = Math.max(5, Math.round(((Number(last.sizePercent) || 0) + (100 - roundedTotal)) * 10) / 10);
+  }
+
+  function consecutiveGroups(nodes, type) {
+    const groups = [];
+    for (let index = 0; index < nodes.length; index += 1) {
+      if ((nodes[index].type || "section") !== type) continue;
+      const group = [];
+      while (nodes[index] && (nodes[index].type || "section") === type) { group.push(nodes[index]); index += 1; }
+      index -= 1;
+      groups.push(group);
+    }
+    return groups;
+  }
+
+  function normalizeAllLayoutSizes(page) {
+    const layout = page.blocks.B04.values.layout || [];
+    const parentIds = new Set(["canvas", ...layout.map(node => node.recordId)]);
+    parentIds.forEach(parentId => {
+      const children = layoutChildren(page, parentId);
+      consecutiveGroups(children, "panel").forEach(group => normalizeLayoutSizes(page, group, "panel"));
+      consecutiveGroups(children, "row").forEach(group => normalizeLayoutSizes(page, group, "row"));
+    });
   }
 
   function createPage(id, name, route, built = true, isSettings = false) {
@@ -579,8 +645,8 @@
           const navigationPanelId = "PNL-01";
           const contentPanelId = "PNL-02";
           mock.panels.push(
-            { _id: navigationPanelId, _status: "wip", _accountable: "Page owner", _note: "Migrated from the former fixed application menu", id: navigationPanelId, name: "Application navigation", role: "application navigation", width: "2", trace: "MIGRATED" },
-            { _id: contentPanelId, _status: "wip", _accountable: "Page owner", _note: "Migrated from the former fixed content area", id: contentPanelId, name: "Primary content", role: "primary content", width: "10", trace: "MIGRATED" }
+            { _id: navigationPanelId, _status: "wip", _accountable: "Page owner", _note: "Migrated from the former fixed application menu", id: navigationPanelId, name: "Application navigation", description: "Migrated application menu region", role: "application navigation", width: "2", trace: "MIGRATED" },
+            { _id: contentPanelId, _status: "wip", _accountable: "Page owner", _note: "Migrated from the former fixed content area", id: contentPanelId, name: "Primary content", description: "Migrated primary content region", role: "primary content", width: "10", trace: "MIGRATED" }
           );
           mock.layout.forEach(section => { section.panelId = contentPanelId; });
           const highest = (mock.elements || []).reduce((max, row) => { const match = String(row.id || row._id || "").match(/^EL-(\d+)$/); return match ? Math.max(max, Number(match[1])) : max; }, 0);
@@ -597,6 +663,50 @@
         syncPage(page);
       });
       if (!next.changeLog.some(entry => entry.version === "0.26.0")) next.changeLog.push({ version: "0.26.0", date: new Date().toISOString(), note: "Replaced the fixed sidebar/content shell with a blank panel-first canvas and migrated existing mocks into navigation and primary-content panels." });
+    }
+    if (previousSchemaVersion < 26) {
+      Object.values(next.pages).forEach(page => {
+        const mock = page.blocks.B04.values;
+        mock.rows = Array.isArray(mock.rows) ? mock.rows : [];
+        mock.layout = Array.isArray(mock.layout) ? mock.layout : [];
+        mock.layout.forEach(node => {
+          if (!node.type) node.type = "section";
+          if (!node.parentId) node.parentId = node.panelId || "canvas";
+          if (!Array.isArray(node.items)) node.items = [];
+        });
+        const hasLayoutRegions = mock.layout.some(node => ["row", "panel"].includes(node.type));
+        if (!hasLayoutRegions && (mock.panels || []).length) {
+          const rowId = nextRecordId(page, "ROW");
+          mock.rows.push({ _id: rowId, _status: "wip", _accountable: "Page owner", _note: "Migrated from the former panel-only canvas", id: rowId, name: "Main canvas row", description: "Migrated row containing the existing panels", role: "main area", trace: "MIGRATED" });
+          mock.layout.unshift({ uid: `ROW-${Date.now()}-${page.id}`, type: "row", recordId: rowId, parentId: "canvas", items: [] });
+          (mock.panels || []).forEach(panel => {
+            const panelId = panel.id || panel._id;
+            mock.layout.push({ uid: `PANEL-${Date.now()}-${page.id}-${panelId}`, type: "panel", recordId: panelId, parentId: rowId, items: [] });
+          });
+          mock.layout.forEach(node => {
+            if (node.type === "section") node.parentId = node.panelId || node.parentId || (mock.panels[0] && (mock.panels[0].id || mock.panels[0]._id)) || rowId;
+          });
+        }
+        Object.values(page.blocks.B04.humanReviews).forEach(review => { review.confirmed = false; review.confirmedAt = ""; review.reviewedContentHash = ""; });
+        syncPage(page);
+      });
+      if (!next.changeLog.some(entry => entry.version === "0.27.0")) next.changeLog.push({ version: "0.27.0", date: new Date().toISOString(), note: "Added recursive rows and panels so the mock canvas can stack full-width bands, split panels, and nested regions in either direction." });
+    }
+    if (previousSchemaVersion < 27) {
+      Object.values(next.pages).forEach(page => {
+        const mock = page.blocks.B04.values;
+        (mock.rows || []).forEach(row => { if (row.description == null) row.description = ""; });
+        (mock.panels || []).forEach(panel => { if (panel.description == null) panel.description = ""; });
+        syncPage(page);
+      });
+      if (!next.changeLog.some(entry => entry.version === "0.28.0")) next.changeLog.push({ version: "0.28.0", date: new Date().toISOString(), note: "Added row and panel descriptions plus a full-browser B04 canvas preview mode." });
+    }
+    if (previousSchemaVersion < 28) {
+      Object.values(next.pages).forEach(page => {
+        normalizeAllLayoutSizes(page);
+        syncPage(page);
+      });
+      if (!next.changeLog.some(entry => entry.version === "0.29.0")) next.changeLog.push({ version: "0.29.0", date: new Date().toISOString(), note: "Added responsive percentage sizing and drag handles for sibling panels and rows." });
     }
     return next;
   }
@@ -709,18 +819,25 @@
       if (unshaped) missing.push(`${unshaped} data definition${unshaped === 1 ? " has" : "s have"} unresolved cardinality or structure`);
     }
     if (definition.id === "B04") {
+      const rows = block.values.rows || [];
       const panels = block.values.panels || [];
       const layout = block.values.layout || [];
+      const regionNodes = layout.filter(node => ["row", "panel"].includes(node.type));
+      const sectionNodes = layout.filter(node => (node.type || "section") === "section");
+      const regionIds = new Set(["canvas", ...rows.map(row => row.id || row._id), ...panels.map(panel => panel.id || panel._id)]);
+      if (!regionNodes.length) missing.push("mock canvas has no rows or panels");
       if (!panels.length) missing.push("mock canvas has no panels");
-      if (!layout.length) missing.push("mock canvas has no sections");
-      const brokenSections = layout.filter(section => !panels.some(panel => (panel.id || panel._id) === section.panelId)).length;
-      if (brokenSections) missing.push(`${brokenSections} section${brokenSections === 1 ? " references" : "s reference"} a missing panel`);
+      if (!sectionNodes.length) missing.push("mock canvas has no content sections");
+      const brokenNodes = layout.filter(node => !regionIds.has(node.parentId || node.panelId || "canvas")).length;
+      if (brokenNodes) missing.push(`${brokenNodes} layout node${brokenNodes === 1 ? " references" : "s reference"} a missing parent`);
+      const untracedRows = rows.filter(row => !String(row.trace || "").trim()).length;
       const untracedPanels = panels.filter(panel => !String(panel.trace || "").trim()).length;
+      if (untracedRows) missing.push(`${untracedRows} row${untracedRows === 1 ? " is" : "s are"} untraced`);
       if (untracedPanels) missing.push(`${untracedPanels} panel${untracedPanels === 1 ? " is" : "s are"} untraced`);
       const elements = block.values.elements || [];
-      if (!elements.some(row => row.kind !== "section")) missing.push("no visible element is recorded");
+      if (!elements.some(row => row.kind !== "section")) missing.push("no visible component is recorded");
       const untraced = elements.filter(row => row.kind !== "section" && !String(row.trace || "").trim()).length;
-      if (untraced) missing.push(`${untraced} visible element${untraced === 1 ? " is" : "s are"} untraced`);
+      if (untraced) missing.push(`${untraced} visible component${untraced === 1 ? " is" : "s are"} untraced`);
       const definitions = page.blocks.B03.values.data || [];
       const dataComponents = elements.filter(row => row.kind === "data");
       const unlinked = dataComponents.filter(row => !row.dataRef || row.dataRef === "Not yet defined" || !definitions.some(definition => (definition.id || definition._id) === row.dataRef)).length;
@@ -801,10 +918,11 @@
         if (definition.id === "B02" && !roles.some(row => String(row.role || "").trim())) missing.push("user role");
         if (definition.id === "B03" && data.some(row => !String(row.name || "").trim())) missing.push("data definition name");
         if (definition.id === "B04") {
+          if (!(block.values.layout || []).some(node => ["row", "panel"].includes(node.type))) missing.push("mock row or panel");
           if (!(block.values.panels || []).length) missing.push("mock panel");
-          if (!(block.values.layout || []).length) missing.push("mock section");
-          if (!elements.some(row => row.kind !== "section" && String(row.name || "").trim())) missing.push("visible element");
-          if (elements.some(row => !["done", "wip", "todo"].includes(row._status))) missing.push("element work status");
+          if (!(block.values.layout || []).some(node => (node.type || "section") === "section")) missing.push("content section");
+          if (!elements.some(row => row.kind !== "section" && String(row.name || "").trim())) missing.push("visible component");
+          if (elements.some(row => !["done", "wip", "todo"].includes(row._status))) missing.push("component work status");
           if (controls.some(row => !["done", "wip", "todo"].includes(row._status))) missing.push("control work status");
         }
         if (definition.id === "B05" && conditions.some(row => !String(row.name || "").trim())) missing.push("unnamed page condition");
@@ -961,7 +1079,11 @@
     if (kind === "navigation") {
       let destinations = [];
       if (row.navigationSource === "application pages") destinations = state.pageOrder.map(pageId => state.pages[pageId]).filter(Boolean).map(candidate => candidate.name);
-      else if (row.navigationSource === "current-page surfaces") destinations = (page.blocks.B04.values.elements || []).filter(candidate => candidate.kind === "section").map(candidate => candidate.name || candidate.id || candidate._id);
+      else if (row.navigationSource === "current-page surfaces") destinations = [
+        ...(page.blocks.B04.values.rows || []).map(candidate => candidate.name || candidate.id || candidate._id),
+        ...(page.blocks.B04.values.panels || []).map(candidate => candidate.name || candidate.id || candidate._id),
+        ...(page.blocks.B04.values.elements || []).filter(candidate => candidate.kind === "section").map(candidate => candidate.name || candidate.id || candidate._id)
+      ];
       else if (row.navigationSource === "workflow steps") destinations = (state.app.workflows || []).flatMap(workflow => (workflow.steps || []).filter(step => step.pageId === page.id).map(step => `${workflow.name || workflow.id} · ${step.name || step.id}`));
       else destinations = String(row.navigationTargets || "").split("\n").map(value => value.trim()).filter(Boolean);
       return `<nav class="mock-element mock-element--navigation status--${esc(row._status || "todo")}" data-mock-record="${esc(id)}">${label}<div class="mock-name">${esc(row.name || "Navigation")}</div><div class="mock-navigation-items">${destinations.length ? destinations.map(destination => `<span>${esc(destination)}</span>`).join("") : `<small>No destinations selected</small>`}</div></nav>`;
@@ -972,33 +1094,52 @@
 
   function renderMockComposer(page, disabled) {
     const mock = page.blocks.B04.values;
-    const panels = mock.panels || [];
     const layout = mock.layout || [];
-    const renderSection = (section, panelSections, localIndex) => {
-      const sectionIndex = layout.indexOf(section);
-      const row = mockRecord(page, section.recordId) || {};
-      return `<div class="composer-section" data-mock-record="${esc(section.recordId)}">
-        <div class="composer-section-head"><span class="row-id">${esc(section.recordId)}</span><strong>${esc(row.name || "Unnamed section")}</strong>
-          <label>Inner columns <select data-section-columns data-section="${sectionIndex}" ${disabled ? "disabled" : ""}>${[1,2,3].map(number => `<option value="${number}" ${Number(section.columns) === number ? "selected" : ""}>${number}</option>`).join("")}</select></label>
-          <button class="composer-move" data-move-section="up" data-section="${sectionIndex}" type="button" ${disabled || localIndex === 0 ? "disabled" : ""}>↑</button>
-          <button class="composer-move" data-move-section="down" data-section="${sectionIndex}" type="button" ${disabled || localIndex === panelSections.length - 1 ? "disabled" : ""}>↓</button>
-          <button class="remove-row" data-remove-section data-section="${sectionIndex}" type="button" ${disabled ? "disabled" : ""}>Remove</button>
+    const recordForNode = node => node.type === "row" ? (mock.rows || []).find(row => (row.id || row._id) === node.recordId) : node.type === "panel" ? (mock.panels || []).find(panel => (panel.id || panel._id) === node.recordId) : mockRecord(page, node.recordId);
+    const childNodes = parentId => layout.filter(node => (node.parentId || node.panelId || "canvas") === parentId);
+    const renderAddLayout = parentId => `<div class="composer-add-layout"><button class="button button--small" data-add-row-region="${esc(parentId)}" type="button" ${disabled ? "disabled" : ""}>+ Row</button><button class="button button--small" data-add-panel-region="${esc(parentId)}" type="button" ${disabled ? "disabled" : ""}>+ Panel</button><button class="button button--small" data-add-section data-parent-id="${esc(parentId)}" type="button" ${disabled ? "disabled" : ""}>+ Content section</button></div>`;
+    const renderSection = (node, siblings) => {
+      const sectionIndex = layout.indexOf(node);
+      const localIndex = siblings.indexOf(node);
+      const row = recordForNode(node) || {};
+      return `<div class="composer-section" data-mock-record="${esc(node.recordId)}">
+        <div class="composer-section-head"><span class="row-id">${esc(node.recordId)}</span><strong>${esc(row.name || "Unnamed content section")}</strong>
+          <label>Inner columns <select data-section-columns data-section="${sectionIndex}" ${disabled ? "disabled" : ""}>${[1,2,3].map(number => `<option value="${number}" ${Number(node.columns) === number ? "selected" : ""}>${number}</option>`).join("")}</select></label>
+          <button class="composer-move" data-move-layout="up" data-layout-index="${sectionIndex}" type="button" ${disabled || localIndex === 0 ? "disabled" : ""}>↑</button>
+          <button class="composer-move" data-move-layout="down" data-layout-index="${sectionIndex}" type="button" ${disabled || localIndex === siblings.length - 1 ? "disabled" : ""}>↓</button>
+          <button class="remove-row" data-remove-layout data-layout-index="${sectionIndex}" type="button" ${disabled ? "disabled" : ""}>Remove</button>
         </div>
-        <div class="composer-items">${(section.items || []).map((item, itemIndex) => {
+        <div class="composer-items">${(node.items || []).map((item, itemIndex) => {
           const itemRow = mockRecord(page, item.recordId) || {};
-          return `<div class="composer-item" data-mock-record="${esc(item.recordId)}"><span class="row-id">${esc(item.recordId)}</span><strong>${esc(itemRow.name || "Missing record")}</strong><small>${esc(item.recordId.startsWith("CTL-") ? "action" : (itemRow.kind || "component"))}</small><span class="composer-item-actions"><button data-move-item="up" data-section="${sectionIndex}" data-item="${itemIndex}" type="button" ${disabled || itemIndex === 0 ? "disabled" : ""}>←</button><button data-move-item="down" data-section="${sectionIndex}" data-item="${itemIndex}" type="button" ${disabled || itemIndex === section.items.length - 1 ? "disabled" : ""}>→</button><button data-remove-item data-section="${sectionIndex}" data-item="${itemIndex}" type="button" ${disabled ? "disabled" : ""}>×</button></span></div>`;
-        }).join("") || `<div class="repeater-empty">This section is empty.</div>`}</div>
+          return `<div class="composer-item" data-mock-record="${esc(item.recordId)}"><span class="row-id">${esc(item.recordId)}</span><strong>${esc(itemRow.name || "Missing record")}</strong><small>${esc(item.recordId.startsWith("CTL-") ? "action" : (itemRow.kind || "component"))}</small><span class="composer-item-actions"><button data-move-item="up" data-section="${sectionIndex}" data-item="${itemIndex}" type="button" ${disabled || itemIndex === 0 ? "disabled" : ""}>←</button><button data-move-item="down" data-section="${sectionIndex}" data-item="${itemIndex}" type="button" ${disabled || itemIndex === node.items.length - 1 ? "disabled" : ""}>→</button><button data-remove-item data-section="${sectionIndex}" data-item="${itemIndex}" type="button" ${disabled ? "disabled" : ""}>×</button></span></div>`;
+        }).join("") || `<div class="repeater-empty">This content section is empty.</div>`}</div>
         <div class="composer-add"><select data-new-item-type ${disabled ? "disabled" : ""}><option value="content">Static content</option><option value="data">Data-bound component</option><option value="navigation">Navigation</option><option value="notice">Notice</option><option value="action">Action</option></select><button class="button button--small" data-add-item data-section="${sectionIndex}" type="button" ${disabled ? "disabled" : ""}>Add to section</button></div>
       </div>`;
     };
-    return `<div class="composer composer--panels">
-      <div class="composer-head"><div><strong>Panel-first mock composer</strong><span>Start with a blank canvas. Add up to four top-level panels, then add sections and components.</span></div><button class="button button--small" data-add-panel type="button" ${disabled || panels.length >= 4 ? "disabled" : ""}>+ Panel</button></div>
-      ${panels.length ? panels.map((panel, panelIndex) => {
-        const panelId = panel.id || panel._id;
-        const panelSections = layout.filter(section => section.panelId === panelId);
-        return `<div class="composer-panel" data-mock-record="${esc(panelId)}"><div class="composer-panel-head"><span class="row-id">Panel ${panelIndex + 1} · ${esc(panelId)}</span><strong>${esc(panel.name || "Unnamed panel")}</strong><small>${esc(panel.role || "custom")}</small><label>Width <select data-panel-width data-panel="${panelIndex}" ${disabled ? "disabled" : ""}>${Array.from({length:12}, (_, index) => String(index + 1)).map(width => `<option value="${width}" ${String(panel.width) === width ? "selected" : ""}>${width}</option>`).join("")}</select></label><button class="composer-move" data-move-panel="left" data-panel="${panelIndex}" type="button" ${disabled || panelIndex === 0 ? "disabled" : ""}>←</button><button class="composer-move" data-move-panel="right" data-panel="${panelIndex}" type="button" ${disabled || panelIndex === panels.length - 1 ? "disabled" : ""}>→</button><button class="remove-row" data-remove-panel data-panel="${panelIndex}" type="button" ${disabled ? "disabled" : ""}>Remove panel</button></div><div class="composer-panel-sections">${panelSections.map((section, localIndex) => renderSection(section, panelSections, localIndex)).join("") || `<div class="repeater-empty">This panel has no sections.</div>`}</div><button class="button button--small composer-add-section" data-add-section data-panel-id="${esc(panelId)}" type="button" ${disabled ? "disabled" : ""}>+ Section in panel</button></div>`;
-      }).join("") : `<div class="canvas-empty"><strong>Blank canvas</strong><span>Add a panel before adding sections or components.</span><button class="button button--primary" data-add-panel type="button" ${disabled ? "disabled" : ""}>+ Add first panel</button></div>`}
-      ${panels.length >= 4 ? `<div class="form-help">Four panels is the current desktop authoring limit. The stored panel array remains extensible.</div>` : ""}
+    const renderNode = (node, siblings, depth = 0) => {
+      const layoutIndex = layout.indexOf(node);
+      const localIndex = siblings.indexOf(node);
+      const type = node.type || "section";
+      if (type === "section") return renderSection(node, siblings);
+      const row = recordForNode(node) || {};
+      const id = node.recordId;
+      const children = childNodes(id);
+      const isPanel = type === "panel";
+      const panelIndex = isPanel ? (mock.panels || []).findIndex(panel => (panel.id || panel._id) === id) : -1;
+      const description = String(row.description || "").trim();
+      return `<div class="composer-region composer-region--${esc(type)}" data-mock-record="${esc(id)}" style="--composer-depth:${depth}">
+        <div class="composer-region-head"><span class="row-id">${esc(type === "row" ? "Row" : "Panel")} · ${esc(id)}</span><strong>${esc(row.name || (type === "row" ? "Unnamed row" : "Unnamed panel"))}</strong>${description ? `<span class="composer-region-description">${esc(description)}</span>` : ""}<small>${esc(row.role || "custom")}</small><label>Size % <input class="composer-size-input" data-layout-size data-layout-index="${layoutIndex}" value="${esc(node.sizePercent || "")}" placeholder="auto" ${disabled ? "disabled" : ""}></label><button class="composer-move" data-move-layout="up" data-layout-index="${layoutIndex}" type="button" ${disabled || localIndex === 0 ? "disabled" : ""}>↑</button><button class="composer-move" data-move-layout="down" data-layout-index="${layoutIndex}" type="button" ${disabled || localIndex === siblings.length - 1 ? "disabled" : ""}>↓</button><button class="remove-row" data-remove-layout data-layout-index="${layoutIndex}" type="button" ${disabled ? "disabled" : ""}>Remove ${esc(type)}</button></div>
+        <div class="composer-region-body">${children.length ? renderChildren(id, depth + 1) : `<div class="repeater-empty">This ${esc(type)} has no rows, panels, or content sections.</div>`}${renderAddLayout(id)}</div>
+      </div>`;
+    };
+    const renderChildren = (parentId, depth = 0) => {
+      const children = childNodes(parentId);
+      return children.map(node => renderNode(node, children, depth)).join("");
+    };
+    const rootChildren = childNodes("canvas");
+    return `<div class="composer composer--regions">
+      <div class="composer-head"><div><strong>Flexible mock composer</strong><span>Start with a blank canvas. Add rows and panels in either direction, then add content sections and components.</span></div><div class="composer-head-actions"><button class="button button--small" data-add-row-region="canvas" type="button" ${disabled ? "disabled" : ""}>+ Row</button><button class="button button--small" data-add-panel-region="canvas" type="button" ${disabled ? "disabled" : ""}>+ Panel</button></div></div>
+      ${rootChildren.length ? `<div class="composer-tree">${renderChildren("canvas")}</div>` : `<div class="canvas-empty"><strong>Blank canvas</strong><span>Add a row for a full-width band, or add panels directly for a split screen.</span><div><button class="button button--primary" data-add-row-region="canvas" type="button" ${disabled ? "disabled" : ""}>+ Add first row</button> <button class="button" data-add-panel-region="canvas" type="button" ${disabled ? "disabled" : ""}>+ Add first panel</button></div></div>`}
     </div>`;
   }
 
@@ -1007,7 +1148,6 @@
     const conditions = page.blocks.B05.values.conditions || [];
     const conditionNames = ["default", ...conditions.map(row => row.name).filter(name => name && String(name).toLowerCase() !== "default")];
     const mock = page.blocks.B04.values;
-    const panels = mock.panels || [];
     const layout = mock.layout || [];
     if (roles.length && !roles.includes(mockChoice.role)) mockChoice.role = roles[0];
     if (!conditionNames.includes(mockChoice.state)) mockChoice.state = "default";
@@ -1016,19 +1156,62 @@
     const segment = (name, values, current) => `<div class="segment">${values.map(value => `<button type="button" data-mock-choice="${name}" data-value="${esc(value)}" class="${value === current ? "is-on" : ""}">${esc(value)}</button>`).join("")}</div>`;
     const showIds = ["IDs", "honesty + IDs"].includes(mockChoice.reviewMode);
     const showHonesty = ["honesty", "honesty + IDs"].includes(mockChoice.reviewMode);
-    const panelTracks = panels.map(panel => `${Math.max(1, Number(panel.width) || 1)}fr`).join(" ");
+    const childNodes = parentId => layout.filter(node => (node.parentId || node.panelId || "canvas") === parentId);
+    const recordForNode = node => node.type === "row" ? (mock.rows || []).find(row => (row.id || row._id) === node.recordId) : node.type === "panel" ? (mock.panels || []).find(panel => (panel.id || panel._id) === node.recordId) : mockRecord(page, node.recordId);
+    const renderSectionNode = node => {
+      const row = recordForNode(node) || {};
+      const sectionMetadata = [showIds ? node.recordId : "", showHonesty ? statusLabel(row._status) : ""].filter(Boolean).join(" · ");
+      return `<section class="mock-layout-section status--${esc(row._status || "todo")}" data-mock-record="${esc(node.recordId)}"><div class="mock-layout-title">${sectionMetadata ? `<span>${esc(sectionMetadata)}</span>` : ""}${esc(row.name || "Unnamed content section")}</div><div class="mock-layout-grid" style="--mock-columns:${Number(node.columns) || 1}">${(node.items || []).map(item => renderMockItem(page, item)).join("") || `<div class="mock-empty">Empty section</div>`}</div></section>`;
+    };
+    const renderPanelNode = (node, panelIndex) => {
+      const panel = recordForNode(node) || {};
+      const panelId = node.recordId;
+      const panelMetadata = [showIds ? `Panel ${panelIndex + 1} · ${panelId}` : "", showHonesty ? statusLabel(panel._status) : ""].filter(Boolean).join(" · ");
+      const description = String(panel.description || "").trim();
+      return `<section class="mock-panel status--${esc(panel._status || "todo")}" data-mock-record="${esc(panelId)}"><div class="mock-panel-title">${panelMetadata ? `<span>${esc(panelMetadata)}</span>` : ""}<strong>${esc(panel.name || "Unnamed panel")}</strong>${description ? `<p>${esc(description)}</p>` : ""}<small>${esc(panel.role || "custom")}</small></div><div class="mock-panel-content">${renderLayoutChildren(panelId) || `<div class="mock-empty">Empty panel</div>`}</div></section>`;
+    };
+    const renderRowNode = node => {
+      const row = recordForNode(node) || {};
+      const rowMetadata = [showIds ? node.recordId : "", showHonesty ? statusLabel(row._status) : ""].filter(Boolean).join(" · ");
+      const description = String(row.description || "").trim();
+      return `<section class="mock-row status--${esc(row._status || "todo")}" data-mock-record="${esc(node.recordId)}"><div class="mock-row-title">${rowMetadata ? `<span>${esc(rowMetadata)}</span>` : ""}<strong>${esc(row.name || "Unnamed row")}</strong>${description ? `<p>${esc(description)}</p>` : ""}<small>${esc(row.role || "custom")}</small></div><div class="mock-row-content">${renderLayoutChildren(node.recordId) || `<div class="mock-empty">Empty row</div>`}</div></section>`;
+    };
+    function groupTracks(group, axis) {
+      normalizeLayoutSizes(page, group, axis === "x" ? "panel" : "row");
+      const tracks = group.map(node => `${clampPercent(node.sizePercent) || (100 / group.length)}%`);
+      return tracks.flatMap((track, index) => index < tracks.length - 1 ? [track, "6px"] : [track]).join(" ");
+    }
+    function resizeHandle(axis, parentId, leftNode, rightNode) {
+      if (disabled) return "";
+      return `<div class="mock-resize-handle mock-resize-handle--${axis === "x" ? "vertical" : "horizontal"}" data-resize-axis="${axis}" data-resize-parent="${esc(parentId)}" data-resize-left="${esc(leftNode.recordId)}" data-resize-right="${esc(rightNode.recordId)}" title="Drag to resize"></div>`;
+    }
+    function interleaveRendered(group, renderer, axis, parentId) {
+      return group.map((node, index) => `${renderer(node, index)}${index < group.length - 1 ? resizeHandle(axis, parentId, node, group[index + 1]) : ""}`).join("");
+    }
+    function renderLayoutChildren(parentId) {
+      const nodes = childNodes(parentId);
+      let html = "";
+      for (let index = 0; index < nodes.length; index += 1) {
+        const node = nodes[index];
+        const type = node.type || "section";
+        if (type === "panel") {
+          const group = [];
+          while (nodes[index] && nodes[index].type === "panel") { group.push(nodes[index]); index += 1; }
+          index -= 1;
+          html += `<div class="mock-panel-row" style="grid-template-columns:${esc(groupTracks(group, "x"))}">${interleaveRendered(group, renderPanelNode, "x", parentId)}</div>`;
+        } else if (type === "row") {
+          const group = [];
+          while (nodes[index] && nodes[index].type === "row") { group.push(nodes[index]); index += 1; }
+          index -= 1;
+          html += `<div class="mock-row-stack" style="grid-template-rows:${esc(groupTracks(group, "y"))}">${interleaveRendered(group, renderRowNode, "y", parentId)}</div>`;
+        } else html += renderSectionNode(node);
+      }
+      return html;
+    }
+    const hasLayout = childNodes("canvas").length;
     return `<div class="mock-shell ${showHonesty ? "honesty-on" : ""} ${showIds ? "ids-on" : ""}">
-      <div class="mock-controls">${segment("role", roles.length ? roles : ["default role"], mockChoice.role)}${segment("state", conditionNames, mockChoice.state)}<div class="review-view"><span>Review view</span>${segment("reviewMode", ["clean", "honesty", "IDs", "honesty + IDs"], mockChoice.reviewMode)}</div></div>
-      <div class="mock-stage"><div class="mock-page-wrap">${conditionNote}${panels.length ? `<div class="mock-panel-canvas" style="grid-template-columns:${esc(panelTracks)}">${panels.map((panel, panelIndex) => {
-        const panelId = panel.id || panel._id;
-        const panelMetadata = [showIds ? `Panel ${panelIndex + 1} · ${panelId}` : "", showHonesty ? statusLabel(panel._status) : ""].filter(Boolean).join(" · ");
-        const sections = layout.filter(section => section.panelId === panelId);
-        return `<section class="mock-panel status--${esc(panel._status || "todo")}" data-mock-record="${esc(panelId)}"><div class="mock-panel-title">${panelMetadata ? `<span>${esc(panelMetadata)}</span>` : ""}<strong>${esc(panel.name || "Unnamed panel")}</strong><small>${esc(panel.role || "custom")}</small></div><div class="mock-panel-content">${sections.map(section => {
-          const row = mockRecord(page, section.recordId) || {};
-          const sectionMetadata = [showIds ? section.recordId : "", showHonesty ? statusLabel(row._status) : ""].filter(Boolean).join(" · ");
-          return `<section class="mock-layout-section status--${esc(row._status || "todo")}" data-mock-record="${esc(section.recordId)}"><div class="mock-layout-title">${sectionMetadata ? `<span>${esc(sectionMetadata)}</span>` : ""}${esc(row.name || "Unnamed section")}</div><div class="mock-layout-grid" style="--mock-columns:${Number(section.columns) || 1}">${(section.items || []).map(item => renderMockItem(page, item)).join("") || `<div class="mock-empty">Empty section</div>`}</div></section>`;
-        }).join("") || `<div class="mock-empty">Empty panel</div>`}</div></section>`;
-      }).join("")}</div>` : `<div class="mock-canvas-empty"><strong>Blank canvas</strong><span>Add the first panel in the composer below.</span></div>`}</div></div>
+      <div class="mock-controls">${segment("role", roles.length ? roles : ["default role"], mockChoice.role)}${segment("state", conditionNames, mockChoice.state)}<button class="button button--small mock-preview-button" data-open-preview type="button">Preview</button><div class="review-view"><span>Review view</span>${segment("reviewMode", ["clean", "honesty", "IDs", "honesty + IDs"], mockChoice.reviewMode)}</div></div>
+      <div class="mock-stage"><div class="mock-page-wrap">${conditionNote}${hasLayout ? `<div class="mock-canvas">${renderLayoutChildren("canvas")}</div>` : `<div class="mock-canvas-empty"><strong>Blank canvas</strong><span>Add the first row or panel in the composer below.</span></div>`}</div></div>
       <div class="mock-caption">${esc(FIDELITY_NOTE)}</div>
     </div>${renderMockComposer(page, disabled)}`;
   }
@@ -1124,9 +1307,10 @@ Anything not covered above is unspecified. Add a question against this page rath
   function workflowSurfaceOptions(pageId) {
     const page = state.pages[pageId];
     if (!page || !page.built) return [];
+    const rows = (page.blocks.B04.values.rows || []).map(record => ({ value: record.id || record._id, label: `${record.id || record._id} — ${record.name || "Unnamed row"} · ${record.role || "custom"}` }));
     const panels = (page.blocks.B04.values.panels || []).map(record => ({ value: record.id || record._id, label: `${record.id || record._id} — ${record.name || "Unnamed panel"} · ${record.role || "custom"}` }));
     const sections = (page.blocks.B04.values.elements || []).filter(record => record.kind === "section").map(record => ({ value: record.id || record._id, label: `${record.id || record._id} — ${record.name || "Unnamed section"} · ${record.surfaceRole || "ordinary section"}` }));
-    return [...panels, ...sections];
+    return [...rows, ...panels, ...sections];
   }
 
   function workflowActionOptions(pageId) {
@@ -1327,7 +1511,17 @@ Anything not covered above is unspecified. Add a question against this page rath
       ${extra}`;
   }
 
+  function renderPreview() {
+    const page = activePage();
+    document.body.classList.add("is-previewing");
+    if (!page) { previewMode = false; return render(); }
+    $("#document").innerHTML = `<div class="fullscreen-preview"><button class="preview-exit" data-exit-preview type="button" aria-label="Back to B04" title="Back to B04">↗</button>${renderMock(page, true)}</div>`;
+    $("#inspector").innerHTML = "";
+  }
+
   function render() {
+    if (previewMode) { renderPreview(); return; }
+    document.body.classList.remove("is-previewing");
     renderMenu();
     renderDocument();
     renderInspector();
@@ -1336,6 +1530,16 @@ Anything not covered above is unspecified. Add a question against this page rath
   function currentEditablePage() {
     const page = activePage();
     return page && page.built ? page : null;
+  }
+
+  function updateLayoutSize(target) {
+    const page = currentEditablePage();
+    if (!page) return;
+    const node = page.blocks.B04.values.layout[Number(target.dataset.layoutIndex)];
+    if (!node) return;
+    node.sizePercent = target.value === "" ? null : clampPercent(target.value);
+    normalizeAllLayoutSizes(page);
+    saveState();
   }
 
   function updateValue(target) {
@@ -1503,18 +1707,28 @@ Anything not covered above is unspecified. Add a question against this page rath
     URL.revokeObjectURL(url);
   }
 
-  function addPanel(page) {
-    const panels = page.blocks.B04.values.panels;
-    if (panels.length >= 4) return;
-    const id = nextRecordId(page, "PNL");
-    panels.push({ _id: id, _status: "todo", _accountable: "Page owner", _note: "", id, name: `Panel ${panels.length + 1}`, role: panels.length ? "custom" : "primary content", width: "1", trace: "" });
+  function addRowRegion(page, parentId = "canvas") {
+    const mock = page.blocks.B04.values;
+    const id = nextRecordId(page, "ROW");
+    mock.rows.push({ _id: id, _status: "todo", _accountable: "Page owner", _note: "", id, name: `Row ${mock.rows.length + 1}`, description: "", role: parentId === "canvas" ? "content band" : "custom", trace: "" });
+    mock.layout.push({ uid: `ROW-${Date.now()}-${id}`, type: "row", recordId: id, parentId, sizePercent: 20, items: [] });
+    normalizeAllLayoutSizes(page);
     selection = { kind: "record", recordId: id, blockId: "B04" };
   }
 
-  function addLayoutSection(page, panelId) {
+  function addPanel(page, parentId = "canvas") {
+    const mock = page.blocks.B04.values;
+    const id = nextRecordId(page, "PNL");
+    mock.panels.push({ _id: id, _status: "todo", _accountable: "Page owner", _note: "", id, name: `Panel ${mock.panels.length + 1}`, description: "", role: mock.panels.length ? "custom" : "primary content", width: "1", trace: "" });
+    mock.layout.push({ uid: `PANEL-${Date.now()}-${id}`, type: "panel", recordId: id, parentId, sizePercent: 20, items: [] });
+    normalizeAllLayoutSizes(page);
+    selection = { kind: "record", recordId: id, blockId: "B04" };
+  }
+
+  function addLayoutSection(page, parentId) {
     const id = nextRecordId(page, "EL");
-    page.blocks.B04.values.elements.push({ _id: id, _status: "todo", _accountable: "Page owner", _note: "", id, kind: "section", name: "New section", shows: "", dataRef: "", presentation: "", surfaceRole: "ordinary section", navigationSource: "application pages", navigationTargets: "", trace: "" });
-    page.blocks.B04.values.layout.push({ uid: `SECTION-${Date.now()}`, recordId: id, panelId, columns: 1, items: [] });
+    page.blocks.B04.values.elements.push({ _id: id, _status: "todo", _accountable: "Page owner", _note: "", id, kind: "section", name: "New content section", shows: "", dataRef: "", presentation: "", surfaceRole: "ordinary section", navigationSource: "application pages", navigationTargets: "", trace: "" });
+    page.blocks.B04.values.layout.push({ uid: `SECTION-${Date.now()}-${id}`, type: "section", recordId: id, parentId, columns: 1, items: [] });
     selection = { kind: "record", recordId: id, blockId: "B04" };
   }
 
@@ -1531,8 +1745,26 @@ Anything not covered above is unspecified. Add a question against this page rath
   }
 
   function removeRecord(page, recordId) {
+    page.blocks.B04.values.rows = page.blocks.B04.values.rows.filter(row => (row.id || row._id) !== recordId);
+    page.blocks.B04.values.panels = page.blocks.B04.values.panels.filter(row => (row.id || row._id) !== recordId);
     page.blocks.B04.values.elements = page.blocks.B04.values.elements.filter(row => (row.id || row._id) !== recordId);
     page.blocks.B04.values.controls = page.blocks.B04.values.controls.filter(row => (row.id || row._id) !== recordId);
+  }
+
+  function collectLayoutRecordIds(layout, node) {
+    const ids = [node.recordId];
+    (node.items || []).forEach(item => ids.push(item.recordId));
+    layout.filter(candidate => (candidate.parentId || candidate.panelId || "canvas") === node.recordId).forEach(child => ids.push(...collectLayoutRecordIds(layout, child)));
+    return ids;
+  }
+
+  function removeLayoutNode(page, layoutIndex) {
+    const mock = page.blocks.B04.values;
+    const node = mock.layout[layoutIndex];
+    if (!node) return;
+    const ids = collectLayoutRecordIds(mock.layout, node);
+    mock.layout = mock.layout.filter(candidate => !ids.includes(candidate.recordId));
+    ids.forEach(id => removeRecord(page, id));
   }
 
   function moveEntry(items, index, direction) {
@@ -1541,15 +1773,67 @@ Anything not covered above is unspecified. Add a question against this page rath
     [items[index], items[target]] = [items[target], items[index]];
   }
 
-  function moveSectionWithinPanel(page, sectionIndex, direction) {
+  function moveLayoutNode(page, layoutIndex, direction) {
     const layout = page.blocks.B04.values.layout;
-    const panelId = layout[sectionIndex].panelId;
-    const indices = layout.map((section, index) => section.panelId === panelId ? index : -1).filter(index => index >= 0);
-    const localIndex = indices.indexOf(sectionIndex);
-    const targetLocal = direction === "up" ? localIndex - 1 : localIndex + 1;
+    const node = layout[layoutIndex];
+    if (!node) return;
+    const parentId = node.parentId || node.panelId || "canvas";
+    const indices = layout.map((candidate, index) => (candidate.parentId || candidate.panelId || "canvas") === parentId ? index : -1).filter(index => index >= 0);
+    const localIndex = indices.indexOf(layoutIndex);
+    const targetLocal = ["up", "left"].includes(direction) ? localIndex - 1 : localIndex + 1;
     if (targetLocal < 0 || targetLocal >= indices.length) return;
     const targetIndex = indices[targetLocal];
-    [layout[sectionIndex], layout[targetIndex]] = [layout[targetIndex], layout[sectionIndex]];
+    [layout[layoutIndex], layout[targetIndex]] = [layout[targetIndex], layout[layoutIndex]];
+  }
+
+  function resizeGroupTracks(group, axis) {
+    const tracks = group.map(node => `${clampPercent(node.sizePercent) || (100 / group.length)}%`);
+    return tracks.flatMap((track, index) => index < tracks.length - 1 ? [track, "6px"] : [track]).join(" ");
+  }
+
+  function startResize(handle, event) {
+    const page = currentEditablePage();
+    if (!page) return;
+    const parentId = handle.dataset.resizeParent || "canvas";
+    const axis = handle.dataset.resizeAxis;
+    const type = axis === "x" ? "panel" : "row";
+    const children = layoutChildren(page, parentId);
+    const left = children.find(node => node.recordId === handle.dataset.resizeLeft);
+    const right = children.find(node => node.recordId === handle.dataset.resizeRight);
+    if (!left || !right) return;
+    const leftIndex = children.indexOf(left);
+    const rightIndex = children.indexOf(right);
+    const group = [];
+    for (let index = leftIndex; index >= 0 && children[index].type === type; index -= 1) group.unshift(children[index]);
+    for (let index = leftIndex + 1; index < children.length && children[index].type === type; index += 1) group.push(children[index]);
+    normalizeLayoutSizes(page, group, type);
+    activeResize = { page, axis, group, left, right, startX: event.clientX, startY: event.clientY, startLeft: Number(left.sizePercent) || 50, startRight: Number(right.sizePercent) || 50, container: handle.parentElement };
+    document.body.classList.add("is-resizing-layout");
+    event.preventDefault();
+  }
+
+  function updateActiveResize(event) {
+    if (!activeResize) return;
+    const rect = activeResize.container.getBoundingClientRect();
+    const span = activeResize.axis === "x" ? rect.width : rect.height;
+    if (!span) return;
+    const delta = activeResize.axis === "x" ? event.clientX - activeResize.startX : event.clientY - activeResize.startY;
+    const deltaPercent = delta / span * 100;
+    const pairTotal = activeResize.startLeft + activeResize.startRight;
+    const minimum = Math.max(5, Math.min(20, pairTotal / 2 - 1));
+    const nextLeft = Math.max(minimum, Math.min(pairTotal - minimum, Math.round((activeResize.startLeft + deltaPercent) * 10) / 10));
+    activeResize.left.sizePercent = nextLeft;
+    activeResize.right.sizePercent = Math.round((pairTotal - nextLeft) * 10) / 10;
+    if (activeResize.container) activeResize.container.style[activeResize.axis === "x" ? "gridTemplateColumns" : "gridTemplateRows"] = resizeGroupTracks(activeResize.group, activeResize.axis);
+  }
+
+  function finishActiveResize() {
+    if (!activeResize) return;
+    normalizeLayoutSizes(activeResize.page, activeResize.group, activeResize.axis === "x" ? "panel" : "row");
+    saveState();
+    activeResize = null;
+    document.body.classList.remove("is-resizing-layout");
+    render();
   }
 
   function showToast(message) {
@@ -1559,6 +1843,14 @@ Anything not covered above is unspecified. Add a question against this page rath
     clearTimeout(toastTimer);
     toastTimer = setTimeout(() => toast.classList.remove("is-on"), 1800);
   }
+
+  document.addEventListener("mousedown", event => {
+    const handle = event.target.closest("[data-resize-axis]");
+    if (handle) startResize(handle, event);
+  });
+
+  document.addEventListener("mousemove", updateActiveResize);
+  document.addEventListener("mouseup", finishActiveResize);
 
   document.addEventListener("click", event => {
     const openWorkflowStep = event.target.closest("[data-open-workflow-step]");
@@ -1588,11 +1880,13 @@ Anything not covered above is unspecified. Add a question against this page rath
       renderInspector();
     }
     const openPage = event.target.closest("[data-open-page]");
-    if (openPage) { state.activePageId = openPage.dataset.openPage; selectBlock("B01"); saveState(); render(); return; }
-    if (event.target.closest("#template-link")) { state.activePageId = "template"; selectBlock("B01"); saveState(); render(); return; }
+    if (openPage) { previewMode = false; state.activePageId = openPage.dataset.openPage; selectBlock("B01"); saveState(); render(); return; }
+    if (event.target.closest("#template-link")) { previewMode = false; state.activePageId = "template"; selectBlock("B01"); saveState(); render(); return; }
     if (event.target.closest("#new-page-button, [data-open-new-page]")) { openNewPageDialog(); return; }
     if (event.target.closest("#export-button")) { exportJson(state, `${slugify(state.app.name)}-mockument.json`); return; }
     if (event.target.closest("#theme-button")) { cycleTheme(); return; }
+    if (event.target.closest("[data-open-preview]")) { previewMode = true; selectBlock("B04"); render(); return; }
+    if (event.target.closest("[data-exit-preview]")) { previewMode = false; selectBlock("B04"); render(); revealActiveBlock(); return; }
     if (event.target.closest("[data-add-reviewer]")) { state.app.reviewers.push(""); saveState(); render(); return; }
     if (event.target.closest("[data-add-workflow]")) { const id = nextWorkflowId(); state.app.workflows.push({ id, name: "New workflow", startStepId: "", steps: [], note: "" }); saveState(); render(); return; }
     const removeWorkflow = event.target.closest("[data-remove-workflow]");
@@ -1614,27 +1908,18 @@ Anything not covered above is unspecified. Add a question against this page rath
     if (gateFilter) { activeGateFilter = activeGateFilter === gateFilter.dataset.gateFilter ? null : gateFilter.dataset.gateFilter; const scrollY = window.scrollY; renderDocument(); renderInspector(); window.scrollTo(0, scrollY); return; }
     const build = event.target.closest("[data-build-page]");
     if (build) { const page = state.pages[build.dataset.buildPage]; createFromTemplate(page.name, page.route, page.parentId, page.id); return; }
-    if (event.target.closest("[data-add-panel]")) { const page = currentEditablePage(); addPanel(page); saveState(); render(); return; }
-    const movePanel = event.target.closest("[data-move-panel]");
-    if (movePanel) { const page = currentEditablePage(); moveEntry(page.blocks.B04.values.panels, Number(movePanel.dataset.panel), movePanel.dataset.movePanel); saveState(); render(); return; }
-    const removePanel = event.target.closest("[data-remove-panel]");
-    if (removePanel && confirm("Remove this panel, all of its sections, and their component records?")) {
-      const page = currentEditablePage();
-      const mock = page.blocks.B04.values;
-      const [panel] = mock.panels.splice(Number(removePanel.dataset.panel), 1);
-      const panelId = panel.id || panel._id;
-      const removedSections = mock.layout.filter(section => section.panelId === panelId);
-      removedSections.flatMap(section => [section.recordId, ...(section.items || []).map(item => item.recordId)]).forEach(id => removeRecord(page, id));
-      mock.layout = mock.layout.filter(section => section.panelId !== panelId);
-      selection = { kind: "block", blockId: "B04" };
-      saveState(); render(); return;
-    }
+    const addRowButton = event.target.closest("[data-add-row-region]");
+    if (addRowButton) { const page = currentEditablePage(); addRowRegion(page, addRowButton.dataset.addRowRegion || "canvas"); saveState(); render(); return; }
+    const addPanelButton = event.target.closest("[data-add-panel-region]");
+    if (addPanelButton) { const page = currentEditablePage(); addPanel(page, addPanelButton.dataset.addPanelRegion || "canvas"); saveState(); render(); return; }
+    const moveLayout = event.target.closest("[data-move-layout]");
+    if (moveLayout) { const page = currentEditablePage(); moveLayoutNode(page, Number(moveLayout.dataset.layoutIndex), moveLayout.dataset.moveLayout); saveState(); render(); return; }
+    const removeLayout = event.target.closest("[data-remove-layout]");
+    if (removeLayout && confirm("Remove this layout region and everything inside it from the mock and specification registers?")) { const page = currentEditablePage(); removeLayoutNode(page, Number(removeLayout.dataset.layoutIndex)); selection = { kind: "block", blockId: "B04" }; saveState(); render(); return; }
     const addSection = event.target.closest("[data-add-section]");
-    if (addSection) { const page = currentEditablePage(); addLayoutSection(page, addSection.dataset.panelId); saveState(); render(); return; }
+    if (addSection) { const page = currentEditablePage(); addLayoutSection(page, addSection.dataset.parentId || "canvas"); saveState(); render(); return; }
     const addItem = event.target.closest("[data-add-item]");
     if (addItem) { const page = currentEditablePage(); const type = addItem.closest(".composer-add").querySelector("[data-new-item-type]").value; addLayoutItem(page, Number(addItem.dataset.section), type); saveState(); render(); return; }
-    const moveSection = event.target.closest("[data-move-section]");
-    if (moveSection) { const page = currentEditablePage(); moveSectionWithinPanel(page, Number(moveSection.dataset.section), moveSection.dataset.moveSection); saveState(); render(); return; }
     const moveItem = event.target.closest("[data-move-item]");
     if (moveItem) { const page = currentEditablePage(); const items = page.blocks.B04.values.layout[Number(moveItem.dataset.section)].items; moveEntry(items, Number(moveItem.dataset.item), moveItem.dataset.moveItem); saveState(); render(); return; }
     const removeItem = event.target.closest("[data-remove-item]");
@@ -1708,6 +1993,7 @@ Anything not covered above is unspecified. Add a question against this page rath
     if (event.target.matches("[data-workflow-field], [data-step-field], [data-transition-field]")) updateWorkflowField(event.target);
     if (event.target.matches("[data-reviewer-index]")) updateReviewerName(event.target);
     if (event.target.matches("[data-app-setting]")) updateAppSetting(event.target);
+    if (event.target.matches("[data-layout-size]")) updateLayoutSize(event.target);
     if (event.target.matches("[data-value-input], [data-block-meta], [data-row-meta]")) updateValue(event.target);
     if (event.target.matches("[data-record-field], [data-record-meta]")) updateRecord(event.target);
     if (event.target.matches("[data-devqa-evidence]")) updateDevQa(event.target);
@@ -1742,9 +2028,16 @@ Anything not covered above is unspecified. Add a question against this page rath
       window.scrollTo(0, scrollY);
       return;
     }
+    if (event.target.matches("[data-layout-size]")) {
+      updateLayoutSize(event.target);
+      const scrollY = window.scrollY;
+      render();
+      window.scrollTo(0, scrollY);
+      return;
+    }
     if (event.target.matches("[data-panel-width]")) {
       const page = currentEditablePage();
-      if (page) { page.blocks.B04.values.panels[Number(event.target.dataset.panel)].width = event.target.value; saveState(); render(); }
+      if (page) { page.blocks.B04.values.panels[Number(event.target.dataset.panel)].width = event.target.value; normalizeAllLayoutSizes(page); saveState(); render(); }
       return;
     }
     if (event.target.matches("[data-section-columns]")) {

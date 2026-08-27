@@ -34,16 +34,19 @@ http://127.0.0.1:8000/mockument-template/
 
 B03 defines canonical business data before B04 composes the page. Cardinality (`one` or `many`) and structure (`value` or `record`) describe the data independently of its presentation. Data-bound mock records select a B03 definition, remain explicitly unresolved, or create a new definition directly from the inspector.
 
-B04 begins as a blank panel canvas; it no longer assumes a fixed application menu and content column. A copied page can:
+B04 begins as a blank layout canvas; it no longer assumes a fixed application menu, content column, or single panel row. A copied page can:
 
-- Add and reorder up to four top-level panels, while storing panels in an extensible array.
-- Give every panel a stable `PNL-##` ID, semantic role and relative width.
-- Add sections inside a selected panel and choose one, two or three inner columns per section.
-- Add static content, data-bound components, navigation, notices and actions.
+- Add rows for full-width horizontal bands, or add panels directly for a split screen.
+- Nest panels inside rows and rows inside panels, so headers, split content, inspectors, toolbars, footers and nested regions can be represented in either direction.
+- Give every row a stable `ROW-##` ID and every panel a stable `PNL-##` ID, semantic role, human-readable description and trace.
+- Size sibling panels and rows as responsive percentages. Drag the divider between panels to change width, or between rows to change height; the stored percentages resize with the browser.
+- Add content sections inside any row or panel and choose one, two or three inner columns per section.
+- Add static content, data-bound components, navigation, notices and actions to a content section.
 - Build application-page, current-surface, workflow-step or custom navigation only when the page actually needs it.
-- Click any panel, section or component and edit its canonical record in the permanent right inspector.
+- Click any row, panel, section or component and edit its canonical record in the permanent right inspector.
+- Open a full-browser Preview that shows only the mock canvas filling the tab; the small arrow in the top-right returns to B04.
 
-B04 owns canonical panel, component and action records without rendering repeated registers. A data-bound component derives valid presentation choices from its B03 definition: one value, one record, or a many-item list/table presentation. Lists require an item definition and tables require named columns. Its grouped **Review view** offers Clean, Honesty, IDs, and Honesty + IDs modes so status evidence and stable references remain independently inspectable without permanent visual clutter.
+B04 owns canonical row, panel, component and action records without rendering repeated registers. A data-bound component derives valid presentation choices from its B03 definition: one value, one record, or a many-item list/table presentation. Lists require an item definition and tables require named columns. Its grouped **Review view** offers Clean, Honesty, IDs, and Honesty + IDs modes so status evidence and stable references remain independently inspectable without permanent visual clutter.
 
 B05 records only material page-level departures from the automatic default condition. Sorting, filtering, column movement, selection and expansion remain B04 component behavior. Selecting a B05 condition annotates the mock with its changed message, affected components, unavailable actions and next step.
 
@@ -51,7 +54,7 @@ B08 explicitly records whether nothing changes without a person acting or refres
 
 B12 is one compact honesty register. Every record begins with a Decision, Observation, Question or Scope dropdown and reveals only the fields appropriate to that authority. Active decisions are included in B13’s build contract only when their applied canonical references are recorded.
 
-Application workflows are canonical graphs managed in Settings. Steps select real pages and optional B04 sections, tabs, wizard steps or panels by stable ID. Transitions select real B04 actions or an explicit business event, support branch conditions and point to another stable step or a terminal outcome. B10 is a generated local participation view; graph validation catches missing, unreachable and unconnected references.
+Application workflows are canonical graphs managed in Settings. Steps select real pages and optional B04 rows, panels, sections, tabs or wizard steps by stable ID. Transitions select real B04 actions or an explicit business event, support branch conditions and point to another stable step or a terminal outcome. B10 is a generated local participation view; graph validation catches missing, unreachable and unconnected references.
 
 ## Data and persistence
 

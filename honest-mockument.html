@@ -907,14 +907,18 @@ register, so individual role rows do not repeat answer ownership. <em>Business u
 (<em>value</em> or <em>record</em>), unit, as-of point, availability, provenance, calculation, whether a person can
 change it, example value and data-ladder rung. Definitions can be provisional while the mock reveals
 missing data. <em>Business user for meaning and timing; data owner for source and calculation.</em></p>
-<p><strong>B04 · Mock composer.</strong> Begin with a blank canvas rather than an assumed sidebar/content shell. Add
-stable <code>PNL-##</code> top-level panels first, then sections and components inside each panel. A panel has a
-semantic role — application navigation, local navigation, primary content, details or inspector, utility,
-or custom — plus a relative width and stable trace. Visible order is Panel 1…N, but reordering never
-changes the stable ID. The desktop authoring interface limits ordinary creation to four panels while the
-machine model remains an extensible array. Navigation is an optional component sourced from application
-pages, current-page surfaces, workflow steps or explicit stable destinations. A data-bound component
-selects B03 before choosing a compatible presentation; list items and table columns remain explicit.</p>
+<p><strong>B04 · Mock composer.</strong> Begin with a blank canvas rather than an assumed sidebar/content shell,
+single row, or fixed panel split. Add stable <code>ROW-##</code> rows and <code>PNL-##</code> panels in either direction:
+rows can contain panels, and panels can contain rows. Rows represent horizontal bands such as headers,
+toolbars, main areas, content bands and footers; panels represent sibling regions such as application
+navigation, local navigation, primary content, details or inspector, utility, or custom areas. Rows and
+panels carry a stable ID plus a human-readable description so reviewers can understand the region without
+relying on the number alone. Sibling panels and sibling rows can store responsive percentage sizes; dragging
+a divider changes the percentage rather than creating a fixed pixel layout. Visible order can change, but
+reordering never changes the stable ID. Content sections sit inside rows or panels, then
+hold static content, data-bound components, navigation, notices and actions. Navigation is an optional component sourced from application pages,
+current-page surfaces, workflow steps or explicit stable destinations. A data-bound component selects B03
+before choosing a compatible presentation; list items and table columns remain explicit.</p>
 <p>The standing fidelity qualification is permanent system text on every mock and an explicit rule in the build contract; it is not a reviewed page block.</p>
 <h3>The remaining specification</h3><p><strong>B05 · Page conditions.</strong> The default condition is automatic. Record only a named departure from default
 that materially changes the page’s message, major visibility, available business actions, ability to
@@ -937,7 +941,7 @@ page uses. Rendered as links, so the graph is walkable in both directions.</p>
 <p><strong>B10 · Workflow participation.</strong> A generated local view of every canonical application workflow that
 references this page. It shows the stable step, targeted page root or B04 surface, incoming transitions,
 outgoing action or business-event transitions, branch conditions and terminal outcomes. Canonical graphs
-are managed in Settings; B10 never asks somebody to retype page, tab, wizard-step or section names.</p>
+are managed in Settings; B10 never asks somebody to retype page, row, panel, tab, wizard-step or section names.</p>
 <h3 id="the-honesty-apparatus">The honesty apparatus</h3><p><strong>B11 · Copy register.</strong> Every user-visible string, each marked <em>required wording</em> or <em>placeholder</em>.
 Wording is where an unattended builder invents most freely; a placeholder that is labelled is safe,
 an unlabelled one becomes product.</p>
@@ -951,9 +955,13 @@ All types can reference affected stable IDs; selecting the type reveals only its
 this page — what to build, what not to invent, what to ask about first, what done means — and the
 structured record that the checker validates and the builder consumes.</p>
 <h2 id="16-the-mock-frame">16. The mock frame</h2><p>The frame is what turns a picture into an instrument. Its structural hierarchy is
-<em>blank canvas → top-level panels → sections → components and actions</em>. No navigation or principal
-content exists until somebody adds it. Panels are arranged as relative-width columns; sections may then
-use one, two or three inner columns. Panels and sections are addressable B10 workflow surfaces.</p>
+<em>blank canvas → rows and panels in either direction → content sections → components and actions</em>. No
+navigation or principal content exists until somebody adds it. Rows stack bands vertically. Consecutive
+panels sit beside one another with responsive percentage widths; consecutive rows can use responsive
+percentage heights. A panel may contain rows, and a row may contain panels, so full-width headers, split
+content, nested inspectors and footers can coexist without inventing a fixed shell. Rows, panels and
+sections are addressable B10 workflow surfaces.</p>
+<p>The authoring view keeps the composer, records and inspector visible. The Preview control temporarily replaces the full browser tab with the rendered canvas only, so reviewers can judge the page as a screen rather than as a specification. A small diagonal arrow in the top-right returns to B04.</p>
 <p>Three review controls sit above every mock.</p>
 <p><strong>Role.</strong> Switching role hides and reveals elements according to the permissions block, so &quot;what does a
 supervisor see?&quot; is answered by looking rather than by reading. What a role must <em>not</em> see is stated
@@ -1265,12 +1273,16 @@ specification is rendered from it.</p>
 <td><code>role</code> <code>differs</code> <code>mustNotSee</code> · every listed role can access the page</td>
 </tr>
 <tr>
+<td><code>rows[]</code></td>
+<td><code>id</code> <code>name</code> <code>description</code> <code>role</code> <code>status</code> <code>trace</code> <code>note</code></td>
+</tr>
+<tr>
 <td><code>panels[]</code></td>
-<td><code>id</code> <code>name</code> <code>role</code> <code>width</code> <code>status</code> <code>trace</code> <code>note</code></td>
+<td><code>id</code> <code>name</code> <code>description</code> <code>role</code> <code>width</code> <code>status</code> <code>trace</code> <code>note</code></td>
 </tr>
 <tr>
 <td><code>layout[]</code></td>
-<td><code>sectionId</code> <code>panelId</code> <code>columns</code> <code>items[]</code></td>
+<td><code>type</code> <code>recordId</code> <code>parentId</code> <code>sizePercent</code> <code>columns</code> <code>items[]</code></td>
 </tr>
 <tr>
 <td><code>components[]</code></td>
@@ -1540,7 +1552,7 @@ contract.</p>
     &quot;page_spec&quot;: {
       &quot;description&quot;: &quot;One page of the app, represented and specified.&quot;,
       &quot;type&quot;: &quot;object&quot;,
-      &quot;required&quot;: [&quot;id&quot;, &quot;name&quot;, &quot;activity&quot;, &quot;available_to&quot;, &quot;elements&quot;],
+      &quot;required&quot;: [&quot;id&quot;, &quot;name&quot;, &quot;activity&quot;, &quot;available_to&quot;, &quot;rows&quot;, &quot;panels&quot;, &quot;layout&quot;, &quot;elements&quot;],
       &quot;properties&quot;: {
         &quot;id&quot;: { &quot;type&quot;: &quot;string&quot; },
         &quot;name&quot;: { &quot;type&quot;: &quot;string&quot; },
@@ -1563,6 +1575,20 @@ contract.</p>
             }
           }
         },
+        &quot;rows&quot;: {
+          &quot;type&quot;: &quot;array&quot;,
+          &quot;items&quot;: {
+            &quot;type&quot;: &quot;object&quot;,
+            &quot;required&quot;: [&quot;id&quot;, &quot;name&quot;, &quot;role&quot;],
+            &quot;properties&quot;: {
+              &quot;id&quot;: { &quot;type&quot;: &quot;string&quot; },
+              &quot;name&quot;: { &quot;type&quot;: &quot;string&quot; },
+              &quot;description&quot;: { &quot;type&quot;: &quot;string&quot; },
+              &quot;role&quot;: { &quot;enum&quot;: [&quot;header&quot;, &quot;main area&quot;, &quot;content band&quot;, &quot;footer&quot;, &quot;toolbar&quot;, &quot;utility&quot;, &quot;custom&quot;] },
+              &quot;trace&quot;: { &quot;type&quot;: &quot;string&quot; }
+            }
+          }
+        },
         &quot;panels&quot;: {
           &quot;type&quot;: &quot;array&quot;,
           &quot;items&quot;: {
@@ -1571,6 +1597,7 @@ contract.</p>
             &quot;properties&quot;: {
               &quot;id&quot;: { &quot;type&quot;: &quot;string&quot; },
               &quot;name&quot;: { &quot;type&quot;: &quot;string&quot; },
+              &quot;description&quot;: { &quot;type&quot;: &quot;string&quot; },
               &quot;role&quot;: { &quot;enum&quot;: [&quot;application navigation&quot;, &quot;local or document navigation&quot;, &quot;primary content&quot;, &quot;details or inspector&quot;, &quot;utility&quot;, &quot;custom&quot;] },
               &quot;width&quot;: { &quot;type&quot;: &quot;integer&quot;, &quot;minimum&quot;: 1 },
               &quot;trace&quot;: { &quot;type&quot;: &quot;string&quot; }
@@ -1581,10 +1608,12 @@ contract.</p>
           &quot;type&quot;: &quot;array&quot;,
           &quot;items&quot;: {
             &quot;type&quot;: &quot;object&quot;,
-            &quot;required&quot;: [&quot;section_id&quot;, &quot;panel_id&quot;, &quot;columns&quot;, &quot;items&quot;],
+            &quot;required&quot;: [&quot;type&quot;, &quot;record_id&quot;, &quot;parent_id&quot;],
             &quot;properties&quot;: {
-              &quot;section_id&quot;: { &quot;type&quot;: &quot;string&quot; },
-              &quot;panel_id&quot;: { &quot;type&quot;: &quot;string&quot; },
+              &quot;type&quot;: { &quot;enum&quot;: [&quot;row&quot;, &quot;panel&quot;, &quot;section&quot;] },
+              &quot;record_id&quot;: { &quot;type&quot;: &quot;string&quot; },
+              &quot;parent_id&quot;: { &quot;description&quot;: &quot;canvas, ROW-##, or PNL-##&quot;, &quot;type&quot;: &quot;string&quot; },
+              &quot;size_percent&quot;: { &quot;description&quot;: &quot;Responsive percentage width for sibling panels, or height for sibling rows.&quot;, &quot;type&quot;: &quot;number&quot;, &quot;minimum&quot;: 0, &quot;maximum&quot;: 100 },
               &quot;columns&quot;: { &quot;type&quot;: &quot;integer&quot;, &quot;minimum&quot;: 1, &quot;maximum&quot;: 3 },
               &quot;items&quot;: { &quot;type&quot;: &quot;array&quot;, &quot;items&quot;: { &quot;type&quot;: &quot;string&quot; } }
             }

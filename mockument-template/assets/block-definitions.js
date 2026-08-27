@@ -53,22 +53,30 @@
     },
     {
       id: "B04", group: "The mock", title: "Mock composer", answeredBy: "Page owner with business users",
-      definition: "Begin with a blank canvas, add top-level panels, then add sections and components inside each panel. Every panel, section, component and action receives a stable record edited in the inspector.",
-      why: "The Mockument must not assume a fixed sidebar and content column. Panels make application navigation, local navigation, primary content, details and utility regions explicit while preserving B03 data links and B10 workflow references.",
+      definition: "Begin with a blank canvas, add rows and panels in either direction, then add content sections and components inside them. Every row, panel, section, component and action receives a stable record edited in the inspector.",
+      why: "The Mockument must not assume a fixed sidebar, content column, or single horizontal split. Rows and panels make headers, navigation, primary content, details, inspectors, footers, split panes and nested regions explicit while preserving B03 data links and B10 workflow references.",
       custom: "mock",
       fields: [
         text("defaultRole", "Default role", "Which role opens first?"),
-        rows("panels", "Panel records", "Canonical top-level canvas regions created by the mock composer and edited in the inspector.", [
+        rows("rows", "Row records", "Canonical horizontal bands created by the mock composer and edited in the inspector.", [
+          text("id", "ID", "What stable ID addresses this row?", { placeholder: "ROW-01" }),
+          text("name", "Row", "What is this row called?"),
+          textarea("description", "Description", "What should appear next to this row reference so reviewers understand what this band represents?"),
+          select("role", "Row role", "What purpose does this horizontal band serve?", ["header", "main area", "content band", "footer", "toolbar", "utility", "custom"]),
+          text("trace", "Traces to", "Which requirement, decision, question, or scope record accounts for this row?")
+        ], { idPrefix: "ROW", hidden: true }),
+        rows("panels", "Panel records", "Canonical layout regions created by the mock composer and edited in the inspector.", [
           text("id", "ID", "What stable ID addresses this panel?", { placeholder: "PNL-01" }),
           text("name", "Panel", "What is this panel called?"),
-          select("role", "Panel role", "What purpose does this top-level region serve?", ["application navigation", "local or document navigation", "primary content", "details or inspector", "utility", "custom"]),
-          select("width", "Relative width", "How many relative layout units does this panel occupy?", ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"]),
+          textarea("description", "Description", "What should appear next to this panel reference so reviewers understand what this region represents?"),
+          select("role", "Panel role", "What purpose does this region serve?", ["application navigation", "local or document navigation", "primary content", "details or inspector", "utility", "custom"]),
+          select("width", "Fallback width units", "If no percentage size is set yet, how many relative layout units does this panel occupy beside sibling panels?", ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"]),
           text("trace", "Traces to", "Which requirement, decision, question, or scope record accounts for this panel?")
         ], { idPrefix: "PNL", hidden: true }),
-        rows("elements", "Element records", "Canonical records created by the mock composer and edited in the inspector.", [
-          text("id", "ID", "What stable ID addresses this element?", { placeholder: "EL-01" }),
-          select("kind", "Kind", "What structural kind of component is this?", ["content", "data", "navigation", "notice", "section"]),
-          text("name", "Component", "What is the component called?"),
+        rows("elements", "Component records", "Canonical content-section and component records created by the mock composer and edited in the inspector.", [
+          text("id", "ID", "What stable ID addresses this content section or component?", { placeholder: "EL-01" }),
+          select("kind", "Kind", "What structural kind is this?", ["content", "data", "navigation", "notice", "section"]),
+          text("name", "Component or section", "What is this called?"),
           textarea("shows", "Shows or accepts", "What does it show or accept?"),
           select("dataRef", "Data definition", "Which B03 data definition supplies this component?", [], { dynamicOptions: "data", allowUnresolved: true, forKinds: ["data"] }),
           select("presentation", "Presentation", "How should a person encounter the selected data?", [], { dynamicOptions: "presentation", forKinds: ["data"] }),
@@ -162,7 +170,7 @@
     },
     {
       id: "B10", group: "Specification", title: "Workflow participation", answeredBy: "Business user",
-      definition: "Show the canonical application workflows that reference this page, its sections, tabs, wizard steps, panels, or actions.",
+      definition: "Show the canonical application workflows that reference this page, its rows, panels, sections, tabs, wizard steps, or actions.",
       why: "Workflows cross page boundaries and therefore live at application level. B10 is generated from stable references rather than asking each page to repeat names and positions as text.",
       custom: "workflowParticipation",
       fields: []
