@@ -207,6 +207,7 @@ h2 { margin: 0; }
 .block-pager > span { text-align: center; color: var(--text-2); font-size: 11px; }
 .block-view-link { display: block; margin: 3px auto 0; padding: 0; border: 0; background: transparent; color: var(--accent); font: inherit; cursor: pointer; }
 .block-view-link:hover { text-decoration: underline; }
+.block-pager > button:first-child { justify-self: start; }
 .block-pager > button:last-child { justify-self: end; }
 .block-view-note { max-width: 1080px; margin: 0 auto 12px; padding: 8px 10px; border: 1px solid var(--line); border-radius: 7px; color: var(--text-3); font-size: 10px; text-align: center; }
 .block { border: 1px solid var(--line); border-radius: 12px; background: var(--panel); margin: 0 0 18px; overflow: clip; scroll-margin-top: 190px; }
