@@ -907,10 +907,14 @@ register, so individual role rows do not repeat answer ownership. <em>Business u
 (<em>value</em> or <em>record</em>), unit, as-of point, availability, provenance, calculation, whether a person can
 change it, example value and data-ladder rung. Definitions can be provisional while the mock reveals
 missing data. <em>Business user for meaning and timing; data owner for source and calculation.</em></p>
-<p><strong>B04 · Mock composer.</strong> The navigable representation and canonical records for sections, static content,
-data-bound components, notices and actions. A data-bound component selects a B03 definition before it can
-choose a compatible presentation. Many-item data may be a list or table; lists define one item and tables
-define named columns. Presentation and data shape are related but never treated as the same concept.</p>
+<p><strong>B04 · Mock composer.</strong> Begin with a blank canvas rather than an assumed sidebar/content shell. Add
+stable <code>PNL-##</code> top-level panels first, then sections and components inside each panel. A panel has a
+semantic role — application navigation, local navigation, primary content, details or inspector, utility,
+or custom — plus a relative width and stable trace. Visible order is Panel 1…N, but reordering never
+changes the stable ID. The desktop authoring interface limits ordinary creation to four panels while the
+machine model remains an extensible array. Navigation is an optional component sourced from application
+pages, current-page surfaces, workflow steps or explicit stable destinations. A data-bound component
+selects B03 before choosing a compatible presentation; list items and table columns remain explicit.</p>
 <p>The standing fidelity qualification is permanent system text on every mock and an explicit rule in the build contract; it is not a reviewed page block.</p>
 <h3>The remaining specification</h3><p><strong>B05 · Page conditions.</strong> The default condition is automatic. Record only a named departure from default
 that materially changes the page’s message, major visibility, available business actions, ability to
@@ -946,7 +950,11 @@ All types can reference affected stable IDs; selecting the type reveals only its
 <p><strong>B13 · Build contract and machine-readable record.</strong> The instruction block handed to whoever builds
 this page — what to build, what not to invent, what to ask about first, what done means — and the
 structured record that the checker validates and the builder consumes.</p>
-<h2 id="16-the-mock-frame">16. The mock frame</h2><p>The frame is what turns a picture into an instrument. Three controls sit above every mock.</p>
+<h2 id="16-the-mock-frame">16. The mock frame</h2><p>The frame is what turns a picture into an instrument. Its structural hierarchy is
+<em>blank canvas → top-level panels → sections → components and actions</em>. No navigation or principal
+content exists until somebody adds it. Panels are arranged as relative-width columns; sections may then
+use one, two or three inner columns. Panels and sections are addressable B10 workflow surfaces.</p>
+<p>Three review controls sit above every mock.</p>
 <p><strong>Role.</strong> Switching role hides and reveals elements according to the permissions block, so &quot;what does a
 supervisor see?&quot; is answered by looking rather than by reading. What a role must <em>not</em> see is stated
 beside it.</p>
@@ -1257,8 +1265,16 @@ specification is rendered from it.</p>
 <td><code>role</code> <code>differs</code> <code>mustNotSee</code> · every listed role can access the page</td>
 </tr>
 <tr>
+<td><code>panels[]</code></td>
+<td><code>id</code> <code>name</code> <code>role</code> <code>width</code> <code>status</code> <code>trace</code> <code>note</code></td>
+</tr>
+<tr>
+<td><code>layout[]</code></td>
+<td><code>sectionId</code> <code>panelId</code> <code>columns</code> <code>items[]</code></td>
+</tr>
+<tr>
 <td><code>components[]</code></td>
-<td><code>id</code> <code>kind</code> <code>name</code> <code>shows</code> <code>dataRef</code> <code>presentation</code> <code>itemTemplate</code> <code>columns</code> <code>status</code> <code>trace</code> <code>note</code></td>
+<td><code>id</code> <code>kind</code> <code>name</code> <code>shows</code> <code>dataRef</code> <code>presentation</code> <code>itemTemplate</code> <code>columns</code> <code>navigationSource</code> <code>navigationTargets</code> <code>status</code> <code>trace</code> <code>note</code></td>
 </tr>
 <tr>
 <td><code>controls[]</code></td>
@@ -1547,6 +1563,33 @@ contract.</p>
             }
           }
         },
+        &quot;panels&quot;: {
+          &quot;type&quot;: &quot;array&quot;,
+          &quot;items&quot;: {
+            &quot;type&quot;: &quot;object&quot;,
+            &quot;required&quot;: [&quot;id&quot;, &quot;name&quot;, &quot;role&quot;, &quot;width&quot;],
+            &quot;properties&quot;: {
+              &quot;id&quot;: { &quot;type&quot;: &quot;string&quot; },
+              &quot;name&quot;: { &quot;type&quot;: &quot;string&quot; },
+              &quot;role&quot;: { &quot;enum&quot;: [&quot;application navigation&quot;, &quot;local or document navigation&quot;, &quot;primary content&quot;, &quot;details or inspector&quot;, &quot;utility&quot;, &quot;custom&quot;] },
+              &quot;width&quot;: { &quot;type&quot;: &quot;integer&quot;, &quot;minimum&quot;: 1 },
+              &quot;trace&quot;: { &quot;type&quot;: &quot;string&quot; }
+            }
+          }
+        },
+        &quot;layout&quot;: {
+          &quot;type&quot;: &quot;array&quot;,
+          &quot;items&quot;: {
+            &quot;type&quot;: &quot;object&quot;,
+            &quot;required&quot;: [&quot;section_id&quot;, &quot;panel_id&quot;, &quot;columns&quot;, &quot;items&quot;],
+            &quot;properties&quot;: {
+              &quot;section_id&quot;: { &quot;type&quot;: &quot;string&quot; },
+              &quot;panel_id&quot;: { &quot;type&quot;: &quot;string&quot; },
+              &quot;columns&quot;: { &quot;type&quot;: &quot;integer&quot;, &quot;minimum&quot;: 1, &quot;maximum&quot;: 3 },
+              &quot;items&quot;: { &quot;type&quot;: &quot;array&quot;, &quot;items&quot;: { &quot;type&quot;: &quot;string&quot; } }
+            }
+          }
+        },
         &quot;elements&quot;: {
           &quot;type&quot;: &quot;array&quot;,
           &quot;items&quot;: {
@@ -1554,6 +1597,7 @@ contract.</p>
             &quot;required&quot;: [&quot;id&quot;, &quot;name&quot;, &quot;status&quot;],
             &quot;properties&quot;: {
               &quot;id&quot;: { &quot;type&quot;: &quot;string&quot; },
+              &quot;kind&quot;: { &quot;enum&quot;: [&quot;content&quot;, &quot;data&quot;, &quot;navigation&quot;, &quot;notice&quot;, &quot;section&quot;] },
               &quot;name&quot;: { &quot;type&quot;: &quot;string&quot; },
               &quot;shows&quot;: { &quot;type&quot;: &quot;string&quot; },
               &quot;data_ref&quot;: { &quot;description&quot;: &quot;A B03 data definition ID, or an explicit unresolved marker.&quot;, &quot;type&quot;: &quot;string&quot; },
@@ -1567,6 +1611,8 @@ contract.</p>
               &quot;empty&quot;: { &quot;type&quot;: &quot;string&quot; },
               &quot;one&quot;: { &quot;type&quot;: &quot;string&quot; },
               &quot;overflow&quot;: { &quot;type&quot;: &quot;string&quot; },
+              &quot;navigation_source&quot;: { &quot;enum&quot;: [&quot;application pages&quot;, &quot;current-page surfaces&quot;, &quot;workflow steps&quot;, &quot;custom destinations&quot;] },
+              &quot;navigation_targets&quot;: { &quot;type&quot;: &quot;array&quot;, &quot;items&quot;: { &quot;type&quot;: &quot;string&quot; } },
               &quot;status&quot;: { &quot;$ref&quot;: &quot;#/$defs/status&quot; },
               &quot;trace&quot;: { &quot;type&quot;: &quot;string&quot; },
               &quot;note&quot;: { &quot;type&quot;: &quot;string&quot; },

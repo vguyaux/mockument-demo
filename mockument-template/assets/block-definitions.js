@@ -53,19 +53,28 @@
     },
     {
       id: "B04", group: "The mock", title: "Mock composer", answeredBy: "Page owner with business users",
-      definition: "Compose the low-fidelity page from sections, static content, data-bound components, notices and actions. Every component receives a stable record edited in the inspector.",
-      why: "B03 defines what the data is; B04 defines how a person encounters it. Presentation choices are constrained by the selected data definition instead of silently inventing another data model.",
+      definition: "Begin with a blank canvas, add top-level panels, then add sections and components inside each panel. Every panel, section, component and action receives a stable record edited in the inspector.",
+      why: "The Mockument must not assume a fixed sidebar and content column. Panels make application navigation, local navigation, primary content, details and utility regions explicit while preserving B03 data links and B10 workflow references.",
       custom: "mock",
       fields: [
         text("defaultRole", "Default role", "Which role opens first?"),
+        rows("panels", "Panel records", "Canonical top-level canvas regions created by the mock composer and edited in the inspector.", [
+          text("id", "ID", "What stable ID addresses this panel?", { placeholder: "PNL-01" }),
+          text("name", "Panel", "What is this panel called?"),
+          select("role", "Panel role", "What purpose does this top-level region serve?", ["application navigation", "local or document navigation", "primary content", "details or inspector", "utility", "custom"]),
+          select("width", "Relative width", "How many relative layout units does this panel occupy?", ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"]),
+          text("trace", "Traces to", "Which requirement, decision, question, or scope record accounts for this panel?")
+        ], { idPrefix: "PNL", hidden: true }),
         rows("elements", "Element records", "Canonical records created by the mock composer and edited in the inspector.", [
           text("id", "ID", "What stable ID addresses this element?", { placeholder: "EL-01" }),
-          select("kind", "Kind", "What structural kind of component is this?", ["content", "data", "notice", "section"]),
+          select("kind", "Kind", "What structural kind of component is this?", ["content", "data", "navigation", "notice", "section"]),
           text("name", "Component", "What is the component called?"),
           textarea("shows", "Shows or accepts", "What does it show or accept?"),
           select("dataRef", "Data definition", "Which B03 data definition supplies this component?", [], { dynamicOptions: "data", allowUnresolved: true, forKinds: ["data"] }),
           select("presentation", "Presentation", "How should a person encounter the selected data?", [], { dynamicOptions: "presentation", forKinds: ["data"] }),
-          select("surfaceRole", "Surface role", "Can a workflow target this section as a named surface?", ["ordinary section", "workflow section", "tab", "wizard step", "panel"], { forKinds: ["section"] }),
+          select("surfaceRole", "Surface role", "Can a workflow target this section as a named surface?", ["ordinary section", "workflow section", "tab", "wizard step"], { forKinds: ["section"] }),
+          select("navigationSource", "Navigation source", "Which canonical destinations supply this navigation?", ["application pages", "current-page surfaces", "workflow steps", "custom destinations"], { forKinds: ["navigation"] }),
+          textarea("navigationTargets", "Custom destinations", "When using custom destinations, record stable page or external references, one per line.", { forKinds: ["navigation"] }),
           text("trace", "Traces to", "Which requirement, decision or question accounts for it?"),
           textarea("itemTemplate", "List item", "What does one list item contain?", { forPresentations: ["list"] }),
           textarea("columns", "Table columns", "Which named columns appear, and what does each mean?", { forPresentations: ["table"] }),

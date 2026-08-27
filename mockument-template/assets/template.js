@@ -3,8 +3,8 @@
 
   const BLOCKS = window.MOCKUMENT_BLOCKS || [];
   const STORAGE_KEY = "honest-mockument-template-state";
-  const SCHEMA_VERSION = 24;
-  const TEMPLATE_VERSION = "0.25.0";
+  const SCHEMA_VERSION = 25;
+  const TEMPLATE_VERSION = "0.26.0";
   const FIDELITY_NOTE = "Structure only, example data, nothing here is proof that the application works.";
   const THEME_KEY = "mockument-theme";
   const THEME_CYCLE = ["system", "dark", "light"];
@@ -88,18 +88,8 @@
     };
   }
 
-  function starterRows(page) {
-    page.blocks.B04.values.elements = [
-      { _id: "EL-01", _status: "wip", _accountable: "Page owner", _note: "Starter structure from Template", id: "EL-01", kind: "content", name: "Page header", shows: "The page name and the context a person needs on arrival", dataRef: "", trace: "PROPOSED" },
-      { _id: "EL-02", _status: "todo", _accountable: "Business user", _note: "Replace with the principal content this page exists for", id: "EL-02", kind: "content", name: "Main page content", shows: "", dataRef: "", trace: "" }
-    ];
-    page.blocks.B04.values.controls = [
-      { _id: "CTL-01", _status: "todo", _accountable: "Business user", _note: "Replace with the principal action, or remove it", id: "CTL-01", name: "Primary action", effect: "acts on data", serverData: "unknown", leadsTo: "", confirmation: "" }
-    ];
-  }
-
   function nextRecordId(page, prefix) {
-    const rows = prefix === "CTL" ? page.blocks.B04.values.controls : page.blocks.B04.values.elements;
+    const rows = prefix === "PNL" ? page.blocks.B04.values.panels : prefix === "CTL" ? page.blocks.B04.values.controls : page.blocks.B04.values.elements;
     const highest = rows.reduce((max, row) => {
       const match = String(row.id || row._id || "").match(new RegExp(`^${prefix}-(\\d+)$`));
       return match ? Math.max(max, Number(match[1])) : max;
@@ -109,19 +99,10 @@
 
   function ensureLayout(page) {
     const mock = page.blocks.B04.values;
-    if (Array.isArray(mock.layout) && mock.layout.length) return;
-    const sectionId = nextRecordId(page, "EL");
-    page.blocks.B04.values.elements.push({
-      _id: sectionId, _status: "wip", _accountable: "Page owner", _note: "Starter section from Template",
-      id: sectionId, kind: "section", name: "Main section", shows: "Groups the principal content of the page", dataRef: "", trace: "PROPOSED"
-    });
-    mock.layout = [{
-      uid: `SECTION-${Date.now()}`, recordId: sectionId, columns: 1,
-      items: [
-        ...page.blocks.B04.values.elements.filter(row => row.id !== sectionId).map(row => ({ recordId: row.id })),
-        ...page.blocks.B04.values.controls.map(row => ({ recordId: row.id }))
-      ]
-    }];
+    if (!Array.isArray(mock.panels)) mock.panels = [];
+    if (!Array.isArray(mock.elements)) mock.elements = [];
+    if (!Array.isArray(mock.controls)) mock.controls = [];
+    if (!Array.isArray(mock.layout)) mock.layout = [];
   }
 
   function createPage(id, name, route, built = true, isSettings = false) {
@@ -131,7 +112,6 @@
     blocks.B01.values = { ...blocks.B01.values, name, route, buildStatus: "new", version: "0.1", updated: today, owner: "" };
     blocks.B04.values.defaultRole = "default role";
     const page = { id, name, route, built, isSettings, parentId: null, templateVersion: TEMPLATE_VERSION, schemaVersion: SCHEMA_VERSION, blocks, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
-    starterRows(page);
     ensureLayout(page);
     return page;
   }
@@ -590,6 +570,34 @@
       });
       if (!next.changeLog.some(entry => entry.version === "0.25.0")) next.changeLog.push({ version: "0.25.0", date: new Date().toISOString(), note: "Merged decisions, observations, questions, and scope into one typed B12 honesty register and renumbered the build contract to B13." });
     }
+    if (previousSchemaVersion < 25) {
+      Object.values(next.pages).forEach(page => {
+        const mock = page.blocks.B04.values;
+        mock.panels = Array.isArray(mock.panels) ? mock.panels : [];
+        mock.layout = Array.isArray(mock.layout) ? mock.layout : [];
+        if (mock.layout.length && !mock.panels.length) {
+          const navigationPanelId = "PNL-01";
+          const contentPanelId = "PNL-02";
+          mock.panels.push(
+            { _id: navigationPanelId, _status: "wip", _accountable: "Page owner", _note: "Migrated from the former fixed application menu", id: navigationPanelId, name: "Application navigation", role: "application navigation", width: "2", trace: "MIGRATED" },
+            { _id: contentPanelId, _status: "wip", _accountable: "Page owner", _note: "Migrated from the former fixed content area", id: contentPanelId, name: "Primary content", role: "primary content", width: "10", trace: "MIGRATED" }
+          );
+          mock.layout.forEach(section => { section.panelId = contentPanelId; });
+          const highest = (mock.elements || []).reduce((max, row) => { const match = String(row.id || row._id || "").match(/^EL-(\d+)$/); return match ? Math.max(max, Number(match[1])) : max; }, 0);
+          const sectionId = `EL-${String(highest + 1).padStart(2, "0")}`;
+          const navigationId = `EL-${String(highest + 2).padStart(2, "0")}`;
+          mock.elements.push(
+            { _id: sectionId, _status: "wip", _accountable: "Page owner", _note: "Migrated navigation container", id: sectionId, kind: "section", name: "Application menu", shows: "", dataRef: "", presentation: "", surfaceRole: "ordinary section", navigationSource: "application pages", navigationTargets: "", trace: "MIGRATED" },
+            { _id: navigationId, _status: "wip", _accountable: "Page owner", _note: "Replaces the former fixed menu", id: navigationId, kind: "navigation", name: "Application pages", shows: "", dataRef: "", presentation: "", surfaceRole: "ordinary section", navigationSource: "application pages", navigationTargets: "", trace: "MIGRATED" }
+          );
+          mock.layout.unshift({ uid: `SECTION-${Date.now()}-${page.id}`, recordId: sectionId, panelId: navigationPanelId, columns: 1, items: [{ recordId: navigationId }] });
+        }
+        (mock.elements || []).filter(row => row.kind === "section" && row.surfaceRole === "panel").forEach(row => { row.surfaceRole = "workflow section"; row._note = [row._note, "Former section-level panel role migrated to workflow section; top-level panels now use PNL IDs."].filter(Boolean).join(" · "); });
+        Object.values(page.blocks.B04.humanReviews).forEach(review => { review.confirmed = false; review.confirmedAt = ""; review.reviewedContentHash = ""; });
+        syncPage(page);
+      });
+      if (!next.changeLog.some(entry => entry.version === "0.26.0")) next.changeLog.push({ version: "0.26.0", date: new Date().toISOString(), note: "Replaced the fixed sidebar/content shell with a blank panel-first canvas and migrated existing mocks into navigation and primary-content panels." });
+    }
     return next;
   }
 
@@ -701,7 +709,14 @@
       if (unshaped) missing.push(`${unshaped} data definition${unshaped === 1 ? " has" : "s have"} unresolved cardinality or structure`);
     }
     if (definition.id === "B04") {
-      if (!(block.values.layout || []).length) missing.push("mock layout is empty");
+      const panels = block.values.panels || [];
+      const layout = block.values.layout || [];
+      if (!panels.length) missing.push("mock canvas has no panels");
+      if (!layout.length) missing.push("mock canvas has no sections");
+      const brokenSections = layout.filter(section => !panels.some(panel => (panel.id || panel._id) === section.panelId)).length;
+      if (brokenSections) missing.push(`${brokenSections} section${brokenSections === 1 ? " references" : "s reference"} a missing panel`);
+      const untracedPanels = panels.filter(panel => !String(panel.trace || "").trim()).length;
+      if (untracedPanels) missing.push(`${untracedPanels} panel${untracedPanels === 1 ? " is" : "s are"} untraced`);
       const elements = block.values.elements || [];
       if (!elements.some(row => row.kind !== "section")) missing.push("no visible element is recorded");
       const untraced = elements.filter(row => row.kind !== "section" && !String(row.trace || "").trim()).length;
@@ -786,7 +801,8 @@
         if (definition.id === "B02" && !roles.some(row => String(row.role || "").trim())) missing.push("user role");
         if (definition.id === "B03" && data.some(row => !String(row.name || "").trim())) missing.push("data definition name");
         if (definition.id === "B04") {
-          if (!(block.values.layout || []).length) missing.push("mock structure");
+          if (!(block.values.panels || []).length) missing.push("mock panel");
+          if (!(block.values.layout || []).length) missing.push("mock section");
           if (!elements.some(row => row.kind !== "section" && String(row.name || "").trim())) missing.push("visible element");
           if (elements.some(row => !["done", "wip", "todo"].includes(row._status))) missing.push("element work status");
           if (controls.some(row => !["done", "wip", "todo"].includes(row._status))) missing.push("control work status");
@@ -942,30 +958,47 @@
     if (kind === "data" && presentation === "input") return `<div class="mock-element mock-element--field status--${esc(row._status || "todo")}" data-mock-record="${esc(id)}">${label}<div class="mock-name">${esc(row.name || "Unnamed input")}</div><div class="mock-input">${esc(row.shows || "Value")}</div></div>`;
     if (kind === "data" && presentation === "list") return `<div class="mock-element status--${esc(row._status || "todo")}" data-mock-record="${esc(id)}">${label}<div class="mock-name">${esc(row.name || "Unnamed list")}</div><div class="mock-lines"><i></i><i></i><i></i></div></div>`;
     if (kind === "data" && presentation === "table") return `<div class="mock-element status--${esc(row._status || "todo")}" data-mock-record="${esc(id)}">${label}<div class="mock-name">${esc(row.name || "Unnamed table")}</div><div class="mock-table"><i></i><i></i><i></i><i></i><i></i><i></i></div></div>`;
+    if (kind === "navigation") {
+      let destinations = [];
+      if (row.navigationSource === "application pages") destinations = state.pageOrder.map(pageId => state.pages[pageId]).filter(Boolean).map(candidate => candidate.name);
+      else if (row.navigationSource === "current-page surfaces") destinations = (page.blocks.B04.values.elements || []).filter(candidate => candidate.kind === "section").map(candidate => candidate.name || candidate.id || candidate._id);
+      else if (row.navigationSource === "workflow steps") destinations = (state.app.workflows || []).flatMap(workflow => (workflow.steps || []).filter(step => step.pageId === page.id).map(step => `${workflow.name || workflow.id} · ${step.name || step.id}`));
+      else destinations = String(row.navigationTargets || "").split("\n").map(value => value.trim()).filter(Boolean);
+      return `<nav class="mock-element mock-element--navigation status--${esc(row._status || "todo")}" data-mock-record="${esc(id)}">${label}<div class="mock-name">${esc(row.name || "Navigation")}</div><div class="mock-navigation-items">${destinations.length ? destinations.map(destination => `<span>${esc(destination)}</span>`).join("") : `<small>No destinations selected</small>`}</div></nav>`;
+    }
     if (kind === "notice") return `<div class="mock-element mock-element--notice status--${esc(row._status || "todo")}" data-mock-record="${esc(id)}">${label}<div class="mock-name">${esc(row.name || "Notice")}</div>${row.shows ? `<div>${esc(row.shows)}</div>` : ""}</div>`;
     return `<div class="mock-element status--${esc(row._status || "todo")}" data-mock-record="${esc(id)}">${label}<div class="mock-name">${esc(row.name || "Unnamed element")}</div>${row.shows ? `<div>${esc(row.shows)}</div>` : ""}</div>`;
   }
 
   function renderMockComposer(page, disabled) {
-    const layout = page.blocks.B04.values.layout || [];
-    return `<div class="composer">
-      <div class="composer-head"><div><strong>Mock composer</strong><span>Add low-fidelity structure. Edit selected records in the right inspector.</span></div><button class="button button--small" data-add-section type="button" ${disabled ? "disabled" : ""}>+ Section</button></div>
-      ${layout.map((section, sectionIndex) => {
-        const row = mockRecord(page, section.recordId) || {};
-        return `<div class="composer-section" data-mock-record="${esc(section.recordId)}">
-          <div class="composer-section-head"><span class="row-id">${esc(section.recordId)}</span><strong>${esc(row.name || "Unnamed section")}</strong>
-            <label>Columns <select data-section-columns data-section="${sectionIndex}" ${disabled ? "disabled" : ""}>${[1,2,3].map(number => `<option value="${number}" ${Number(section.columns) === number ? "selected" : ""}>${number}</option>`).join("")}</select></label>
-            <button class="composer-move" data-move-section="up" data-section="${sectionIndex}" type="button" ${disabled || sectionIndex === 0 ? "disabled" : ""}>↑</button>
-            <button class="composer-move" data-move-section="down" data-section="${sectionIndex}" type="button" ${disabled || sectionIndex === layout.length - 1 ? "disabled" : ""}>↓</button>
-            <button class="remove-row" data-remove-section data-section="${sectionIndex}" type="button" ${disabled ? "disabled" : ""}>Remove</button>
-          </div>
-          <div class="composer-items">${(section.items || []).map((item, itemIndex) => {
-            const itemRow = mockRecord(page, item.recordId) || {};
-            return `<div class="composer-item" data-mock-record="${esc(item.recordId)}"><span class="row-id">${esc(item.recordId)}</span><strong>${esc(itemRow.name || "Missing record")}</strong><small>${esc(item.recordId.startsWith("CTL-") ? "button" : (itemRow.kind || "element"))}</small><span class="composer-item-actions"><button data-move-item="up" data-section="${sectionIndex}" data-item="${itemIndex}" type="button" ${disabled || itemIndex === 0 ? "disabled" : ""}>←</button><button data-move-item="down" data-section="${sectionIndex}" data-item="${itemIndex}" type="button" ${disabled || itemIndex === section.items.length - 1 ? "disabled" : ""}>→</button><button data-remove-item data-section="${sectionIndex}" data-item="${itemIndex}" type="button" ${disabled ? "disabled" : ""}>×</button></span></div>`;
-          }).join("") || `<div class="repeater-empty">This section is empty.</div>`}</div>
-          <div class="composer-add"><select data-new-item-type ${disabled ? "disabled" : ""}><option value="content">Static content</option><option value="data">Data-bound component</option><option value="notice">Notice</option><option value="action">Action</option></select><button class="button button--small" data-add-item data-section="${sectionIndex}" type="button" ${disabled ? "disabled" : ""}>Add to section</button></div>
-        </div>`;
-      }).join("")}
+    const mock = page.blocks.B04.values;
+    const panels = mock.panels || [];
+    const layout = mock.layout || [];
+    const renderSection = (section, panelSections, localIndex) => {
+      const sectionIndex = layout.indexOf(section);
+      const row = mockRecord(page, section.recordId) || {};
+      return `<div class="composer-section" data-mock-record="${esc(section.recordId)}">
+        <div class="composer-section-head"><span class="row-id">${esc(section.recordId)}</span><strong>${esc(row.name || "Unnamed section")}</strong>
+          <label>Inner columns <select data-section-columns data-section="${sectionIndex}" ${disabled ? "disabled" : ""}>${[1,2,3].map(number => `<option value="${number}" ${Number(section.columns) === number ? "selected" : ""}>${number}</option>`).join("")}</select></label>
+          <button class="composer-move" data-move-section="up" data-section="${sectionIndex}" type="button" ${disabled || localIndex === 0 ? "disabled" : ""}>↑</button>
+          <button class="composer-move" data-move-section="down" data-section="${sectionIndex}" type="button" ${disabled || localIndex === panelSections.length - 1 ? "disabled" : ""}>↓</button>
+          <button class="remove-row" data-remove-section data-section="${sectionIndex}" type="button" ${disabled ? "disabled" : ""}>Remove</button>
+        </div>
+        <div class="composer-items">${(section.items || []).map((item, itemIndex) => {
+          const itemRow = mockRecord(page, item.recordId) || {};
+          return `<div class="composer-item" data-mock-record="${esc(item.recordId)}"><span class="row-id">${esc(item.recordId)}</span><strong>${esc(itemRow.name || "Missing record")}</strong><small>${esc(item.recordId.startsWith("CTL-") ? "action" : (itemRow.kind || "component"))}</small><span class="composer-item-actions"><button data-move-item="up" data-section="${sectionIndex}" data-item="${itemIndex}" type="button" ${disabled || itemIndex === 0 ? "disabled" : ""}>←</button><button data-move-item="down" data-section="${sectionIndex}" data-item="${itemIndex}" type="button" ${disabled || itemIndex === section.items.length - 1 ? "disabled" : ""}>→</button><button data-remove-item data-section="${sectionIndex}" data-item="${itemIndex}" type="button" ${disabled ? "disabled" : ""}>×</button></span></div>`;
+        }).join("") || `<div class="repeater-empty">This section is empty.</div>`}</div>
+        <div class="composer-add"><select data-new-item-type ${disabled ? "disabled" : ""}><option value="content">Static content</option><option value="data">Data-bound component</option><option value="navigation">Navigation</option><option value="notice">Notice</option><option value="action">Action</option></select><button class="button button--small" data-add-item data-section="${sectionIndex}" type="button" ${disabled ? "disabled" : ""}>Add to section</button></div>
+      </div>`;
+    };
+    return `<div class="composer composer--panels">
+      <div class="composer-head"><div><strong>Panel-first mock composer</strong><span>Start with a blank canvas. Add up to four top-level panels, then add sections and components.</span></div><button class="button button--small" data-add-panel type="button" ${disabled || panels.length >= 4 ? "disabled" : ""}>+ Panel</button></div>
+      ${panels.length ? panels.map((panel, panelIndex) => {
+        const panelId = panel.id || panel._id;
+        const panelSections = layout.filter(section => section.panelId === panelId);
+        return `<div class="composer-panel" data-mock-record="${esc(panelId)}"><div class="composer-panel-head"><span class="row-id">Panel ${panelIndex + 1} · ${esc(panelId)}</span><strong>${esc(panel.name || "Unnamed panel")}</strong><small>${esc(panel.role || "custom")}</small><label>Width <select data-panel-width data-panel="${panelIndex}" ${disabled ? "disabled" : ""}>${Array.from({length:12}, (_, index) => String(index + 1)).map(width => `<option value="${width}" ${String(panel.width) === width ? "selected" : ""}>${width}</option>`).join("")}</select></label><button class="composer-move" data-move-panel="left" data-panel="${panelIndex}" type="button" ${disabled || panelIndex === 0 ? "disabled" : ""}>←</button><button class="composer-move" data-move-panel="right" data-panel="${panelIndex}" type="button" ${disabled || panelIndex === panels.length - 1 ? "disabled" : ""}>→</button><button class="remove-row" data-remove-panel data-panel="${panelIndex}" type="button" ${disabled ? "disabled" : ""}>Remove panel</button></div><div class="composer-panel-sections">${panelSections.map((section, localIndex) => renderSection(section, panelSections, localIndex)).join("") || `<div class="repeater-empty">This panel has no sections.</div>`}</div><button class="button button--small composer-add-section" data-add-section data-panel-id="${esc(panelId)}" type="button" ${disabled ? "disabled" : ""}>+ Section in panel</button></div>`;
+      }).join("") : `<div class="canvas-empty"><strong>Blank canvas</strong><span>Add a panel before adding sections or components.</span><button class="button button--primary" data-add-panel type="button" ${disabled ? "disabled" : ""}>+ Add first panel</button></div>`}
+      ${panels.length >= 4 ? `<div class="form-help">Four panels is the current desktop authoring limit. The stored panel array remains extensible.</div>` : ""}
     </div>`;
   }
 
@@ -973,25 +1006,29 @@
     const roles = (page.blocks.B02.values.roles || []).map(row => row.role).filter(Boolean);
     const conditions = page.blocks.B05.values.conditions || [];
     const conditionNames = ["default", ...conditions.map(row => row.name).filter(name => name && String(name).toLowerCase() !== "default")];
-    const layout = page.blocks.B04.values.layout || [];
+    const mock = page.blocks.B04.values;
+    const panels = mock.panels || [];
+    const layout = mock.layout || [];
     if (roles.length && !roles.includes(mockChoice.role)) mockChoice.role = roles[0];
     if (!conditionNames.includes(mockChoice.state)) mockChoice.state = "default";
     const activeCondition = conditions.find(row => row.name === mockChoice.state);
     const conditionNote = activeCondition ? `<div class="mock-condition"><strong>${esc(activeCondition.name)}</strong><span>${esc(activeCondition.changes || "Change from default not yet defined.")}</span>${activeCondition.affected ? `<small>Affects ${esc(activeCondition.affected)}</small>` : ""}${activeCondition.unavailableActions ? `<small>Unavailable: ${esc(activeCondition.unavailableActions)}</small>` : ""}${activeCondition.next ? `<small>Next: ${esc(activeCondition.next)}</small>` : ""}</div>` : "";
     const segment = (name, values, current) => `<div class="segment">${values.map(value => `<button type="button" data-mock-choice="${name}" data-value="${esc(value)}" class="${value === current ? "is-on" : ""}">${esc(value)}</button>`).join("")}</div>`;
-    const appPages = state.pageOrder.map(id => state.pages[id]).filter(candidate => candidate && !candidate.isSettings).slice(0, 5);
     const showIds = ["IDs", "honesty + IDs"].includes(mockChoice.reviewMode);
     const showHonesty = ["honesty", "honesty + IDs"].includes(mockChoice.reviewMode);
+    const panelTracks = panels.map(panel => `${Math.max(1, Number(panel.width) || 1)}fr`).join(" ");
     return `<div class="mock-shell ${showHonesty ? "honesty-on" : ""} ${showIds ? "ids-on" : ""}">
       <div class="mock-controls">${segment("role", roles.length ? roles : ["default role"], mockChoice.role)}${segment("state", conditionNames, mockChoice.state)}<div class="review-view"><span>Review view</span>${segment("reviewMode", ["clean", "honesty", "IDs", "honesty + IDs"], mockChoice.reviewMode)}</div></div>
-      <div class="mock-stage"><div class="mock-page">
-        <div class="mock-nav"><strong>${esc(state.app.name || "Application Name")}</strong>${appPages.length ? appPages.map(candidate => `<span>${esc(candidate.name)}</span>`).join("") : "<span>First page</span>"}<span>Settings</span></div>
-        ${conditionNote}<div class="mock-content">${layout.map(section => {
+      <div class="mock-stage"><div class="mock-page-wrap">${conditionNote}${panels.length ? `<div class="mock-panel-canvas" style="grid-template-columns:${esc(panelTracks)}">${panels.map((panel, panelIndex) => {
+        const panelId = panel.id || panel._id;
+        const panelMetadata = [showIds ? `Panel ${panelIndex + 1} · ${panelId}` : "", showHonesty ? statusLabel(panel._status) : ""].filter(Boolean).join(" · ");
+        const sections = layout.filter(section => section.panelId === panelId);
+        return `<section class="mock-panel status--${esc(panel._status || "todo")}" data-mock-record="${esc(panelId)}"><div class="mock-panel-title">${panelMetadata ? `<span>${esc(panelMetadata)}</span>` : ""}<strong>${esc(panel.name || "Unnamed panel")}</strong><small>${esc(panel.role || "custom")}</small></div><div class="mock-panel-content">${sections.map(section => {
           const row = mockRecord(page, section.recordId) || {};
           const sectionMetadata = [showIds ? section.recordId : "", showHonesty ? statusLabel(row._status) : ""].filter(Boolean).join(" · ");
           return `<section class="mock-layout-section status--${esc(row._status || "todo")}" data-mock-record="${esc(section.recordId)}"><div class="mock-layout-title">${sectionMetadata ? `<span>${esc(sectionMetadata)}</span>` : ""}${esc(row.name || "Unnamed section")}</div><div class="mock-layout-grid" style="--mock-columns:${Number(section.columns) || 1}">${(section.items || []).map(item => renderMockItem(page, item)).join("") || `<div class="mock-empty">Empty section</div>`}</div></section>`;
-        }).join("")}</div>
-      </div></div>
+        }).join("") || `<div class="mock-empty">Empty panel</div>`}</div></section>`;
+      }).join("")}</div>` : `<div class="mock-canvas-empty"><strong>Blank canvas</strong><span>Add the first panel in the composer below.</span></div>`}</div></div>
       <div class="mock-caption">${esc(FIDELITY_NOTE)}</div>
     </div>${renderMockComposer(page, disabled)}`;
   }
@@ -1087,7 +1124,9 @@ Anything not covered above is unspecified. Add a question against this page rath
   function workflowSurfaceOptions(pageId) {
     const page = state.pages[pageId];
     if (!page || !page.built) return [];
-    return (page.blocks.B04.values.elements || []).filter(record => record.kind === "section").map(record => ({ value: record.id || record._id, label: `${record.id || record._id} — ${record.name || "Unnamed section"} · ${record.surfaceRole || "ordinary section"}` }));
+    const panels = (page.blocks.B04.values.panels || []).map(record => ({ value: record.id || record._id, label: `${record.id || record._id} — ${record.name || "Unnamed panel"} · ${record.role || "custom"}` }));
+    const sections = (page.blocks.B04.values.elements || []).filter(record => record.kind === "section").map(record => ({ value: record.id || record._id, label: `${record.id || record._id} — ${record.name || "Unnamed section"} · ${record.surfaceRole || "ordinary section"}` }));
+    return [...panels, ...sections];
   }
 
   function workflowActionOptions(pageId) {
@@ -1464,21 +1503,29 @@ Anything not covered above is unspecified. Add a question against this page rath
     URL.revokeObjectURL(url);
   }
 
-  function addLayoutSection(page) {
+  function addPanel(page) {
+    const panels = page.blocks.B04.values.panels;
+    if (panels.length >= 4) return;
+    const id = nextRecordId(page, "PNL");
+    panels.push({ _id: id, _status: "todo", _accountable: "Page owner", _note: "", id, name: `Panel ${panels.length + 1}`, role: panels.length ? "custom" : "primary content", width: "1", trace: "" });
+    selection = { kind: "record", recordId: id, blockId: "B04" };
+  }
+
+  function addLayoutSection(page, panelId) {
     const id = nextRecordId(page, "EL");
-    page.blocks.B04.values.elements.push({ _id: id, _status: "todo", _accountable: "Page owner", _note: "", id, kind: "section", name: "New section", shows: "", dataRef: "", trace: "" });
-    page.blocks.B04.values.layout.push({ uid: `SECTION-${Date.now()}`, recordId: id, columns: 1, items: [] });
+    page.blocks.B04.values.elements.push({ _id: id, _status: "todo", _accountable: "Page owner", _note: "", id, kind: "section", name: "New section", shows: "", dataRef: "", presentation: "", surfaceRole: "ordinary section", navigationSource: "application pages", navigationTargets: "", trace: "" });
+    page.blocks.B04.values.layout.push({ uid: `SECTION-${Date.now()}`, recordId: id, panelId, columns: 1, items: [] });
     selection = { kind: "record", recordId: id, blockId: "B04" };
   }
 
   function addLayoutItem(page, sectionIndex, type) {
-    const allowedTypes = ["content", "data", "notice", "action"];
+    const allowedTypes = ["content", "data", "navigation", "notice", "action"];
     type = allowedTypes.includes(type) ? type : "content";
     const isAction = type === "action";
     const id = nextRecordId(page, isAction ? "CTL" : "EL");
-    const names = { content: "New static content", data: "New data component", notice: "New notice", action: "New action" };
+    const names = { content: "New static content", data: "New data component", navigation: "New navigation", notice: "New notice", action: "New action" };
     if (isAction) page.blocks.B04.values.controls.push({ _id: id, _status: "todo", _accountable: "Business user", _note: "", id, name: names[type], effect: "acts on data", dataRef: "", serverData: "unknown", leadsTo: "", confirmation: "" });
-    else page.blocks.B04.values.elements.push({ _id: id, _status: "todo", _accountable: "Business user", _note: "", id, kind: type, name: names[type], shows: "", dataRef: type === "data" ? "Not yet defined" : "", presentation: type === "data" ? "not yet defined" : "", trace: "" });
+    else page.blocks.B04.values.elements.push({ _id: id, _status: "todo", _accountable: "Business user", _note: "", id, kind: type, name: names[type], shows: "", dataRef: type === "data" ? "Not yet defined" : "", presentation: type === "data" ? "not yet defined" : "", surfaceRole: "ordinary section", navigationSource: "application pages", navigationTargets: "", trace: "" });
     page.blocks.B04.values.layout[sectionIndex].items.push({ recordId: id });
     selection = { kind: "record", recordId: id, blockId: "B04" };
   }
@@ -1489,9 +1536,20 @@ Anything not covered above is unspecified. Add a question against this page rath
   }
 
   function moveEntry(items, index, direction) {
-    const target = direction === "up" ? index - 1 : index + 1;
+    const target = ["up", "left"].includes(direction) ? index - 1 : index + 1;
     if (target < 0 || target >= items.length) return;
     [items[index], items[target]] = [items[target], items[index]];
+  }
+
+  function moveSectionWithinPanel(page, sectionIndex, direction) {
+    const layout = page.blocks.B04.values.layout;
+    const panelId = layout[sectionIndex].panelId;
+    const indices = layout.map((section, index) => section.panelId === panelId ? index : -1).filter(index => index >= 0);
+    const localIndex = indices.indexOf(sectionIndex);
+    const targetLocal = direction === "up" ? localIndex - 1 : localIndex + 1;
+    if (targetLocal < 0 || targetLocal >= indices.length) return;
+    const targetIndex = indices[targetLocal];
+    [layout[sectionIndex], layout[targetIndex]] = [layout[targetIndex], layout[sectionIndex]];
   }
 
   function showToast(message) {
@@ -1556,11 +1614,27 @@ Anything not covered above is unspecified. Add a question against this page rath
     if (gateFilter) { activeGateFilter = activeGateFilter === gateFilter.dataset.gateFilter ? null : gateFilter.dataset.gateFilter; const scrollY = window.scrollY; renderDocument(); renderInspector(); window.scrollTo(0, scrollY); return; }
     const build = event.target.closest("[data-build-page]");
     if (build) { const page = state.pages[build.dataset.buildPage]; createFromTemplate(page.name, page.route, page.parentId, page.id); return; }
-    if (event.target.closest("[data-add-section]")) { const page = currentEditablePage(); addLayoutSection(page); saveState(); render(); return; }
+    if (event.target.closest("[data-add-panel]")) { const page = currentEditablePage(); addPanel(page); saveState(); render(); return; }
+    const movePanel = event.target.closest("[data-move-panel]");
+    if (movePanel) { const page = currentEditablePage(); moveEntry(page.blocks.B04.values.panels, Number(movePanel.dataset.panel), movePanel.dataset.movePanel); saveState(); render(); return; }
+    const removePanel = event.target.closest("[data-remove-panel]");
+    if (removePanel && confirm("Remove this panel, all of its sections, and their component records?")) {
+      const page = currentEditablePage();
+      const mock = page.blocks.B04.values;
+      const [panel] = mock.panels.splice(Number(removePanel.dataset.panel), 1);
+      const panelId = panel.id || panel._id;
+      const removedSections = mock.layout.filter(section => section.panelId === panelId);
+      removedSections.flatMap(section => [section.recordId, ...(section.items || []).map(item => item.recordId)]).forEach(id => removeRecord(page, id));
+      mock.layout = mock.layout.filter(section => section.panelId !== panelId);
+      selection = { kind: "block", blockId: "B04" };
+      saveState(); render(); return;
+    }
+    const addSection = event.target.closest("[data-add-section]");
+    if (addSection) { const page = currentEditablePage(); addLayoutSection(page, addSection.dataset.panelId); saveState(); render(); return; }
     const addItem = event.target.closest("[data-add-item]");
     if (addItem) { const page = currentEditablePage(); const type = addItem.closest(".composer-add").querySelector("[data-new-item-type]").value; addLayoutItem(page, Number(addItem.dataset.section), type); saveState(); render(); return; }
     const moveSection = event.target.closest("[data-move-section]");
-    if (moveSection) { const page = currentEditablePage(); moveEntry(page.blocks.B04.values.layout, Number(moveSection.dataset.section), moveSection.dataset.moveSection); saveState(); render(); return; }
+    if (moveSection) { const page = currentEditablePage(); moveSectionWithinPanel(page, Number(moveSection.dataset.section), moveSection.dataset.moveSection); saveState(); render(); return; }
     const moveItem = event.target.closest("[data-move-item]");
     if (moveItem) { const page = currentEditablePage(); const items = page.blocks.B04.values.layout[Number(moveItem.dataset.section)].items; moveEntry(items, Number(moveItem.dataset.item), moveItem.dataset.moveItem); saveState(); render(); return; }
     const removeItem = event.target.closest("[data-remove-item]");
@@ -1666,6 +1740,11 @@ Anything not covered above is unspecified. Add a question against this page rath
       const scrollY = window.scrollY;
       render();
       window.scrollTo(0, scrollY);
+      return;
+    }
+    if (event.target.matches("[data-panel-width]")) {
+      const page = currentEditablePage();
+      if (page) { page.blocks.B04.values.panels[Number(event.target.dataset.panel)].width = event.target.value; saveState(); render(); }
       return;
     }
     if (event.target.matches("[data-section-columns]")) {

@@ -34,15 +34,16 @@ http://127.0.0.1:8000/mockument-template/
 
 B03 defines canonical business data before B04 composes the page. Cardinality (`one` or `many`) and structure (`value` or `record`) describe the data independently of its presentation. Data-bound mock records select a B03 definition, remain explicitly unresolved, or create a new definition directly from the inspector.
 
-B04 contains a structured low-fidelity composer. A copied page can:
+B04 begins as a blank panel canvas; it no longer assumes a fixed application menu and content column. A copied page can:
 
-- Add and reorder sections.
-- Choose one, two or three columns per section.
-- Add static content, data-bound components, notices and actions.
-- Reorder or remove items.
-- Click any item and edit its specification in the permanent right inspector.
+- Add and reorder up to four top-level panels, while storing panels in an extensible array.
+- Give every panel a stable `PNL-##` ID, semantic role and relative width.
+- Add sections inside a selected panel and choose one, two or three inner columns per section.
+- Add static content, data-bound components, navigation, notices and actions.
+- Build application-page, current-surface, workflow-step or custom navigation only when the page actually needs it.
+- Click any panel, section or component and edit its canonical record in the permanent right inspector.
 
-B04 owns canonical component and action records without rendering repeated registers. A data-bound component derives valid presentation choices from its B03 definition: one value, one record, or a many-item list/table presentation. Lists require an item definition and tables require named columns. Its grouped **Review view** offers Clean, Honesty, IDs, and Honesty + IDs modes so status evidence and stable references remain independently inspectable without permanent visual clutter.
+B04 owns canonical panel, component and action records without rendering repeated registers. A data-bound component derives valid presentation choices from its B03 definition: one value, one record, or a many-item list/table presentation. Lists require an item definition and tables require named columns. Its grouped **Review view** offers Clean, Honesty, IDs, and Honesty + IDs modes so status evidence and stable references remain independently inspectable without permanent visual clutter.
 
 B05 records only material page-level departures from the automatic default condition. Sorting, filtering, column movement, selection and expansion remain B04 component behavior. Selecting a B05 condition annotates the mock with its changed message, affected components, unavailable actions and next step.
 
