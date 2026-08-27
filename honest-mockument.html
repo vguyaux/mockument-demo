@@ -245,9 +245,6 @@ td .sub { display: block; font-size: 12px; color: var(--text3); margin-top: 3px;
 .wf-menu a { display: block; font-size: 11.5px; color: var(--text2); text-decoration: none; padding: 5px 8px; border-radius: 5px; }
 .wf-menu a:hover { background: var(--surface3); color: var(--text1); }
 .wf-menu a.is-on { color: var(--text1); font-weight: 600; background: color-mix(in srgb, var(--accent) 16%, transparent); }
-.wf-phone { max-width: 300px; margin: 0 auto; }
-.wf-voice { font-family: var(--font-mono); font-size: 12.5px; line-height: 1.9; color: var(--text2); }
-.wf-voice b { color: var(--text1); }
 
 /* element hooks */
 [data-el] { cursor: pointer; }
@@ -457,7 +454,7 @@ html { scroll-behavior: smooth; }
 <a class="doc-nav-link" href="#13-what-a-mockument-does-not-settle">13. What a mockument does not settle</a>
 <a class="doc-nav-link is-part" href="#part-4--the-mockument-page">Part 4 · The mockument page</a>
 <a class="doc-nav-link" href="#14-one-page-per-page">14. One page per page</a>
-<a class="doc-nav-link" href="#15-the-twenty-two-blocks">15. The twenty-two blocks</a>
+<a class="doc-nav-link" href="#15-the-thirteen-blocks">15. The thirteen blocks</a>
 <a class="doc-nav-link" href="#16-the-mock-frame">16. The mock frame</a>
 <a class="doc-nav-link" href="#17-identity-ids-and-traceability">17. Identity, IDs and traceability</a>
 <a class="doc-nav-link is-part" href="#part-5--the-data-layer">Part 5 · The data layer</a>
@@ -590,7 +587,7 @@ machinery for making that rule survive contact with a deadline.</p>
 <p><strong><a href="#part-4--the-mockument-page">Part 4 · The mockument page</a></strong></p>
 <ol start="14">
 <li><a href="#14-one-page-per-page">One page per page</a></li>
-<li><a href="#15-the-twenty-two-blocks">The twenty-two blocks</a></li>
+<li><a href="#15-the-thirteen-blocks">The thirteen blocks</a></li>
 <li><a href="#16-the-mock-frame">The mock frame</a></li>
 <li><a href="#17-identity-ids-and-traceability">Identity, IDs and traceability</a></li>
 </ol>
@@ -662,7 +659,7 @@ finished is labelled as exactly that.</p>
 <h2 id="4-what-a-mockument-produces">4. What a mockument produces</h2><p>One artefact, readable four ways:</p>
 <ul>
 <li><strong>An app you can walk.</strong> A navigable, low-fidelity version of the proposed app: menu on the left,
-pages that open, links that lead somewhere, states you can switch between.</li>
+pages that open, links that lead somewhere, page conditions you can inspect.</li>
 <li><strong>A specification you can read.</strong> Beside every represented page, the written meaning of everything on
 it — what it is for, who may see it, what each control does, what happens when things go wrong.</li>
 <li><strong>A register you can chase.</strong> Every open question in the app, by owner, with what it blocks and when
@@ -712,10 +709,6 @@ allowed to see a customer&#39;s file, and should never be left to.</p>
 <td>Business user</td>
 </tr>
 <tr>
-<td>Which device types the work has to happen on</td>
-<td>Business user</td>
-</tr>
-<tr>
 <td>When a figure is <em>as of</em>, and when a person can see it</td>
 <td>Business user, with the data owner</td>
 </tr>
@@ -745,32 +738,21 @@ page, or they get invented in the build.</p>
 it, including agents as users in their own right.</p>
 <p><strong>A business process</strong> has a data dictionary, a record of what the app remembers about each user
 between visits, and one or more process steps.</p>
-<p><strong>A process step</strong> has a subset of the data dictionary and one or more device types. It records who may
-see it and what differs between them; what can go wrong and what should happen then, as a person would
-notice it; and, for each piece of its data that is a list, how the list is ordered, how it may be
-filtered or grouped, whether items can be selected and what happens then, and how deep it nests.</p>
-<p><strong>A device type</strong> is a desktop, a phone, a voice assistant, or anything else the step has to work on.
-It also records whether anything changes while a person is looking at it — the one live-behaviour
-question that is genuinely a business question.</p>
-<p><strong>A device step</strong> is one screen, or one prompt. It has data output, data input and interactive
-controls.</p>
+<p><strong>A process step</strong> has a subset of the data dictionary. It records who may see it and what differs
+between them; what can go wrong and what should happen then, as a person would notice it; whether
+anything changes while a person is looking at it; and, for each piece of its data that is a list, how
+the list is ordered, filtered, grouped, selected and presented at zero, one and overflow.</p>
 <p><strong>An interactive control</strong> does one of three things, and the wording matters because it decides who
 answers the next question: it <em>acts on data</em>, it <em>alters the screen</em>, or <em>both</em>. A control that acts on
 data may also need information only the server holds, which is recorded but not designed here.</p>
-<p><strong>A data field</strong> has a business meaning, holds either one value or a list, is <em>as of</em> some point in
+<p><strong>A data definition</strong> has a business meaning, cardinality (one or many), structure (value or record), and is <em>as of</em> some point in
 time, becomes visible to users some interval after that point, and comes from somewhere — held by us,
 supplied by a provider, entered by the user, or computed. Part 5 covers how far this is taken, and when.</p>
 <p><strong>Any part of any of these may be marked &quot;nobody has answered this yet&quot;,</strong> naming who must answer it.
 That marker is not an administrative nicety; it is the mechanism the whole method rests on.</p>
-<h2 id="7-three-things-about-the-shape">7. Three things about the shape</h2><p><strong>The step is what stays the same across devices.</strong> It holds the data and the business meaning. The
-device type is where that meaning becomes something a person looks at or listens to, and the
-decomposition changes with it: one desktop screen may be four phone screens or twenty-six spoken
-prompts. If a step becomes twenty-six prompts, either the step is too big or voice is the wrong device
-for it — and that is worth discovering before anyone builds it, not after.</p>
-<p><strong>Lists are split across two levels on purpose.</strong> How a list is ordered and filtered is business
-meaning, so it belongs to the step and is the same everywhere. What appears when it holds nothing, one
-item, or more than fits is a device question, so it belongs to the device type: twenty rows on a
-desktop, five on a phone, the first three and then a question on voice.</p>
+<h2 id="7-two-things-about-the-shape">7. Two things about the shape</h2><p><strong>List behavior belongs together.</strong> Ordering, filtering, grouping, selection, nesting, empty behavior
+and overflow behavior all affect the work. Keeping them in one record makes the list understandable
+without forcing reviewers to assemble its meaning from separate places.</p>
 <p><strong>The unanswered marker is the part most likely to be dropped as bureaucracy, and it is the reason the
 rest works.</strong> A question nobody asked still gets answered during the build, and by then it looks like a
 decision. Marking it costs one line and keeps the difference visible for as long as the difference
@@ -778,9 +760,10 @@ matters.</p>
 <h2 id="8-what-is-deliberately-outside-the-model">8. What is deliberately outside the model</h2><p>Reconnecting, retrying and resuming after a failure. Session handling. Storage. Caching. Performance.
 Infrastructure. Every one of these belongs to whoever builds the app, and none of them improves by
 being guessed at in a business conversation.</p>
-<p>The single exception is whether a screen changes while somebody is looking at it. That is a business
-question about the experience — somebody watching a queue that reorders under their cursor has a
-business problem, not a technical one — so it sits on the device type and gets asked with the rest.</p>
+<p>The single exception is whether meaningful business information changes while a page remains open
+without the current person directly causing it. Somebody watching a queue reorder because new work
+arrived has a business problem, not merely a technical one. B08 records the expected experience while
+leaving polling, WebSockets, retries and reconnection to implementation.</p>
 <p>When an implementation constraint does change the business experience — a figure that cannot be
 produced more often than monthly, a permission that cannot be enforced at the row level — the
 constraint and its consequence come back into the specification as something to discuss, not as a
@@ -790,7 +773,7 @@ footnote in a technical document nobody reads.</p>
 opens the page the real app would open. Destinations nobody has drawn yet stay in the menu, marked as
 undrawn, because a gap you can see is worth more than a tidy diagram.</p>
 <p>The page itself is not a visual design. It is a high-level representation showing the parts that carry
-meaning: headings, information, lists, inputs, actions, states and links. Elements that would lead
+meaning: headings, information, lists, inputs, actions, page conditions and links. Elements that would lead
 somewhere in the real app lead somewhere here too. A person can click from an item in a queue to the record that
 closes it, exactly as they would at work, and discover that the two live on different pages and that
 every walkthrough participant tried to do both in one place.</p>
@@ -805,7 +788,6 @@ or followed as a piece of work from beginning to end.</p>
 <li>Connecting every visible element to a business requirement — or exposing that it has none.</li>
 <li>Revealing requirements that are missing, contradictory or impossible to represent.</li>
 <li>Comparing what different people see, by switching role rather than by reading a table.</li>
-<li>Exploring how one step lands differently on desktop, phone or voice.</li>
 <li>Recording observations and unanswered questions where they arise, in context.</li>
 <li>Giving business users, designers, implementers and agents one shared object to argue about.</li>
 <li>Producing a starting point for the build that does not require anybody to invent.</li>
@@ -813,25 +795,25 @@ or followed as a piece of work from beginning to end.</p>
 <p>It is not for deciding infrastructure, storage, session handling, retry behaviour or any other matter
 that belongs to the implementer.</p>
 <h2 id="11-the-objects-of-representation">11. The objects of representation</h2><p><strong>A mockument</strong> represents one business app and one version of its description. It has a navigation
-structure, represented pages or prompts, workflows, observations, unanswered questions, and a record of
+structure, represented pages, workflows, observations, unanswered questions, and a record of
 the assumptions and proposals that were needed to make it navigable.</p>
 <p><strong>The navigation structure</strong> is the proposed menu and the other routes through the app: what a person
 can open, from where, and as which kind of user. Unrepresented destinations are shown and marked.</p>
-<p><strong>A represented page</strong> is the high-level form of one page of the proposed app. It names the step or
-steps it represents, who may see it, and the device type. It contains representations of outputs,
-inputs, controls, messages and links, together with the written explanation of each.</p>
-<p><strong>A represented prompt</strong> is the same thing for a voice assistant or any other device not organised as
-visual pages.</p>
+<p><strong>A represented page</strong> is the high-level form of one page of the proposed app. It names the business
+activity it supports and who may see it. It contains representations of outputs, inputs, controls,
+messages and links, together with the written explanation of each.</p>
 <p><strong>A represented element</strong> is anything a person can see, hear, enter, select or activate. It is
 deliberately low fidelity: it communicates meaning, hierarchy and behaviour without settling
 typography, colour, spacing or final wording — unless one of those is itself a requirement, in which
 case it is recorded as one.</p>
-<p><strong>A workflow</strong> is a path through the mockument representing a real piece of work. It names its starting
-point, the people involved, the sequence of pages or prompts, the decisions taken along the way, its
-possible endings, and the exceptional paths people need to be able to discuss.</p>
+<p><strong>A workflow</strong> is an application-level graph representing a real piece of work. Its canonical record
+stores stable IDs for a starting step, page and optional page surface at each step, and transitions tied
+to actual B04 actions or named business events. Names are displayed to people but never used as the
+connection. Branches, terminal outcomes and exceptional paths are explicit, so renaming a page does not
+break the workflow and deleting a referenced surface produces a visible graph error.</p>
 <p><strong>An observation</strong> records something learned by looking at or walking through the mockument. It is not
 automatically a decision and never automatically a requirement. It may expose a conflict, an awkward
-transition, a missing state, an unnecessary step, or a question worth asking.</p>
+transition, a missing page condition, an unnecessary step, or a question worth asking.</p>
 <p><strong>A proposal</strong> is a representational choice made so the mockument can be experienced at all. It stays
 visibly a proposal until the appropriate person accepts it. Acceptance updates the description when the
 decision concerns business meaning.</p>
@@ -899,6 +881,13 @@ top and travels downward, which is nothing like using an app. When each page of 
 page of the mockument, the mockument&#39;s own navigation <em>is</em> the app&#39;s proposed menu, and reviewing the
 structure of the app becomes the same act as reading the document. Questions like &quot;can I get back from
 here?&quot; and &quot;why is this three clicks away?&quot; answer themselves.</p>
+<p>Within one Mockument page, B01–B13 are focused block views rather than thirteen more application pages.
+The status dashboard is their menu: it remains pinned in one viewport position while selecting a block
+replaces the working panel without scrolling. B01 includes the page overview, identity, metadata, page
+tools and overall readiness; B02–B13 show only their selected block. The application page, browser title,
+autosave record and export remain the same. Previous and Next
+support sequential work; a block hash supports deep links. An explicit all-block view exists only for
+printing, browser search and full-document review.</p>
 <p>The consequences are practical:</p>
 <ul>
 <li>Every page has one owner, one version and one readiness state.</li>
@@ -906,66 +895,65 @@ here?&quot; and &quot;why is this three clicks away?&quot; answer themselves.</p
 <li>A page can be sent to somebody on its own and still make sense.</li>
 <li>The register pages — questions, fields, routes — can be assembled mechanically from the set.</li>
 </ul>
-<h2 id="15-the-twenty-two-blocks">15. The twenty-two blocks</h2><p>Every page carries the same twenty-two blocks in the same order. Blocks B01–B04 are identity, B05–B06 are the
-mock, B07–B16 are the specification, B17–B22 are the honesty apparatus. Each block names who answers it.</p>
-<h3 id="identity">Identity</h3><p><strong>B01 · Page header.</strong> Name, route, build status (new / modify / existing), version, date, owner, the
-three readiness gates, and the share of elements that are actually required. <em>Answered by the page
-owner.</em></p>
-<p><strong>B02 · Represents.</strong> The process and step this page belongs to, and the device types it covers, as links
-into the app map. Where one step needs several pages, each of them says so. <em>Business user.</em></p>
-<p><strong>B03 · Available to.</strong> Every role that may reach the page, what differs between them, and what each must
-<em>not</em> see. <em>Business user.</em></p>
-<p><strong>B04 · Purpose.</strong> Three or four sentences: what work this supports, why somebody opens it, what they
-leave with. Not a feature list. <em>Business user.</em></p>
-<h3 id="the-mock">The mock</h3><p><strong>B05 · The mock frame.</strong> The navigable representation, with four controls above it — device type, role,
-state and the honesty overlay — and an inspector that opens when any element is clicked. See §16.</p>
-<p><strong>B06 · Fidelity note.</strong> One standing line: structure only, example data, nothing here is proof.</p>
-<h3 id="the-specification">The specification</h3><p><strong>B07 · Elements.</strong> ID, element, what it shows or accepts, where it comes from, status, and what it
-traces to. This is the spine: anything visible appears here or it should not be visible. <em>Business user
-with the data owner.</em></p>
-<p><strong>B08 · Controls and actions.</strong> ID, control, business effect (<em>acts on data</em> / <em>alters the screen</em> /
-<em>both</em>), whether it needs information only the server holds, where it leads, what confirmation or undo
-exists, status. <em>Business user.</em></p>
-<p><strong>B09 · Data and fields.</strong> Field, meaning, one value or a list, unit, what it is <em>as of</em>, when a user can
-see it, where it comes from, how it is calculated and from what, and the sample value used in the mock.
-Climbed as a ladder — see Part 5. <em>Business user for meaning and timing; data owner for source and
-calculation.</em></p>
-<p><strong>B10 · Lists.</strong> Per list: order, filtering and grouping, whether items can be selected and what then
-happens, nesting depth — then, per device, what appears when the list holds nothing, exactly one item,
-or more than fits. <em>Business user.</em></p>
-<p><strong>B11 · States.</strong> Default, empty, one item, more than fits, loading, error, restricted: when each
-happens, what the person sees, and what they can do next. Every state listed here is selectable in the
-mock. <em>Business user.</em></p>
-<p><strong>B12 · What can go wrong.</strong> Described as the person notices it, never as a cause; what should happen;
+<h2 id="15-the-thirteen-blocks">15. The thirteen blocks</h2><p>Every page carries the same thirteen blocks in the same order. Blocks B01–B02 are identity, B03 defines the
+available business data, B04 is the mock and its records, B05–B10 complete the specification, and B11–B13 are the honesty apparatus. Each block names who answers it.</p>
+<h3 id="identity">Identity</h3><p><strong>B01 · Page header.</strong> Name, business activity, route, build status, version, date and owner, followed
+by the readiness stages. Business activity explains what work the page supports, why someone opens it,
+and what they should leave with. <em>Answered by the page owner.</em></p>
+<p><strong>B02 · Roles.</strong> Every listed role can access the page. Record what differs between roles and what
+each must <em>not</em> see; omit roles that cannot access the page. The B02 block assignee owns the role
+register, so individual role rows do not repeat answer ownership. <em>Business user.</em></p>
+<h3 id="the-specification">Data and the mock</h3><p><strong>B03 · Data definitions.</strong> Stable data ID, business name, meaning, cardinality (<em>one</em> or <em>many</em>), structure
+(<em>value</em> or <em>record</em>), unit, as-of point, availability, provenance, calculation, whether a person can
+change it, example value and data-ladder rung. Definitions can be provisional while the mock reveals
+missing data. <em>Business user for meaning and timing; data owner for source and calculation.</em></p>
+<p><strong>B04 · Mock composer.</strong> The navigable representation and canonical records for sections, static content,
+data-bound components, notices and actions. A data-bound component selects a B03 definition before it can
+choose a compatible presentation. Many-item data may be a list or table; lists define one item and tables
+define named columns. Presentation and data shape are related but never treated as the same concept.</p>
+<p>The standing fidelity qualification is permanent system text on every mock and an explicit rule in the build contract; it is not a reviewed page block.</p>
+<h3>The remaining specification</h3><p><strong>B05 · Page conditions.</strong> The default condition is automatic. Record only a named departure from default
+that materially changes the page’s message, major visibility, available business actions, ability to
+continue, or required next step. Sorting, filtering, selected rows, moved columns and expanded sections
+remain B04 component behavior. Each condition records when it occurs, what changes, affected component
+IDs, unavailable actions and what happens next. <em>Business user.</em></p>
+<p><strong>B06 · What can go wrong.</strong> Described as the person notices it, never as a cause; what should happen;
 who is told. <em>Business user.</em></p>
-<p><strong>B13 · Remembered between visits.</strong> What the app remembers about this person, for how long, and whether
+<p><strong>B07 · Remembered between visits.</strong> What the app remembers about this person, for how long, and whether
 they can clear it. Asked directly because it is never volunteered. <em>Business user.</em></p>
-<p><strong>B14 · Changes while being looked at.</strong> What may update under the person&#39;s eyes, how they are told, and
-what happens if they are mid-action. <em>Business user.</em></p>
-<p><strong>B15 · Connections.</strong> Where a person arrives from, where they can go, and which shared components this
+<p><strong>B08 · Updates while the page is open.</strong> First answer whether nothing changes unless the person acts or
+refreshes, or whether information may change while open. Only the latter requires update records. Each
+record names the business event, affected B03 data and B04 components, expected timing and update method,
+how the person is told, collection movement, protection for in-progress or stale work, and any resulting
+B05 condition. Sorting, filtering and moved columns remain B04 behavior because the current person causes
+them directly. A calculation belongs to B03; its trigger and immediate progress belong to B04; an
+asynchronous result arriving later belongs here. <em>Business user.</em></p>
+<p><strong>B09 · Connections.</strong> Where a person arrives from, where they can go, and which shared components this
 page uses. Rendered as links, so the graph is walkable in both directions.</p>
-<p><strong>B16 · Workflows.</strong> The named pieces of work this page takes part in, and where in each it sits.</p>
-<h3 id="the-honesty-apparatus">The honesty apparatus</h3><p><strong>B17 · Copy register.</strong> Every user-visible string, each marked <em>required wording</em> or <em>placeholder</em>.
+<p><strong>B10 · Workflow participation.</strong> A generated local view of every canonical application workflow that
+references this page. It shows the stable step, targeted page root or B04 surface, incoming transitions,
+outgoing action or business-event transitions, branch conditions and terminal outcomes. Canonical graphs
+are managed in Settings; B10 never asks somebody to retype page, tab, wizard-step or section names.</p>
+<h3 id="the-honesty-apparatus">The honesty apparatus</h3><p><strong>B11 · Copy register.</strong> Every user-visible string, each marked <em>required wording</em> or <em>placeholder</em>.
 Wording is where an unattended builder invents most freely; a placeholder that is labelled is safe,
 an unlabelled one becomes product.</p>
-<p><strong>B18 · Decisions.</strong> What was decided, by whom, on what date. A decision with no name on it is a rumour.</p>
-<p><strong>B19 · Observations.</strong> What walking through revealed. Explicitly not decisions and not requirements.</p>
-<p><strong>B20 · Open questions.</strong> Question, why it matters, what it blocks, who must answer, needed by. Each is
-anchored to the element it affects and mirrored in the app-wide register.</p>
-<p><strong>B21 · Out of scope, and what this does not settle.</strong> What this page deliberately does not answer, plus
-the standing list from §13.</p>
-<p><strong>B22 · Build contract and machine-readable record.</strong> The instruction block handed to whoever builds
+<p><strong>B12 · Decisions, observations, questions and scope.</strong> One compact register whose first field declares
+the record’s authority. A <em>decision</em> is accepted and names its scope, owner, date, rationale, lifecycle,
+superseded decision and the canonical records it changed. An <em>observation</em> preserves what a walkthrough
+taught without granting it authority. A <em>question</em> remains unresolved and names why it matters, what it
+blocks, who owes the answer and when. A <em>scope</em> record deliberately excludes something and explains why.
+All types can reference affected stable IDs; selecting the type reveals only its relevant fields.</p>
+<p><strong>B13 · Build contract and machine-readable record.</strong> The instruction block handed to whoever builds
 this page — what to build, what not to invent, what to ask about first, what done means — and the
 structured record that the checker validates and the builder consumes.</p>
-<h2 id="16-the-mock-frame">16. The mock frame</h2><p>The frame is what turns a picture into an instrument. Four controls sit above every mock.</p>
-<p><strong>Device type.</strong> Desktop, phone, voice — whatever the step has to work on. Switching device shows how
-the same step decomposes, and makes the twenty-six-prompts problem visible rather than theoretical.</p>
+<h2 id="16-the-mock-frame">16. The mock frame</h2><p>The frame is what turns a picture into an instrument. Three controls sit above every mock.</p>
 <p><strong>Role.</strong> Switching role hides and reveals elements according to the permissions block, so &quot;what does a
 supervisor see?&quot; is answered by looking rather than by reading. What a role must <em>not</em> see is stated
 beside it.</p>
-<p><strong>State.</strong> Default, empty, one item, more than fits, loading, error, restricted. Where a state has its
-own sketch, selecting it shows that sketch; where it does not, the frame says so and quotes what the
-specification says should happen — which is itself a useful admission.</p>
+<p><strong>Page condition.</strong> Default is always available. Any additional option is a B05 page-level condition,
+not a sort order, filter, column arrangement or other component setting. Selecting a condition annotates
+the mock with what changes from default, which components are affected, which actions become unavailable,
+and what the person must do next.</p>
 <p><strong>Honesty overlay.</strong> Tints every element by its status. Amber is proposed, pink is unanswered, green is
 required, grey is out of scope. An element with no status shows as unanswered, because that is what it
 is.</p>
@@ -1015,7 +1003,7 @@ page</strong>, so nothing above the bottom rung is ever paid for on a page that 
 </thead>
 <tbody><tr>
 <td><strong>L0 · exists</strong></td>
-<td>What the field means in business words · one value or a list · what it is <em>as of</em> · when a person can see it · who supplies it (held by us, a provider, the user, computed, or nobody knows)</td>
+<td>What the data means in business words · one or many · value or record · what it is <em>as of</em> · when a person can see it · who supplies it (held by us, a provider, the user, computed, or nobody knows)</td>
 <td>With the mockument. <strong>Required to pass the business-review gate.</strong></td>
 <td><code>means</code> <code>holds</code> <code>periodicity</code> <code>visibleWhen</code> <code>provenance</code></td>
 </tr>
@@ -1085,9 +1073,8 @@ and, when one fails, exactly what is in the way.</p>
 <p><em>Meaning: somebody can be shown this without a guide.</em></p>
 <h3 id="gate-2-ready-for-a-business-review">Gate 2 — ready for a business review</h3><p>Everything in gate 1, plus:</p>
 <ul>
-<li>Who may reach the page, and what differs between roles, is recorded.</li>
-<li>The empty, error and restricted states are described, and every described state says what a person
-sees.</li>
+<li>Every role listed can reach the page, and what differs between roles is recorded.</li>
+<li>Every applicable page-level condition says when it occurs, what changes from default, which components or actions are affected, and what the person does next. Pages with no material departure from default do not invent conditions.</li>
 <li>What can go wrong is recorded as a person would notice it.</li>
 <li>Every field is at least at <strong>L0</strong>, and every hero field is at <strong>L2</strong>.</li>
 </ul>
@@ -1128,15 +1115,15 @@ is the trend and the reason list, not the colour.</p>
 </tr>
 <tr>
 <td><strong>App map</strong></td>
-<td>The proposed menu including undrawn destinations; the step → device decomposition; routes between pages; the shared component register.</td>
+<td>The proposed menu including undrawn destinations; routes between pages; the shared component register.</td>
 </tr>
 <tr>
 <td><strong>One page per app page</strong></td>
-<td>The twenty-two blocks.</td>
+<td>The thirteen blocks.</td>
 </tr>
 <tr>
-<td><strong>Workflow pages</strong></td>
-<td>One walkable path each: start, actors, sequence, decisions, endings, exceptional paths.</td>
+<td><strong>Application workflows</strong></td>
+<td>Canonical graphs managed in Settings: stable start step, selected page and optional B04 surface, action or business-event transitions, branch conditions, terminal outcomes and graph checks. Each page’s B10 is generated from this source.</td>
 </tr>
 <tr>
 <td><strong>Open questions</strong></td>
@@ -1185,11 +1172,10 @@ doing work.</p>
 what happens then? Does anything sit inside anything else, and how deep?</li>
 <li>What appears when this list holds nothing? When it holds only one? When it holds more than fits here?</li>
 <li>What can go wrong, as <em>you</em> would notice it — and what should happen when it does?</li>
-<li>Which device types does this have to work on?</li>
-<li>Does anything change while somebody is looking at it?</li>
+<li>Can meaningful information change while the page remains open without this person causing it? If so, when should it appear, how are they told, and what protects in-progress work?</li>
 <li>What is this number <em>as of</em>, and how long after that can somebody see it?</li>
 </ul>
-<p><strong>During the session:</strong> switch role and state on the mock frame rather than describing them; turn the honesty
+<p><strong>During the session:</strong> switch role and each applicable page condition on the mock frame rather than describing them; turn the honesty
 overlay on at least once; and when somebody says &quot;obviously it would…&quot;, stop and record it as a
 question, because that sentence is the single most reliable indicator of an unexamined assumption.</p>
 <p><strong>After the session:</strong> every observation is filed as an observation, not promoted to a requirement;
@@ -1202,10 +1188,9 @@ silence illegal. The rules, in order of importance:</p>
 <strong>unanswered</strong> and add a question naming who must answer it and by when.</li>
 <li>Anything drawn to make the mock concrete is <strong>proposed</strong>, with a note saying why it was drawn.</li>
 <li>Describe what can go wrong as the person would notice it, never as a technical cause.</li>
-<li>Ask, explicitly, the two things nobody volunteers: what the app remembers between visits, and what
-changes while somebody is looking at the page.</li>
-<li>For every list: order, filtering, selection and nesting on the step; empty, one and more-than-fits
-per device.</li>
+<li>Ask, explicitly, the two things nobody volunteers: what the app remembers between visits, and whether
+meaningful information may change while the page remains open without the current person causing it.</li>
+<li>For every list: order, filtering, selection, nesting, empty, one and more-than-fits behavior.</li>
 <li>Every element in the mock needs a row with a stable ID; every row needs either a trace to a
 requirement or a status admitting it has none.</li>
 <li>A string is <em>required wording</em> only if somebody confirmed the exact words. Otherwise it is a
@@ -1216,7 +1201,7 @@ and by whom — to pass the next one. Never adjust the data to make a gate pass.
 </ol>
 <h2 id="26-building-from-a-page">26. Building from a page</h2><p>Each page ends with a build contract, addressed to whoever implements it:</p>
 <ul>
-<li><strong>Build exactly this</strong> — the elements, controls, states and wording that are required.</li>
+<li><strong>Build exactly this</strong> — the components, actions, page conditions and wording that are required.</li>
 <li><strong>Do not invent</strong> — the specific things that are drawn but unspecified, named individually.</li>
 <li><strong>Stop and ask first</strong> — the open questions that touch this page, with their owners.</li>
 <li><strong>Done means</strong> — the acceptance checks, including that every element identifier survives into the
@@ -1239,15 +1224,14 @@ deleted. If it is genuinely no longer relevant, it is closed with a note saying 
 <p><strong>The description leads the representation.</strong> Where the two disagree, the description wins and the
 mockument is corrected — never the reverse, and never silently.</p>
 <hr>
-<h1 id="part-8--reference">Part 8 · Reference</h1><h2 id="28-the-minimal-page-record">28. The minimal page record</h2><p>If nothing else is captured for a page, capture these ten things. Everything in §15 is an expansion of
+<h1 id="part-8--reference">Part 8 · Reference</h1><h2 id="28-the-minimal-page-record">28. The minimal page record</h2><p>If nothing else is captured for a page, capture these nine things. Everything in §15 is an expansion of
 this list.</p>
 <ol>
 <li><strong>Name and route</strong> — how the page is reached.</li>
-<li><strong>Represents</strong> — the process step and device step it corresponds to.</li>
-<li><strong>Available to</strong> — who may reach it, and what differs between them.</li>
-<li><strong>Representation</strong> — the high-level page or prompt, with navigable elements.</li>
-<li><strong>Explanation</strong> — what the page is for and what each important part means.</li>
-<li><strong>States</strong> — the conditions a reviewer can inspect.</li>
+<li><strong>Business activity</strong> — what work the page supports, why someone opens it, and what they should leave with.</li>
+<li><strong>Roles</strong> — the roles that can access it, and what differs between them.</li>
+<li><strong>Representation</strong> — the high-level page, with navigable elements.</li>
+<li><strong>Page conditions</strong> — material departures from default that a reviewer can inspect.</li>
 <li><strong>Links and actions</strong> — where they lead, and what business effect they represent.</li>
 <li><strong>Traceability</strong> — the requirement behind each meaningful element.</li>
 <li><strong>Proposals and assumptions</strong> — what was added to make the representation concrete.</li>
@@ -1264,23 +1248,15 @@ specification is rendered from it.</p>
 </thead>
 <tbody><tr>
 <td><code>page</code></td>
-<td><code>id</code> <code>name</code> <code>route</code> <code>buildStatus</code> (new / modify / existing) <code>version</code> <code>updated</code> <code>owner</code></td>
-</tr>
-<tr>
-<td><code>represents</code></td>
-<td><code>process</code> <code>step</code> <code>stepId</code> <code>deviceTypes[]</code></td>
-</tr>
-<tr>
-<td><code>purpose</code></td>
-<td>free text, business words</td>
+<td><code>id</code> <code>name</code> <code>activity</code> <code>route</code> <code>buildStatus</code> <code>version</code> <code>updated</code> <code>owner</code></td>
 </tr>
 <tr>
 <td><code>availableTo[]</code></td>
-<td><code>role</code> <code>mayReach</code> <code>differs</code> <code>mustNotSee</code></td>
+<td><code>role</code> <code>differs</code> <code>mustNotSee</code> · every listed role can access the page</td>
 </tr>
 <tr>
-<td><code>elements[]</code></td>
-<td><code>id</code> <code>name</code> <code>shows</code> <code>source</code> <code>status</code> <code>trace</code> <code>note</code> <code>questions[]</code> <code>roles[]</code></td>
+<td><code>components[]</code></td>
+<td><code>id</code> <code>kind</code> <code>name</code> <code>shows</code> <code>dataRef</code> <code>presentation</code> <code>itemTemplate</code> <code>columns</code> <code>status</code> <code>trace</code> <code>note</code></td>
 </tr>
 <tr>
 <td><code>controls[]</code></td>
@@ -1288,15 +1264,11 @@ specification is rendered from it.</p>
 </tr>
 <tr>
 <td><code>data[]</code></td>
-<td><code>field</code> <code>fieldId</code> <code>means</code> <code>holds</code> <code>periodicity</code> <code>visibleWhen</code> <code>provenance</code> <code>hero</code> <code>unit</code> <code>nullRule</code> <code>staleRule</code> <code>source</code> <code>calculated</code> <code>calculation</code> <code>derivedFrom[]</code> <code>sensitivity</code> <code>tolerance</code> <code>evidence</code> <code>sample</code></td>
+<td><code>id</code> <code>name</code> <code>meaning</code> <code>cardinality</code> <code>structure</code> <code>unit</code> <code>asOf</code> <code>availableWhen</code> <code>provenance</code> <code>calculation</code> <code>userCanChange</code> <code>sample</code> <code>rung</code></td>
 </tr>
 <tr>
-<td><code>lists[]</code></td>
-<td><code>name</code> <code>ordering</code> <code>filtering</code> <code>selection</code> <code>nesting</code> · <code>device[]</code> → <code>device</code> <code>empty</code> <code>one</code> <code>overflow</code></td>
-</tr>
-<tr>
-<td><code>states[]</code></td>
-<td><code>key</code> <code>label</code> <code>when</code> <code>sees</code> <code>next</code></td>
+<td><code>conditions[]</code></td>
+<td><code>id</code> <code>name</code> <code>when</code> <code>changes</code> <code>affectedComponents</code> <code>unavailableActions</code> <code>next</code></td>
 </tr>
 <tr>
 <td><code>failures[]</code></td>
@@ -1307,36 +1279,24 @@ specification is rendered from it.</p>
 <td><code>answer</code> <code>status</code> <code>duration</code> <code>clearable</code> <code>whoMustAnswer</code></td>
 </tr>
 <tr>
-<td><code>liveChange</code></td>
-<td><code>answer</code> <code>status</code> <code>howTold</code> <code>midAction</code> <code>whoMustAnswer</code></td>
+<td><code>updatesWhileOpen</code></td>
+<td><code>expectation</code> <code>updates[]</code> · each update records <code>businessEvent</code> <code>affected[]</code> <code>whenSeen</code> <code>updateMethod</code> <code>howTold</code> <code>midAction</code> <code>staleConflict</code> <code>resultingCondition</code></td>
 </tr>
 <tr>
 <td><code>connections</code></td>
 <td><code>from[]</code> <code>to[]</code> <code>components[]</code></td>
 </tr>
 <tr>
-<td><code>workflows[]</code></td>
-<td><code>id</code> <code>name</code> <code>href</code> <code>position</code></td>
+<td><code>application.workflows[]</code></td>
+<td><code>id</code> <code>name</code> <code>startStepId</code> <code>steps[]</code> · each step records <code>id</code> <code>pageId</code> <code>surfaceId</code> <code>terminalOutcome</code> and <code>transitions[]</code>; each transition records <code>triggerRef</code> <code>condition</code> <code>nextStepId</code></td>
 </tr>
 <tr>
 <td><code>copy[]</code></td>
 <td><code>key</code> <code>string</code> <code>status</code> (required wording / placeholder) <code>note</code></td>
 </tr>
 <tr>
-<td><code>decisions[]</code></td>
-<td><code>what</code> <code>who</code> <code>when</code></td>
-</tr>
-<tr>
-<td><code>observations[]</code></td>
-<td><code>what</code> <code>raisedBy</code> <code>when</code></td>
-</tr>
-<tr>
-<td><code>questions[]</code></td>
-<td><code>id</code> <code>question</code> <code>whyItMatters</code> <code>blocks</code> <code>blocksBuild</code> <code>whoMustAnswer</code> <code>neededBy</code> <code>affects[]</code></td>
-</tr>
-<tr>
-<td><code>outOfScope[]</code></td>
-<td><code>what</code> <code>why</code></td>
+<td><code>honestyRecords[]</code></td>
+<td>Common: <code>id</code> <code>type</code> (decision / observation / question / scope) <code>statement</code> <code>affects[]</code>. Decision: <code>decisionScope</code> <code>decidedBy</code> <code>decidedWhen</code> <code>rationale</code> <code>supersedes</code> <code>decisionLifecycle</code> <code>appliedTo[]</code>. Observation: <code>raisedBy</code> <code>observedWhen</code>. Question: <code>why</code> <code>blocks</code> <code>answerOwner</code> <code>neededBy</code>. Scope: <code>whyOutsideScope</code>.</td>
 </tr>
 <tr>
 <td><code>contract</code></td>
@@ -1369,10 +1329,49 @@ contract.</p>
       }
     },
     &quot;processes&quot;: { &quot;type&quot;: &quot;array&quot;, &quot;minItems&quot;: 1, &quot;items&quot;: { &quot;$ref&quot;: &quot;#/$defs/process&quot; } },
+    &quot;workflows&quot;: { &quot;type&quot;: &quot;array&quot;, &quot;items&quot;: { &quot;$ref&quot;: &quot;#/$defs/workflow&quot; } },
     &quot;pages&quot;: { &quot;type&quot;: &quot;array&quot;, &quot;items&quot;: { &quot;$ref&quot;: &quot;#/$defs/page_spec&quot; } }
   },
 
   &quot;$defs&quot;: {
+
+    &quot;workflow&quot;: {
+      &quot;type&quot;: &quot;object&quot;,
+      &quot;required&quot;: [&quot;id&quot;, &quot;name&quot;, &quot;start_step_id&quot;, &quot;steps&quot;],
+      &quot;properties&quot;: {
+        &quot;id&quot;: { &quot;type&quot;: &quot;string&quot; },
+        &quot;name&quot;: { &quot;type&quot;: &quot;string&quot; },
+        &quot;start_step_id&quot;: { &quot;type&quot;: &quot;string&quot; },
+        &quot;steps&quot;: {
+          &quot;type&quot;: &quot;array&quot;,
+          &quot;minItems&quot;: 1,
+          &quot;items&quot;: {
+            &quot;type&quot;: &quot;object&quot;,
+            &quot;required&quot;: [&quot;id&quot;, &quot;page_id&quot;, &quot;transitions&quot;],
+            &quot;properties&quot;: {
+              &quot;id&quot;: { &quot;type&quot;: &quot;string&quot; },
+              &quot;name&quot;: { &quot;type&quot;: &quot;string&quot; },
+              &quot;page_id&quot;: { &quot;type&quot;: &quot;string&quot; },
+              &quot;surface_id&quot;: { &quot;type&quot;: &quot;string&quot; },
+              &quot;terminal_outcome&quot;: { &quot;type&quot;: &quot;string&quot; },
+              &quot;transitions&quot;: {
+                &quot;type&quot;: &quot;array&quot;,
+                &quot;items&quot;: {
+                  &quot;type&quot;: &quot;object&quot;,
+                  &quot;required&quot;: [&quot;id&quot;, &quot;trigger_ref&quot;, &quot;next_step_id&quot;],
+                  &quot;properties&quot;: {
+                    &quot;id&quot;: { &quot;type&quot;: &quot;string&quot; },
+                    &quot;trigger_ref&quot;: { &quot;description&quot;: &quot;A B04 action ID or the explicit business-event marker.&quot;, &quot;type&quot;: &quot;string&quot; },
+                    &quot;condition&quot;: { &quot;type&quot;: &quot;string&quot; },
+                    &quot;next_step_id&quot;: { &quot;type&quot;: &quot;string&quot; }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
 
     &quot;status&quot;: {
       &quot;description&quot;: &quot;What backs this?&quot;,
@@ -1407,12 +1406,13 @@ contract.</p>
 
     &quot;data_field&quot;: {
       &quot;type&quot;: &quot;object&quot;,
-      &quot;required&quot;: [&quot;name&quot;, &quot;holds&quot;],
+      &quot;required&quot;: [&quot;name&quot;, &quot;cardinality&quot;, &quot;structure&quot;],
       &quot;properties&quot;: {
         &quot;name&quot;: { &quot;type&quot;: &quot;string&quot; },
-        &quot;field_id&quot;: { &quot;type&quot;: &quot;string&quot; },
+        &quot;data_id&quot;: { &quot;type&quot;: &quot;string&quot; },
         &quot;means&quot;: { &quot;description&quot;: &quot;What does this mean, in the words you would use to a client?&quot;, &quot;type&quot;: &quot;string&quot; },
-        &quot;holds&quot;: { &quot;enum&quot;: [&quot;one value&quot;, &quot;a list&quot;] },
+        &quot;cardinality&quot;: { &quot;enum&quot;: [&quot;one&quot;, &quot;many&quot;] },
+        &quot;structure&quot;: { &quot;enum&quot;: [&quot;value&quot;, &quot;record&quot;] },
         &quot;periodicity&quot;: {
           &quot;description&quot;: &quot;What point in time is this value as of?&quot;,
           &quot;enum&quot;: [&quot;live&quot;, &quot;end of previous business day&quot;, &quot;end of previous month&quot;,
@@ -1430,6 +1430,7 @@ contract.</p>
         &quot;source&quot;: { &quot;type&quot;: &quot;string&quot; },
         &quot;calculated&quot;: { &quot;type&quot;: [&quot;boolean&quot;, &quot;null&quot;] },
         &quot;calculation&quot;: { &quot;type&quot;: &quot;string&quot; },
+        &quot;user_can_change&quot;: { &quot;enum&quot;: [&quot;yes&quot;, &quot;no&quot;, &quot;unknown&quot;] },
         &quot;derived_from&quot;: { &quot;type&quot;: &quot;array&quot;, &quot;items&quot;: { &quot;type&quot;: &quot;string&quot; } },
         &quot;sensitivity&quot;: { &quot;type&quot;: &quot;string&quot; },
         &quot;tolerance&quot;: { &quot;type&quot;: &quot;string&quot; },
@@ -1441,7 +1442,7 @@ contract.</p>
 
     &quot;step&quot;: {
       &quot;type&quot;: &quot;object&quot;,
-      &quot;required&quot;: [&quot;name&quot;, &quot;data&quot;, &quot;who_may_see_it&quot;, &quot;what_can_go_wrong&quot;, &quot;device_types&quot;],
+      &quot;required&quot;: [&quot;name&quot;, &quot;data&quot;, &quot;who_may_see_it&quot;, &quot;what_can_go_wrong&quot;],
       &quot;properties&quot;: {
         &quot;name&quot;: { &quot;type&quot;: &quot;string&quot; },
         &quot;id&quot;: { &quot;type&quot;: &quot;string&quot; },
@@ -1463,6 +1464,10 @@ contract.</p>
                 } } }
           ]
         },
+        &quot;updates_while_open&quot;: {
+          &quot;description&quot;: &quot;Can meaningful information change while this step remains open without the current person causing it, how are they told, and what if they are mid-action?&quot;,
+          &quot;$ref&quot;: &quot;#/$defs/answerable&quot;
+        },
         &quot;lists&quot;: {
           &quot;description&quot;: &quot;One entry per piece of this step&#39;s data that holds a list.&quot;,
           &quot;type&quot;: &quot;array&quot;,
@@ -1474,51 +1479,13 @@ contract.</p>
               &quot;ordering&quot;: { &quot;description&quot;: &quot;What order does this list appear in?&quot;, &quot;$ref&quot;: &quot;#/$defs/answerable&quot; },
               &quot;filtering_and_grouping&quot;: { &quot;description&quot;: &quot;How may it be filtered or grouped?&quot;, &quot;$ref&quot;: &quot;#/$defs/answerable&quot; },
               &quot;items_can_be_selected&quot;: { &quot;description&quot;: &quot;Can items be picked out, and what happens then?&quot;, &quot;$ref&quot;: &quot;#/$defs/answerable&quot; },
-              &quot;how_deep_it_nests&quot;: { &quot;description&quot;: &quot;Does anything sit inside anything else, and how deep?&quot;, &quot;$ref&quot;: &quot;#/$defs/answerable&quot; }
-            }
-          }
-        },
-        &quot;device_types&quot;: { &quot;type&quot;: &quot;array&quot;, &quot;minItems&quot;: 1, &quot;items&quot;: { &quot;$ref&quot;: &quot;#/$defs/device_type&quot; } }
-      }
-    },
-
-    &quot;device_type&quot;: {
-      &quot;description&quot;: &quot;Desktop, phone, voice assistant, or anything else this step has to work on.&quot;,
-      &quot;type&quot;: &quot;object&quot;,
-      &quot;required&quot;: [&quot;name&quot;, &quot;changes_while_being_looked_at&quot;, &quot;device_steps&quot;],
-      &quot;properties&quot;: {
-        &quot;name&quot;: { &quot;type&quot;: &quot;string&quot; },
-        &quot;changes_while_being_looked_at&quot;: {
-          &quot;description&quot;: &quot;Does anything change while somebody is looking at it, how are they told, and what if they are mid-action?&quot;,
-          &quot;$ref&quot;: &quot;#/$defs/answerable&quot;
-        },
-        &quot;list_behaviour&quot;: {
-          &quot;type&quot;: &quot;array&quot;,
-          &quot;items&quot;: {
-            &quot;type&quot;: &quot;object&quot;,
-            &quot;required&quot;: [&quot;data_name&quot;],
-            &quot;properties&quot;: {
-              &quot;data_name&quot;: { &quot;type&quot;: &quot;string&quot; },
+              &quot;how_deep_it_nests&quot;: { &quot;description&quot;: &quot;Does anything sit inside anything else, and how deep?&quot;, &quot;$ref&quot;: &quot;#/$defs/answerable&quot; },
               &quot;when_it_holds_nothing&quot;: { &quot;description&quot;: &quot;What appears when the list is empty?&quot;, &quot;$ref&quot;: &quot;#/$defs/answerable&quot; },
               &quot;when_it_holds_one_thing&quot;: { &quot;description&quot;: &quot;What appears when there is only one?&quot;, &quot;$ref&quot;: &quot;#/$defs/answerable&quot; },
               &quot;when_it_holds_more_than_fits&quot;: { &quot;description&quot;: &quot;What appears when there are more than fit here?&quot;, &quot;$ref&quot;: &quot;#/$defs/answerable&quot; }
             }
           }
-        },
-        &quot;device_steps&quot;: { &quot;type&quot;: &quot;array&quot;, &quot;minItems&quot;: 1, &quot;items&quot;: { &quot;$ref&quot;: &quot;#/$defs/device_step&quot; } }
-      }
-    },
-
-    &quot;device_step&quot;: {
-      &quot;description&quot;: &quot;One screen, or one prompt.&quot;,
-      &quot;type&quot;: &quot;object&quot;,
-      &quot;required&quot;: [&quot;name&quot;],
-      &quot;properties&quot;: {
-        &quot;name&quot;: { &quot;type&quot;: &quot;string&quot; },
-        &quot;page_id&quot;: { &quot;description&quot;: &quot;The mockument page representing this device step.&quot;, &quot;type&quot;: &quot;string&quot; },
-        &quot;output_fields&quot;: { &quot;type&quot;: &quot;array&quot;, &quot;items&quot;: { &quot;type&quot;: &quot;string&quot; } },
-        &quot;input_fields&quot;: { &quot;type&quot;: &quot;array&quot;, &quot;items&quot;: { &quot;type&quot;: &quot;string&quot; } },
-        &quot;controls&quot;: { &quot;type&quot;: &quot;array&quot;, &quot;items&quot;: { &quot;$ref&quot;: &quot;#/$defs/control&quot; } }
+        }
       }
     },
 
@@ -1528,7 +1495,7 @@ contract.</p>
       &quot;properties&quot;: {
         &quot;id&quot;: { &quot;type&quot;: &quot;string&quot; },
         &quot;name&quot;: { &quot;type&quot;: &quot;string&quot; },
-        &quot;effect&quot;: { &quot;enum&quot;: [&quot;acts on data&quot;, &quot;alters the device-step&quot;, &quot;both&quot;] },
+        &quot;effect&quot;: { &quot;enum&quot;: [&quot;acts on data&quot;, &quot;changes the page&quot;, &quot;both&quot;] },
         &quot;uses_data_only_the_server_knows&quot;: { &quot;type&quot;: &quot;boolean&quot; },
         &quot;leads_to&quot;: { &quot;type&quot;: &quot;string&quot; },
         &quot;confirm_or_undo&quot;: { &quot;type&quot;: &quot;string&quot; },
@@ -1555,34 +1522,24 @@ contract.</p>
     &quot;page_spec&quot;: {
       &quot;description&quot;: &quot;One page of the app, represented and specified.&quot;,
       &quot;type&quot;: &quot;object&quot;,
-      &quot;required&quot;: [&quot;id&quot;, &quot;name&quot;, &quot;represents&quot;, &quot;purpose&quot;, &quot;available_to&quot;, &quot;elements&quot;],
+      &quot;required&quot;: [&quot;id&quot;, &quot;name&quot;, &quot;activity&quot;, &quot;available_to&quot;, &quot;elements&quot;],
       &quot;properties&quot;: {
         &quot;id&quot;: { &quot;type&quot;: &quot;string&quot; },
         &quot;name&quot;: { &quot;type&quot;: &quot;string&quot; },
+        &quot;activity&quot;: { &quot;type&quot;: &quot;string&quot; },
         &quot;route&quot;: { &quot;type&quot;: &quot;string&quot; },
         &quot;build_status&quot;: { &quot;enum&quot;: [&quot;new&quot;, &quot;modify&quot;, &quot;existing&quot;] },
         &quot;version&quot;: { &quot;type&quot;: &quot;string&quot; },
         &quot;updated&quot;: { &quot;type&quot;: &quot;string&quot; },
         &quot;owner&quot;: { &quot;type&quot;: &quot;string&quot; },
-        &quot;represents&quot;: {
-          &quot;type&quot;: &quot;object&quot;,
-          &quot;required&quot;: [&quot;process&quot;, &quot;step&quot;],
-          &quot;properties&quot;: {
-            &quot;process&quot;: { &quot;type&quot;: &quot;string&quot; },
-            &quot;step&quot;: { &quot;type&quot;: &quot;string&quot; },
-            &quot;step_id&quot;: { &quot;type&quot;: &quot;string&quot; },
-            &quot;device_types&quot;: { &quot;type&quot;: &quot;array&quot;, &quot;items&quot;: { &quot;type&quot;: &quot;string&quot; } }
-          }
-        },
-        &quot;purpose&quot;: { &quot;type&quot;: &quot;string&quot; },
         &quot;available_to&quot;: {
+          &quot;description&quot;: &quot;Every listed role can access the page; roles without access are omitted.&quot;,
           &quot;type&quot;: &quot;array&quot;, &quot;minItems&quot;: 1,
           &quot;items&quot;: {
             &quot;type&quot;: &quot;object&quot;,
             &quot;required&quot;: [&quot;role&quot;],
             &quot;properties&quot;: {
               &quot;role&quot;: { &quot;type&quot;: &quot;string&quot; },
-              &quot;may_reach&quot;: { &quot;type&quot;: &quot;boolean&quot;, &quot;default&quot;: true },
               &quot;differs&quot;: { &quot;type&quot;: &quot;string&quot; },
               &quot;must_not_see&quot;: { &quot;type&quot;: &quot;string&quot; }
             }
@@ -1597,7 +1554,17 @@ contract.</p>
               &quot;id&quot;: { &quot;type&quot;: &quot;string&quot; },
               &quot;name&quot;: { &quot;type&quot;: &quot;string&quot; },
               &quot;shows&quot;: { &quot;type&quot;: &quot;string&quot; },
-              &quot;source&quot;: { &quot;type&quot;: &quot;string&quot; },
+              &quot;data_ref&quot;: { &quot;description&quot;: &quot;A B03 data definition ID, or an explicit unresolved marker.&quot;, &quot;type&quot;: &quot;string&quot; },
+              &quot;presentation&quot;: { &quot;enum&quot;: [&quot;displayed value&quot;, &quot;input&quot;, &quot;status&quot;, &quot;metric&quot;, &quot;summary&quot;, &quot;details&quot;, &quot;form&quot;, &quot;list&quot;, &quot;table&quot;] },
+              &quot;item_template&quot;: { &quot;type&quot;: &quot;string&quot; },
+              &quot;columns&quot;: { &quot;type&quot;: &quot;string&quot; },
+              &quot;ordering&quot;: { &quot;type&quot;: &quot;string&quot; },
+              &quot;filtering&quot;: { &quot;type&quot;: &quot;string&quot; },
+              &quot;selection&quot;: { &quot;type&quot;: &quot;string&quot; },
+              &quot;nesting&quot;: { &quot;type&quot;: &quot;string&quot; },
+              &quot;empty&quot;: { &quot;type&quot;: &quot;string&quot; },
+              &quot;one&quot;: { &quot;type&quot;: &quot;string&quot; },
+              &quot;overflow&quot;: { &quot;type&quot;: &quot;string&quot; },
               &quot;status&quot;: { &quot;$ref&quot;: &quot;#/$defs/status&quot; },
               &quot;trace&quot;: { &quot;type&quot;: &quot;string&quot; },
               &quot;note&quot;: { &quot;type&quot;: &quot;string&quot; },
@@ -1608,16 +1575,18 @@ contract.</p>
         },
         &quot;controls&quot;: { &quot;type&quot;: &quot;array&quot;, &quot;items&quot;: { &quot;$ref&quot;: &quot;#/$defs/control&quot; } },
         &quot;data&quot;: { &quot;type&quot;: &quot;array&quot;, &quot;items&quot;: { &quot;$ref&quot;: &quot;#/$defs/data_field&quot; } },
-        &quot;states&quot;: {
+        &quot;conditions&quot;: {
+          &quot;description&quot;: &quot;Material page-level departures from the automatic default condition; component settings do not belong here.&quot;,
           &quot;type&quot;: &quot;array&quot;,
           &quot;items&quot;: {
             &quot;type&quot;: &quot;object&quot;,
-            &quot;required&quot;: [&quot;key&quot;],
+            &quot;required&quot;: [&quot;name&quot;, &quot;when&quot;, &quot;changes&quot;],
             &quot;properties&quot;: {
-              &quot;key&quot;: { &quot;enum&quot;: [&quot;default&quot;, &quot;empty&quot;, &quot;one&quot;, &quot;overflow&quot;, &quot;loading&quot;, &quot;error&quot;, &quot;restricted&quot;] },
-              &quot;label&quot;: { &quot;type&quot;: &quot;string&quot; },
+              &quot;name&quot;: { &quot;type&quot;: &quot;string&quot; },
               &quot;when&quot;: { &quot;type&quot;: &quot;string&quot; },
-              &quot;sees&quot;: { &quot;type&quot;: &quot;string&quot; },
+              &quot;changes&quot;: { &quot;type&quot;: &quot;string&quot; },
+              &quot;affected_components&quot;: { &quot;type&quot;: &quot;array&quot;, &quot;items&quot;: { &quot;type&quot;: &quot;string&quot; } },
+              &quot;unavailable_actions&quot;: { &quot;type&quot;: &quot;string&quot; },
               &quot;next&quot;: { &quot;type&quot;: &quot;string&quot; }
             }
           }
@@ -1635,7 +1604,32 @@ contract.</p>
           }
         },
         &quot;remembered&quot;: { &quot;$ref&quot;: &quot;#/$defs/answerable&quot; },
-        &quot;live_change&quot;: { &quot;$ref&quot;: &quot;#/$defs/answerable&quot; },
+        &quot;updates_while_open&quot;: {
+          &quot;type&quot;: &quot;object&quot;,
+          &quot;required&quot;: [&quot;expectation&quot;],
+          &quot;properties&quot;: {
+            &quot;expectation&quot;: { &quot;enum&quot;: [&quot;nothing changes unless the person acts or refreshes&quot;, &quot;information may change while the page is open&quot;] },
+            &quot;updates&quot;: {
+              &quot;type&quot;: &quot;array&quot;,
+              &quot;items&quot;: {
+                &quot;type&quot;: &quot;object&quot;,
+                &quot;required&quot;: [&quot;change&quot;, &quot;business_event&quot;, &quot;affected&quot;, &quot;when_seen&quot;, &quot;update_method&quot;, &quot;how_told&quot;, &quot;mid_action&quot;, &quot;stale_conflict&quot;],
+                &quot;properties&quot;: {
+                  &quot;change&quot;: { &quot;type&quot;: &quot;string&quot; },
+                  &quot;business_event&quot;: { &quot;type&quot;: &quot;string&quot; },
+                  &quot;affected&quot;: { &quot;type&quot;: &quot;array&quot;, &quot;items&quot;: { &quot;type&quot;: &quot;string&quot; } },
+                  &quot;when_seen&quot;: { &quot;type&quot;: &quot;string&quot; },
+                  &quot;update_method&quot;: { &quot;enum&quot;: [&quot;automatically&quot;, &quot;when the person refreshes&quot;, &quot;either is acceptable&quot;] },
+                  &quot;how_told&quot;: { &quot;type&quot;: &quot;string&quot; },
+                  &quot;collection_effect&quot;: { &quot;type&quot;: &quot;string&quot; },
+                  &quot;mid_action&quot;: { &quot;type&quot;: &quot;string&quot; },
+                  &quot;stale_conflict&quot;: { &quot;type&quot;: &quot;string&quot; },
+                  &quot;resulting_condition&quot;: { &quot;type&quot;: &quot;string&quot; }
+                }
+              }
+            }
+          }
+        },
         &quot;copy&quot;: {
           &quot;type&quot;: &quot;array&quot;,
           &quot;items&quot;: {
@@ -1649,29 +1643,31 @@ contract.</p>
             }
           }
         },
-        &quot;decisions&quot;: {
+        &quot;honesty_records&quot;: {
           &quot;type&quot;: &quot;array&quot;,
           &quot;items&quot;: {
             &quot;type&quot;: &quot;object&quot;,
-            &quot;required&quot;: [&quot;what&quot;, &quot;who&quot;, &quot;when&quot;],
-            &quot;properties&quot;: { &quot;what&quot;: { &quot;type&quot;: &quot;string&quot; }, &quot;who&quot;: { &quot;type&quot;: &quot;string&quot; }, &quot;when&quot;: { &quot;type&quot;: &quot;string&quot; } }
-          }
-        },
-        &quot;observations&quot;: {
-          &quot;type&quot;: &quot;array&quot;,
-          &quot;items&quot;: {
-            &quot;type&quot;: &quot;object&quot;,
-            &quot;required&quot;: [&quot;what&quot;],
-            &quot;properties&quot;: { &quot;what&quot;: { &quot;type&quot;: &quot;string&quot; }, &quot;raised_by&quot;: { &quot;type&quot;: &quot;string&quot; }, &quot;when&quot;: { &quot;type&quot;: &quot;string&quot; } }
-          }
-        },
-        &quot;questions&quot;: { &quot;type&quot;: &quot;array&quot;, &quot;items&quot;: { &quot;$ref&quot;: &quot;#/$defs/question&quot; } },
-        &quot;out_of_scope&quot;: {
-          &quot;type&quot;: &quot;array&quot;,
-          &quot;items&quot;: {
-            &quot;type&quot;: &quot;object&quot;,
-            &quot;required&quot;: [&quot;what&quot;],
-            &quot;properties&quot;: { &quot;what&quot;: { &quot;type&quot;: &quot;string&quot; }, &quot;why&quot;: { &quot;type&quot;: &quot;string&quot; } }
+            &quot;required&quot;: [&quot;id&quot;, &quot;type&quot;, &quot;statement&quot;],
+            &quot;properties&quot;: {
+              &quot;id&quot;: { &quot;type&quot;: &quot;string&quot; },
+              &quot;type&quot;: { &quot;enum&quot;: [&quot;decision&quot;, &quot;observation&quot;, &quot;question&quot;, &quot;scope&quot;] },
+              &quot;statement&quot;: { &quot;type&quot;: &quot;string&quot; },
+              &quot;affects&quot;: { &quot;type&quot;: &quot;array&quot;, &quot;items&quot;: { &quot;type&quot;: &quot;string&quot; } },
+              &quot;decision_scope&quot;: { &quot;enum&quot;: [&quot;this page&quot;, &quot;application-wide&quot;, &quot;data or source&quot;, &quot;workflow&quot;] },
+              &quot;decided_by&quot;: { &quot;type&quot;: &quot;string&quot; },
+              &quot;decided_when&quot;: { &quot;type&quot;: &quot;string&quot; },
+              &quot;rationale&quot;: { &quot;type&quot;: &quot;string&quot; },
+              &quot;supersedes&quot;: { &quot;type&quot;: &quot;string&quot; },
+              &quot;decision_lifecycle&quot;: { &quot;enum&quot;: [&quot;active&quot;, &quot;superseded&quot;] },
+              &quot;applied_to&quot;: { &quot;type&quot;: &quot;array&quot;, &quot;items&quot;: { &quot;type&quot;: &quot;string&quot; } },
+              &quot;raised_by&quot;: { &quot;type&quot;: &quot;string&quot; },
+              &quot;observed_when&quot;: { &quot;type&quot;: &quot;string&quot; },
+              &quot;question_why&quot;: { &quot;type&quot;: &quot;string&quot; },
+              &quot;blocks&quot;: { &quot;type&quot;: &quot;string&quot; },
+              &quot;answer_owner&quot;: { &quot;type&quot;: &quot;string&quot; },
+              &quot;needed_by&quot;: { &quot;type&quot;: &quot;string&quot; },
+              &quot;scope_why&quot;: { &quot;type&quot;: &quot;string&quot; }
+            }
           }
         },
         &quot;contract&quot;: {
@@ -1697,32 +1693,31 @@ contract.</p>
 </thead>
 <tbody><tr>
 <td>1</td>
-<td><code>represents.step</code> empty · any element or control without <code>status</code> · any question without <code>who_must_answer</code> · empty <code>purpose</code></td>
+<td><code>activity</code> empty · any element or control without <code>status</code> · any question without <code>who_must_answer</code></td>
 </tr>
 <tr>
 <td>2</td>
-<td>anything in gate 1 · empty <code>available_to</code> · <code>empty</code> / <code>error</code> / <code>restricted</code> missing from <code>states</code> · any state without <code>sees</code> · empty <code>failures</code> · any data field below <strong>L0</strong> · any <code>hero</code> field below <strong>L2</strong> · any <code>periodicity</code> outside the vocabulary</td>
+<td>anything in gate 1 · empty <code>available_to</code> · any recorded page condition without <code>name</code>, <code>when</code>, or <code>changes</code> · empty <code>failures</code> · any data field below <strong>L0</strong> · any <code>hero</code> field below <strong>L2</strong> · any <code>periodicity</code> outside the vocabulary</td>
 </tr>
 <tr>
 <td>3</td>
-<td>anything in gates 1 and 2 · any question with <code>blocks_build</code> still open · any element with status <code>unanswered</code> · any element without <code>trace</code> · <code>remembered</code> or <code>live_change</code> not answered · any copy entry still <code>placeholder</code> · any data field below <strong>L2</strong></td>
+<td>anything in gates 1 and 2 · any question with <code>blocks_build</code> still open · any element with status <code>unanswered</code> · any element without <code>trace</code> · <code>remembered</code> or <code>updates_while_open.expectation</code> not answered · any copy entry still <code>placeholder</code> · any data field below <strong>L2</strong></td>
 </tr>
 </tbody></table>
 <h2 id="31-glossary">31. Glossary</h2><p><strong>As of</strong> — the point in time a value describes, as distinct from when it was fetched or displayed.</p>
 <p><strong>Build contract</strong> — the instruction block on each page telling an implementer what to build, what not
 to invent, what to ask about first, and what done means.</p>
-<p><strong>Device step</strong> — one screen or one prompt: how a step appears on one device type.</p>
-<p><strong>Device type</strong> — desktop, phone, voice assistant, or anything else a step has to work on.</p>
 <p><strong>Gate</strong> — a computed readiness check. Three of them: walk-through, business review, implementation.</p>
 <p><strong>Hero field</strong> — a number that is itself the product, and must be defined to L2 while the mockument is
 still being drawn.</p>
 <p><strong>Honesty overlay</strong> — a control that tints the mock frame by status, showing at a glance how much of a
 screen is actually agreed.</p>
-<p><strong>Mock frame</strong> — the navigable representation of one page inside a mockument page, with its device,
-role, state and overlay controls.</p>
+<p><strong>Mock frame</strong> — the navigable representation of one page inside a mockument page, with its role,
+page-condition and overlay controls.</p>
 <p><strong>Mockument</strong> — half mock-up, half document: a navigable representation of an app in which every
 visible thing carries what backs it, who owes the missing answer, and whether it is ready to build.</p>
 <p><strong>Observation</strong> — something learned by walking through. Not a decision and not a requirement.</p>
+<p><strong>Page condition</strong> — a named, material departure from the automatic default that changes the page’s message, major visibility, available business actions, ability to continue, or required next step. Component settings such as sorting and moved columns are not page conditions.</p>
 <p><strong>Periodicity</strong> — which of the agreed fixed answers describes what a value is <em>as of</em>.</p>
 <p><strong>Proposal</strong> — a representational choice made so the mockument can be experienced, awaiting acceptance.</p>
 <p><strong>Provenance</strong> — who supplies a field: held by us, a provider, the user, computed, or nobody knows.</p>
@@ -1772,7 +1767,7 @@ with plausible defaults would undo the method in a single command.</p>
 </tr>
 <tr>
 <td><code>page/page.py</code> · <code>page/page.html</code></td>
-<td>The page scaffold: declared surfaces including the notification zone, the role list, the state list, and the includes and wiring the page emits.</td>
+<td>The page scaffold: declared surfaces including the notification zone, the role list, the page-condition list, and the includes and wiring the page emits.</td>
 </tr>
 <tr>
 <td><code>page/routes.py</code></td>
@@ -1788,7 +1783,7 @@ with plausible defaults would undo the method in a single command.</p>
 </tr>
 <tr>
 <td><code>features/&lt;page&gt;.feature</code></td>
-<td>Scenarios generated from states × roles, plus one per user-noticed failure.</td>
+<td>Scenarios generated from applicable page conditions × roles, plus the automatic default and one per user-noticed failure.</td>
 </tr>
 <tr>
 <td><code>fixtures.json</code></td>
@@ -1836,7 +1831,7 @@ or unanswered, fields below the sourced rung, and copy still marked placeholder.
 <td>The typed boundary where raw request values are classified, and the persistence behind it</td>
 </tr>
 <tr>
-<td>States × roles, and the failures table</td>
+<td>Applicable page conditions × roles, the automatic default, and the failures table</td>
 <td>Generated test scenarios</td>
 </tr>
 <tr>
@@ -1867,7 +1862,7 @@ route is genuinely not answered by the mockument, and is left open rather than a
 belongs in the output.</p>
 <h2 id="36-what-it-refuses-to-do">36. What it refuses to do</h2><p>It will not choose a colour or a density. It will not invent a display format for a field that has not
 reached the display rung. It will not name a currency or a date format nobody has chosen. It will not
-decide whether a page updates while somebody is looking at it. It will not turn a placeholder string
+decide whether meaningful information updates while a page remains open without the current person causing it. It will not turn a placeholder string
 into product copy.</p>
 <p>Each of those refusals appears in the output as a marked gap with an owner, which is the same behaviour
 the method asks of a person drawing a page.</p>

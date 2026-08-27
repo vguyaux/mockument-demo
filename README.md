@@ -8,7 +8,7 @@ decided yet. It looks like the app, and it tells you which parts are real.
 
 Two things to look at:
 
-- **The sample mockument** — a worked example you can walk. Switch device, role and state on any page,
+- **The sample mockument** — a worked example you can walk. Switch role and state on any page,
   turn on the honesty overlay to see how much of the screen is actually agreed, and click any element
   for its record, its source and its open questions. The example app is deliberately generic — an
   internal request-and-approval app — so it can be swapped for any real product.

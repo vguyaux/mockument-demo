@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Application Name — Template</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script>
+    (function () {
+      var mode = localStorage.getItem("mockument-theme") || "system";
+      var effective = mode === "system"
+        ? (window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark")
+        : mode;
+      document.documentElement.dataset.themeMode = mode;
+      document.documentElement.dataset.theme = effective;
+    })();
+  </script>
+  <link rel="stylesheet" href="assets/template.css">
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="menu-column" aria-label="Mockument navigation">
+      <div class="brand">
+        <span class="brand-mark"></span>
+        <div><strong>Honest Mockument</strong><span id="app-name-small">Application Name</span></div>
+      </div>
+
+      <div class="menu-actions">
+        <button class="button button--primary" id="new-page-button" type="button">+ Copy Template</button>
+        <button class="icon-button" id="export-button" type="button" title="Export Mockument JSON">Export</button>
+        <button class="icon-button theme-button" id="theme-button" type="button" aria-label="Change color theme" title="Theme: system">◐</button>
+      </div>
+
+      <nav class="app-menu" id="app-menu"></nav>
+
+      <div class="menu-footer">
+        <button class="menu-link menu-link--template" id="template-link" type="button">
+          <span class="menu-icon">T</span>
+          <span><strong>Template</strong><small>Permanent page source</small></span>
+        </button>
+      </div>
+    </aside>
+
+    <main class="document-column" id="document-column" tabindex="-1">
+      <div id="document"></div>
+    </main>
+
+    <aside class="inspector-column" aria-label="Selection inspector">
+      <div class="inspector" id="inspector"></div>
+    </aside>
+  </div>
+
+  <dialog class="dialog" id="new-page-dialog">
+    <form method="dialog" id="new-page-form">
+      <div class="dialog-head">
+        <div>
+          <span class="eyebrow">Copy Template</span>
+          <h2>Create a Mockument page</h2>
+        </div>
+        <button class="dialog-close" value="cancel" aria-label="Close">×</button>
+      </div>
+      <label>Page name<input name="name" required placeholder="Page name"></label>
+      <label>Route<input name="route" placeholder="/book-of-business"></label>
+      <label>Menu placement
+        <select name="parentId" id="parent-page-select">
+          <option value="">Top-level menu</option>
+        </select>
+      </label>
+      <p class="form-help">Choose a page to place this page beneath it as a submenu.</p>
+      <div class="dialog-actions">
+        <button class="button" value="cancel">Cancel</button>
+        <button class="button button--primary" value="default">Create page</button>
+      </div>
+    </form>
+  </dialog>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script src="assets/block-definitions.js"></script>
+  <script src="assets/template.js"></script>
+</body>
+</html>

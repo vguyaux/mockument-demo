@@ -37,10 +37,9 @@
     </section>
 
     <section class="block">
-      <div class="block-head"><span class="block-num">02</span><span class="block-title">Work, steps, and how they land on devices</span>
+      <div class="block-head"><span class="block-num">02</span><span class="block-title">Work, steps, and their pages</span>
         <span class="block-for">business user</span></div>
-      <p class="block-note">The step is what stays the same across devices. If one step needs four phone screens, that is worth
-        knowing now; if it needs twenty-six voice prompts, either the step is too big or voice is the wrong device for it.</p>
+      <p class="block-note">Each page names the process and step it supports, keeping the app structure connected to the work.</p>
       <div id="decomp"></div>
     </section>
 
@@ -89,17 +88,13 @@
   const rows = [];
   (app.processes || []).forEach(p => (p.steps || []).forEach(s => {
     const specsForStep = (s.pages || []).map(f => byFile[f]).filter(Boolean);
-    const devices = {};
-    specsForStep.forEach(sp => ((sp.represents || {}).deviceTypes || []).forEach(d => devices[d.name || d] = true));
     rows.push([
       esc(p.name), `<span class="id-cell">${esc(s.id)}</span> ${esc(s.name)}`,
-      (s.pages || []).map(f => byFile[f] ? `<a href="${esc(f)}">${esc(byFile[f].page.name)}</a>` : `<span style="opacity:.6">${esc(f.replace(/^page-|\.html$/g, ""))} · not drawn</span>`).join("<br>"),
-      Object.keys(devices).join(", ") || `<span class="tbd">TBD</span>`,
-      specsForStep.length ? specsForStep.map(sp => `${((sp.represents || {}).deviceTypes || []).length} device type(s) described`).join("<br>") : `<span class="tbd">nothing described yet</span>`
+      (s.pages || []).map(f => byFile[f] ? `<a href="${esc(f)}">${esc(byFile[f].page.name)}</a>` : `<span style="opacity:.6">${esc(f.replace(/^page-|\.html$/g, ""))} · not drawn</span>`).join("<br>")
     ]);
   }));
   document.getElementById("decomp").innerHTML = SpecKit.table(
-    ["Process", "Step", "Pages", "Device types", "Decomposition"], rows);
+    ["Process", "Step", "Pages"], rows);
 
   const routes = [];
   specs.forEach(s => {

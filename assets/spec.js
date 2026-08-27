@@ -170,11 +170,9 @@
   }
 
   /* ---------- block helpers ---------- */
-  let blockNo = 6;
-  function block(title, forWhom, body, note, id) {
-    blockNo++;
+  function block(number, title, forWhom, body, note, id) {
     return `<section class="block" id="${id || ""}">
-      <div class="block-head"><span class="block-num">${String(blockNo).padStart(2, "0")}</span>
+      <div class="block-head"><span class="block-num">B${String(number).padStart(2, "0")}</span>
         <span class="block-title">${esc(title)}</span>
         ${forWhom ? `<span class="block-for">answered by ${esc(forWhom)}</span>` : ""}</div>
       ${note ? `<p class="block-note">${note}</p>` : ""}
@@ -193,40 +191,51 @@
     const p = spec.page || {};
     const r = spec.represents || {};
 
-    /* header (blocks 1–4) */
+    /* identity (blocks B01–B04) */
     const head = $("#page-head");
-    if (head) head.innerHTML = `
-      <div class="page-eyebrow">${esc(app.name || "")} · mockument page</div>
-      <h1 class="page-title">${esc(p.name || "Untitled page")}
-        <span class="marker marker--${esc(p.buildStatus || "existing")}">${esc(p.buildStatus || "existing")}</span></h1>
-      <div class="page-route">${esc(p.route || "/")}</div>
-      <p class="page-lede">${esc(spec.purpose || "")}</p>
-      <div class="meta-strip">
-        <span class="meta-chip">Represents <b>${esc(r.process || "?")}</b> → <b>${esc(r.step || "?")}</b>${r.stepId ? ` <span class="page-route">${esc(r.stepId)}</span>` : ""}</span>
-        <span class="meta-chip">Device types <b>${(r.deviceTypes || []).map(d => esc(d.name || d)).join(", ") || "?"}</b></span>
-        <span class="meta-chip">Available to <b>${(spec.availableTo || []).map(a => esc(a.role)).join(", ") || "?"}</b></span>
-        <span class="meta-chip">v${esc(p.version || "0.1")} · ${esc(p.updated || "")}</span>
-        <span class="meta-chip">Kept by <b>${esc(p.owner || "unassigned")}</b></span>
-      </div>
-      <div class="gates">${g.map(x => `
-        <div class="gate gate--${x.pass ? "pass" : "fail"}">
-          <div class="gate-name">${esc(x.name)}</div>
-          <div class="gate-state">${x.pass ? "Yes" : "Not yet"}</div>
-          ${x.why.length ? `<ul class="gate-why">${x.why.slice(0, 3).map(w => `<li>${esc(w)}</li>`).join("")}${x.why.length > 3 ? `<li>+${x.why.length - 3} more</li>` : ""}</ul>` : `<div class="gate-why">All checks pass.</div>`}
-        </div>`).join("")}</div>
-      <div style="margin:14px 0 4px">${coverageBar(spec)}</div>`;
+    if (head) head.innerHTML = [
+      block(1, "Page header", "page owner", `
+        <div class="page-eyebrow">${esc(app.name || "")} · mockument page</div>
+        <h1 class="page-title">${esc(p.name || "Untitled page")}
+          <span class="marker marker--${esc(p.buildStatus || "existing")}">${esc(p.buildStatus || "existing")}</span></h1>
+        <div class="page-route">${esc(p.route || "/")}</div>
+        <div class="meta-strip">
+          <span class="meta-chip">v${esc(p.version || "0.1")} · ${esc(p.updated || "")}</span>
+          <span class="meta-chip">Kept by <b>${esc(p.owner || "unassigned")}</b></span>
+        </div>
+        <div class="gates">${g.map(x => `
+          <div class="gate gate--${x.pass ? "pass" : "fail"}">
+            <div class="gate-name">${esc(x.name)}</div>
+            <div class="gate-state">${x.pass ? "Yes" : "Not yet"}</div>
+            ${x.why.length ? `<ul class="gate-why">${x.why.slice(0, 3).map(w => `<li>${esc(w)}</li>`).join("")}${x.why.length > 3 ? `<li>+${x.why.length - 3} more</li>` : ""}</ul>` : `<div class="gate-why">All checks pass.</div>`}
+          </div>`).join("")}</div>
+        <div style="margin:14px 0 4px">${coverageBar(spec)}</div>`,
+        "Name, route, status, version, owner, readiness gates and required-element coverage.", "page-header"),
+      block(2, "Represents", "business user", `
+        <div class="meta-strip">
+          <span class="meta-chip">Process <b>${esc(r.process || "?")}</b></span>
+          <span class="meta-chip">Step <b>${esc(r.step || "?")}</b>${r.stepId ? ` <span class="page-route">${esc(r.stepId)}</span>` : ""}</span>
+          <span class="meta-chip">Device types <b>${(r.deviceTypes || []).map(d => esc(d.name || d)).join(", ") || "?"}</b></span>
+        </div>`, "The process and step this page belongs to, plus every device type it covers.", "represents"),
+      block(3, "Available to", "business user", table(
+        ["Role", "May reach it", "What differs", "What they must not see"],
+        (spec.availableTo || []).map(a => [esc(a.role), a.mayReach === false ? "No" : "Yes", val(a.differs), val(a.mustNotSee)])),
+        "Switch role in the mock below to see the differences rather than only read them.", "roles"),
+      block(4, "Purpose", "business user", `<p class="page-lede">${esc(spec.purpose || "")}</p>`,
+        "What work this page supports, why somebody opens it, and what they leave with.", "purpose")
+    ].join("");
 
     /* body (blocks 7–22) */
     const out = [];
 
-    out.push(block("Elements", "business user + data", table(
+    out.push(block(7, "Elements", "business user + data", table(
       ["ID", "Element", "What it shows or accepts", "Comes from", "Marker", "Traces to"],
       (spec.elements || []).map(e => [
         `<span class="id-cell">${esc(e.id)}</span>`, esc(e.name) + (e.note ? `<span class="sub">${esc(e.note)}</span>` : ""),
         val(e.shows), val(e.source), marker(e.marker), e.trace ? `<span class="id-cell">${esc(e.trace)}</span>` : '<span class="tbd">none</span>'
       ])), "Everything a person can see or type. If it is on the screen and not in this table, it should not be on the screen.", "elements"));
 
-    out.push(block("Controls and actions", "business user", table(
+    out.push(block(8, "Controls and actions", "business user", table(
       ["ID", "Control", "Business effect", "Needs data only the server knows", "Where it leads", "Confirm / undo", "Marker"],
       (spec.controls || []).map(c => [
         `<span class="id-cell">${esc(c.id)}</span>`, esc(c.name), val(c.effect),
@@ -236,7 +245,7 @@
 
     const ladderCount = [0, 0, 0, 0, 0];
     (spec.data || []).forEach(d => ladderCount[rung(d) + 1]++);
-    out.push(block("Data and fields", "business user for meaning and timing, data team for source", table(
+    out.push(block(9, "Data and fields", "business user for meaning and timing, data team for source", table(
       ["Field", "What it means", "Holds", "Unit / format", "As of", "Visible when", "Comes from", "Sample", "Rung"],
       (spec.data || []).map(d => [
         `${esc(d.field)}${d.metricId ? `<span class="sub id-cell">${esc(d.metricId)}</span>` : ""}${d.hero ? `<span class="sub"><span class="marker marker--observed">hero metric</span></span>` : ""}`,
@@ -261,67 +270,67 @@
     const devRows = [];
     (spec.lists || []).forEach(l => (l.device || []).forEach(d => devRows.push([esc(l.name), esc(d.device), val(d.empty), val(d.one), val(d.overflow)])));
     listsHtml += `<div style="height:12px"></div>` + table(["List", "Device", "When it holds nothing", "When it holds one", "When it holds more than fits"], devRows);
-    out.push(block("Lists", "business user", listsHtml,
+    out.push(block(10, "Lists", "business user", listsHtml,
       "Split on purpose: order and filtering are business meaning and sit with the step; what happens at zero, one and overflow is a device question.", "lists"));
 
-    out.push(block("States", "business user", table(
+    out.push(block(11, "States", "business user", table(
       ["State", "When it happens", "What the person sees", "What they can do next"],
       (spec.states || []).map(s => [esc(s.label || s.key), val(s.when), val(s.sees), val(s.next)])),
       "Every state listed here can be selected in the mock above.", "states"));
 
-    out.push(block("What can go wrong", "business user — causes belong to the implementer", table(
+    out.push(block(12, "What can go wrong", "business user — causes belong to the implementer", table(
       ["What the person notices", "What should happen", "Who is told"],
       (spec.failures || []).map(f => [esc(f.noticed), val(f.thenWhat), val(f.whoIsTold)])),
       "Described as the person would notice it — “the alert never reached the supervisor”, not “the queue backed up”.", "failures"));
 
     const rem = spec.remembered || {}, live = spec.liveChange || {};
-    out.push(block("Remembered between visits, and what changes while you look", "business user", `
-      <div class="grid-2">
-        <div class="card"><div class="card-label">Remembered between visits ${marker(rem.marker)}</div>
-          <div class="card-body">${val(rem.answer)}
-          ${rem.duration ? `<br><br><strong>For how long:</strong> ${esc(rem.duration)}` : ""}
-          ${rem.clearable ? `<br><strong>Can it be cleared:</strong> ${esc(rem.clearable)}` : ""}
-          ${rem.whoMustAnswer ? `<br><br><strong>Owed by:</strong> ${esc(rem.whoMustAnswer)}` : ""}</div></div>
-        <div class="card"><div class="card-label">Changes while being looked at ${marker(live.marker)}</div>
-          <div class="card-body">${val(live.answer)}
-          ${live.howTold ? `<br><br><strong>How the person is told:</strong> ${esc(live.howTold)}` : ""}
-          ${live.midAction ? `<br><strong>If they are mid-action:</strong> ${esc(live.midAction)}` : ""}
-          ${live.whoMustAnswer ? `<br><br><strong>Owed by:</strong> ${esc(live.whoMustAnswer)}` : ""}</div></div>
-      </div>`, "Neither of these is ever volunteered. Ask both directly, every page.", "memory"));
+    out.push(block(13, "Remembered between visits", "business user", `
+      <div class="card"><div class="card-label">Remembered between visits ${marker(rem.marker)}</div>
+        <div class="card-body">${val(rem.answer)}
+        ${rem.duration ? `<br><br><strong>For how long:</strong> ${esc(rem.duration)}` : ""}
+        ${rem.clearable ? `<br><strong>Can it be cleared:</strong> ${esc(rem.clearable)}` : ""}
+        ${rem.whoMustAnswer ? `<br><br><strong>Owed by:</strong> ${esc(rem.whoMustAnswer)}` : ""}</div></div>`,
+      "What the app remembers about this person, for how long, and whether they can clear it.", "memory"));
 
-    out.push(block("Who may see it", "business user", table(
-      ["Role", "May reach it", "What differs", "What they must not see"],
-      (spec.availableTo || []).map(a => [esc(a.role), a.mayReach === false ? "No" : "Yes", val(a.differs), val(a.mustNotSee)])),
-      "Switch role in the mock above to see the difference rather than read it.", "roles"));
+    out.push(block(14, "Changes while being looked at", "business user", `
+      <div class="card"><div class="card-label">Changes while being looked at ${marker(live.marker)}</div>
+        <div class="card-body">${val(live.answer)}
+        ${live.howTold ? `<br><br><strong>How the person is told:</strong> ${esc(live.howTold)}` : ""}
+        ${live.midAction ? `<br><strong>If they are mid-action:</strong> ${esc(live.midAction)}` : ""}
+        ${live.whoMustAnswer ? `<br><br><strong>Owed by:</strong> ${esc(live.whoMustAnswer)}` : ""}</div></div>`,
+      "What may update under the person's eyes, how they are told, and what happens mid-action.", "live-change"));
 
     const c = spec.connections || {};
-    out.push(block("Connections", "whoever maintains the page", `
+    out.push(block(15, "Connections", "whoever maintains the page", `
       <div class="grid-3">
         <div class="card"><div class="card-label">Comes from</div><div class="card-body">${(c.from || []).map(x => link(x.href, x.label)).join("<br>") || "—"}</div></div>
         <div class="card"><div class="card-label">Goes to</div><div class="card-body">${(c.to || []).map(x => link(x.href, x.label)).join("<br>") || "—"}</div></div>
         <div class="card"><div class="card-label">Shares components</div><div class="card-body">${(c.components || []).map(x => `<span class="id-cell">${esc(x.id)}</span> ${esc(x.label)}`).join("<br>") || "—"}</div></div>
-      </div>
-      ${(spec.workflows || []).length ? `<div style="height:12px"></div><div class="card"><div class="card-label">Workflows this page takes part in</div><div class="card-body">${spec.workflows.map(w => `${link(w.href, w.name)} — ${esc(w.position || "")}`).join("<br>")}</div></div>` : ""}`,
-      "Both directions, so a reader can walk out of this page the way a user would.", "connections"));
+      </div>`, "Both directions, so a reader can walk out of this page the way a user would.", "connections"));
 
-    out.push(block("Copy register", "business user", table(
+    out.push(block(16, "Workflows", "business user", table(
+      ["Workflow", "Where this page sits"],
+      (spec.workflows || []).map(w => [link(w.href, w.name), val(w.position)])),
+      "The named pieces of work this page takes part in, and where in each it sits.", "workflows"));
+
+    out.push(block(17, "Copy register", "business user", table(
       ["Where", "Exact string", "Status", "Note"],
       (spec.copy || []).map(x => [esc(x.key), `<code>${esc(x.string)}</code>`,
         x.status === "required wording" ? `<span class="marker marker--required">required wording</span>` : `<span class="marker marker--proposed">placeholder</span>`,
         val(x.note)])),
       "Wording is where an unattended builder invents most freely. A placeholder marked as one is safe; an unmarked one becomes product.", "copy"));
 
-    out.push(block("Decisions", "named person, on a date", table(
+    out.push(block(18, "Decisions", "named person, on a date", table(
       ["What was decided", "By whom", "When"],
       (spec.decisions || []).map(d => [esc(d.what), val(d.who), val(d.when)])),
       "A decision with no name on it is a rumour.", "decisions"));
 
-    out.push(block("Observations", "anyone walking through", table(
+    out.push(block(19, "Observations", "anyone walking through", table(
       ["What walking through revealed", "Raised by", "When"],
       (spec.observations || []).map(o => [esc(o.what), val(o.raisedBy), val(o.when)])),
       "Not decisions, and deliberately not requirements. They are what the mock taught us.", "observations"));
 
-    out.push(block("Open questions", "the named owner", table(
+    out.push(block(20, "Open questions", "the named owner", table(
       ["ID", "Question", "Why it matters", "Blocks", "Who must answer", "Needed by"],
       (spec.questions || []).map(q => [
         `<span class="id-cell">${esc(q.id)}</span>`, esc(q.question), val(q.whyItMatters),
@@ -329,7 +338,7 @@
         val(q.whoMustAnswer), val(q.neededBy)])),
       "Every question names a person. A question with no owner is a question nobody answers.", "questions"));
 
-    out.push(block("Out of scope, and what this does not settle", "everyone", `
+    out.push(block(21, "Out of scope, and what this does not settle", "everyone", `
       ${table(["Not answered here", "Why"], (spec.outOfScope || []).map(o => [esc(o.what), val(o.why)]))}
       <div style="height:12px"></div>
       <div class="callout callout--warn"><div class="callout-title">What this mock does not prove</div>
@@ -338,7 +347,7 @@
       "", "scope"));
 
     const k = spec.contract || {};
-    out.push(block("Build contract", "the implementing agent or developer", `
+    out.push(block(22, "Build contract", "the implementing agent or developer", `
       <pre class="contract">You are building: ${esc((spec.page || {}).name)} (${esc((spec.page || {}).route)}) of ${esc(app.name)}.
 Source of truth: the JSON island in this file (id="spec"). Element IDs are stable — use them in commits, tickets and tests.
 
@@ -532,8 +541,7 @@ Anything not covered above is unspecified. Raise it as a new question against th
   window.SpecKit = {
     chrome, renderPage, wireMock, gates, coverage, coverageBar, loadSpecs, esc, val, marker, table,
     rung, rungChip, PERIODICITY,
-    block: (t, f, b, n, i) => block(t, f, b, n, i),
-    resetBlockCounter: (n) => { blockNo = n === undefined ? 6 : n; },
+    block: (number, title, forWhom, body, note, id) => block(number, title, forWhom, body, note, id),
     boot(currentFile) {
       chrome(currentFile);
       const island = $("#spec");
