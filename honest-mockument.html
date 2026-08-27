@@ -954,9 +954,11 @@ beside it.</p>
 not a sort order, filter, column arrangement or other component setting. Selecting a condition annotates
 the mock with what changes from default, which components are affected, which actions become unavailable,
 and what the person must do next.</p>
-<p><strong>Honesty overlay.</strong> Tints every element by its status. Amber is proposed, pink is unanswered, green is
-required, grey is out of scope. An element with no status shows as unanswered, because that is what it
-is.</p>
+<p><strong>Review view.</strong> One grouped control keeps two independent review aids available without forcing both
+onto every walkthrough. <em>Honesty</em> tints components and prints their Done, WIP or To Do status without
+showing stable IDs. <em>IDs</em> prints references such as <code>EL-07</code> and <code>CTL-03</code> without status tinting.
+The four modes are Clean, Honesty, IDs, and Honesty + IDs; Clean is the default. Status is never conveyed
+by colour alone, and ID labels must not overlap the component wording they identify.</p>
 <p><strong>The inspector.</strong> Clicking any element opens its full record: status, what it shows, where it comes
 from, where it leads, what it traces to, and every open question attached to it. Clicking an element
 that has no record is the most useful outcome of all — it means somebody drew a thing nobody asked for,

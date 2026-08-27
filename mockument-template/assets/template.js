@@ -20,7 +20,7 @@
   const initialHashBlock = window.location && /^#B\d{2}$/.test(window.location.hash || "") && BLOCKS.some(block => `#${block.id}` === window.location.hash) ? window.location.hash.slice(1) : "B01";
   let selection = { kind: "block", blockId: initialHashBlock };
   let showAllBlocks = false;
-  let mockChoice = { role: "default role", state: "default", overlay: false };
+  let mockChoice = { role: "default role", state: "default", reviewMode: "clean" };
   let activeGateFilter = null;
   let toastTimer;
 
@@ -934,8 +934,11 @@
     const id = row.id || row._id;
     const kind = id.startsWith("CTL-") ? "action" : (row.kind || "content");
     const presentation = row.presentation || "";
-    const label = `<div class="mock-label">${esc(id)} · ${esc(kind === "data" && presentation ? presentation : kind)} · ${esc(statusLabel(row._status))}</div>`;
-    if (kind === "action") return `<button class="mock-control" type="button" data-mock-record="${esc(id)}">${esc(row.name || "Unnamed action")}</button>`;
+    const showIds = ["IDs", "honesty + IDs"].includes(mockChoice.reviewMode);
+    const showHonesty = ["honesty", "honesty + IDs"].includes(mockChoice.reviewMode);
+    const metadata = [showIds ? `${id} · ${kind === "data" && presentation ? presentation : kind}` : "", showHonesty ? statusLabel(row._status) : ""].filter(Boolean).join(" · ");
+    const label = metadata ? `<div class="mock-label">${esc(metadata)}</div>` : "";
+    if (kind === "action") return `<button class="mock-control status--${esc(row._status || "todo")}" type="button" data-mock-record="${esc(id)}">${esc(row.name || "Unnamed action")}${metadata ? `<small class="mock-inline-meta">${esc(metadata)}</small>` : ""}</button>`;
     if (kind === "data" && presentation === "input") return `<div class="mock-element mock-element--field status--${esc(row._status || "todo")}" data-mock-record="${esc(id)}">${label}<div class="mock-name">${esc(row.name || "Unnamed input")}</div><div class="mock-input">${esc(row.shows || "Value")}</div></div>`;
     if (kind === "data" && presentation === "list") return `<div class="mock-element status--${esc(row._status || "todo")}" data-mock-record="${esc(id)}">${label}<div class="mock-name">${esc(row.name || "Unnamed list")}</div><div class="mock-lines"><i></i><i></i><i></i></div></div>`;
     if (kind === "data" && presentation === "table") return `<div class="mock-element status--${esc(row._status || "todo")}" data-mock-record="${esc(id)}">${label}<div class="mock-name">${esc(row.name || "Unnamed table")}</div><div class="mock-table"><i></i><i></i><i></i><i></i><i></i><i></i></div></div>`;
@@ -977,13 +980,16 @@
     const conditionNote = activeCondition ? `<div class="mock-condition"><strong>${esc(activeCondition.name)}</strong><span>${esc(activeCondition.changes || "Change from default not yet defined.")}</span>${activeCondition.affected ? `<small>Affects ${esc(activeCondition.affected)}</small>` : ""}${activeCondition.unavailableActions ? `<small>Unavailable: ${esc(activeCondition.unavailableActions)}</small>` : ""}${activeCondition.next ? `<small>Next: ${esc(activeCondition.next)}</small>` : ""}</div>` : "";
     const segment = (name, values, current) => `<div class="segment">${values.map(value => `<button type="button" data-mock-choice="${name}" data-value="${esc(value)}" class="${value === current ? "is-on" : ""}">${esc(value)}</button>`).join("")}</div>`;
     const appPages = state.pageOrder.map(id => state.pages[id]).filter(candidate => candidate && !candidate.isSettings).slice(0, 5);
-    return `<div class="mock-shell ${mockChoice.overlay ? "honesty-on" : ""}">
-      <div class="mock-controls">${segment("role", roles.length ? roles : ["default role"], mockChoice.role)}${segment("state", conditionNames, mockChoice.state)}<div class="segment"><button type="button" data-mock-choice="overlay" data-value="toggle" class="${mockChoice.overlay ? "is-on" : ""}">honesty overlay</button></div></div>
+    const showIds = ["IDs", "honesty + IDs"].includes(mockChoice.reviewMode);
+    const showHonesty = ["honesty", "honesty + IDs"].includes(mockChoice.reviewMode);
+    return `<div class="mock-shell ${showHonesty ? "honesty-on" : ""} ${showIds ? "ids-on" : ""}">
+      <div class="mock-controls">${segment("role", roles.length ? roles : ["default role"], mockChoice.role)}${segment("state", conditionNames, mockChoice.state)}<div class="review-view"><span>Review view</span>${segment("reviewMode", ["clean", "honesty", "IDs", "honesty + IDs"], mockChoice.reviewMode)}</div></div>
       <div class="mock-stage"><div class="mock-page">
         <div class="mock-nav"><strong>${esc(state.app.name || "Application Name")}</strong>${appPages.length ? appPages.map(candidate => `<span>${esc(candidate.name)}</span>`).join("") : "<span>First page</span>"}<span>Settings</span></div>
         ${conditionNote}<div class="mock-content">${layout.map(section => {
           const row = mockRecord(page, section.recordId) || {};
-          return `<section class="mock-layout-section status--${esc(row._status || "todo")}" data-mock-record="${esc(section.recordId)}"><div class="mock-layout-title"><span>${esc(section.recordId)}</span>${esc(row.name || "Unnamed section")}</div><div class="mock-layout-grid" style="--mock-columns:${Number(section.columns) || 1}">${(section.items || []).map(item => renderMockItem(page, item)).join("") || `<div class="mock-empty">Empty section</div>`}</div></section>`;
+          const sectionMetadata = [showIds ? section.recordId : "", showHonesty ? statusLabel(row._status) : ""].filter(Boolean).join(" · ");
+          return `<section class="mock-layout-section status--${esc(row._status || "todo")}" data-mock-record="${esc(section.recordId)}"><div class="mock-layout-title">${sectionMetadata ? `<span>${esc(sectionMetadata)}</span>` : ""}${esc(row.name || "Unnamed section")}</div><div class="mock-layout-grid" style="--mock-columns:${Number(section.columns) || 1}">${(section.items || []).map(item => renderMockItem(page, item)).join("") || `<div class="mock-empty">Empty section</div>`}</div></section>`;
         }).join("")}</div>
       </div></div>
       <div class="mock-caption">${esc(FIDELITY_NOTE)}</div>
@@ -1594,7 +1600,7 @@ Anything not covered above is unspecified. Add a question against this page rath
       saveState(); render(); return;
     }
     const mockButton = event.target.closest("[data-mock-choice]");
-    if (mockButton) { if (mockButton.dataset.mockChoice === "overlay") mockChoice.overlay = !mockChoice.overlay; else mockChoice[mockButton.dataset.mockChoice] = mockButton.dataset.value; renderDocument(); renderInspector(); return; }
+    if (mockButton) { mockChoice[mockButton.dataset.mockChoice] = mockButton.dataset.value; renderDocument(); renderInspector(); return; }
     const record = event.target.closest("[data-mock-record]");
     if (record) { selection = { kind: "record", recordId: record.dataset.mockRecord, blockId: "B04" }; updateBlockHash(); renderInspector(); $$("[data-mock-record]").forEach(node => node.classList.toggle("is-selected", node === record)); $$(".block-jump button").forEach(node => node.classList.toggle("is-active", node.dataset.jumpBlock === selection.blockId)); return; }
     const jump = event.target.closest("[data-jump-block]");

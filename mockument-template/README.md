@@ -42,7 +42,7 @@ B04 contains a structured low-fidelity composer. A copied page can:
 - Reorder or remove items.
 - Click any item and edit its specification in the permanent right inspector.
 
-B04 owns canonical component and action records without rendering repeated registers. A data-bound component derives valid presentation choices from its B03 definition: one value, one record, or a many-item list/table presentation. Lists require an item definition and tables require named columns.
+B04 owns canonical component and action records without rendering repeated registers. A data-bound component derives valid presentation choices from its B03 definition: one value, one record, or a many-item list/table presentation. Lists require an item definition and tables require named columns. Its grouped **Review view** offers Clean, Honesty, IDs, and Honesty + IDs modes so status evidence and stable references remain independently inspectable without permanent visual clutter.
 
 B05 records only material page-level departures from the automatic default condition. Sorting, filtering, column movement, selection and expansion remain B04 component behavior. Selecting a B05 condition annotates the mock with its changed message, affected components, unavailable actions and next step.
 
