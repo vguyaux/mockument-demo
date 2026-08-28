@@ -2518,6 +2518,7 @@ Anything not covered above is unspecified. Add a question against this page rath
     if (event.target.closest("#new-page-button, [data-open-new-page]")) { openNewPageDialog(); return; }
     if (event.target.closest("#planned-page-button, [data-add-planned-page]")) { addPlannedPage(); return; }
     if (event.target.closest("#export-button")) { exportJson(state, `${slugify(state.app.name)}-mockument.json`); return; }
+    if (event.target.closest("#import-button")) { document.getElementById("import-file")?.click(); return; }
     if (event.target.closest("#theme-button")) { cycleTheme(); return; }
     if (event.target.closest("[data-open-preview]")) { previewMode = true; selectBlock("B04"); render(); return; }
     if (event.target.closest("[data-exit-preview]")) { previewMode = false; selectBlock("B04"); render(); revealActiveBlock(); return; }
@@ -2715,6 +2716,27 @@ Anything not covered above is unspecified. Add a question against this page rath
     createFromTemplate(String(data.get("name")).trim(), String(data.get("route")).trim(), String(data.get("parentId")).trim());
     $("#new-page-dialog").close();
   });
+
+  const importFileInput = document.getElementById("import-file");
+  if (importFileInput) {
+    importFileInput.addEventListener("change", async event => {
+      const file = event.target.files && event.target.files[0];
+      if (!file) return;
+      try {
+        const imported = JSON.parse(await file.text());
+        if (!imported || typeof imported !== "object" || !imported.app || !Array.isArray(imported.pages)) throw new Error("This does not look like a Mockument export.");
+        if (!confirm(`Import ${imported.app?.name || "Mockument"}? This replaces the current browser-saved Mockument on this device.`)) return;
+        state = migrateState(imported);
+        saveState(state);
+        render();
+        showToast("Imported Mockument JSON");
+      } catch (error) {
+        showToast(`Import failed: ${error.message || error}`);
+      } finally {
+        importFileInput.value = "";
+      }
+    });
+  }
 
   window.addEventListener("hashchange", () => {
     const blockId = String(window.location.hash || "").replace(/^#/, "");
