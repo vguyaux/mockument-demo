@@ -9,16 +9,14 @@
   window.MOCKUMENT_BLOCKS = [
     {
       id: "B01", group: "Identity", title: "Page header", answeredBy: "Page owner",
-      definition: "Name the page and record its route, build status, version, date, owner, readiness gates, and the share of visible elements that are actually required.",
+      definition: "Name the page and record its route, build status, version, readiness gates, and the share of visible components that are actually required.",
       why: "A page must be independently identifiable, ownable and reviewable. Readiness is calculated from its records rather than asserted.",
       fields: [
         text("name", "Page name", "What is this page called? This one value is also used for the menu label, page heading, and browser title.", { required: true, placeholder: "Template" }),
         textarea("activity", "Business activity", "What business activity does this page support, why does someone open it, and what should they leave with?", { required: true, rows: 4 }),
         text("route", "Route", "Where does this page live in the proposed app?", { required: true, placeholder: "/book-of-business" }),
         select("buildStatus", "Build status", "Is this page new or a modification of an existing page?", ["new", "modification of an existing page"], { required: true }),
-        text("version", "Version", "Which version of this page specification is this?", { required: true, placeholder: "0.1" }),
-        text("updated", "Updated", "When was this page last changed? This is automatic.", { required: true, inputType: "date", readOnly: true }),
-        select("owner", "Page owner", "Who keeps this page specification accurate?", [], { required: true, dynamicOptions: "reviewers", allowUnresolved: true })
+        text("version", "Version", "Which version of this page specification is this?", { required: true, placeholder: "0.1" })
       ]
     },
     {
@@ -37,6 +35,7 @@
       why: "Presentation should select known business data rather than silently inventing meaning, provenance, timing or calculations after it has been drawn.",
       fields: [rows("data", "Data definitions for this page", "What business data can this page use?", [
         text("id", "Data ID", "What stable ID addresses this definition?", { placeholder: "DATA-01" }),
+        select("globalRef", "Data Dictionary field", "Which application-level data field defines this page data, if one already exists?", [], { dynamicOptions: "globalData", allowUnresolved: true }),
         text("name", "Business name", "What is this data called?", { required: true }),
         textarea("meaning", "Meaning", "What does it mean in business words?", { required: true }),
         select("cardinality", "Cardinality", "Does this definition describe one item or many?", ["not yet defined", "one", "many"], { required: true }),
@@ -87,7 +86,8 @@
           text("visibleConditions", "Visible in conditions", "Which page conditions show this section or component? Leave blank for all conditions; separate names with commas."),
           text("name", "Component or section", "What is this called?"),
           textarea("shows", "Shows or accepts", "What does it show or accept?"),
-          select("dataRef", "Data definition", "Which B03 data definition supplies this component?", [], { dynamicOptions: "data", allowUnresolved: true, forKinds: ["data"] }),
+          select("dataRef", "Data definition", "Which B03 or Data Dictionary definition supplies this component?", [], { dynamicOptions: "data", allowUnresolved: true, forKinds: ["data"] }),
+          select("sourceRouteRef", "Source route", "Which Data Dictionary source route supplies this component, or should routing be selected by conditions?", [], { dynamicOptions: "sourceRoutes", allowUnresolved: true, forKinds: ["data"] }),
           select("presentation", "Presentation", "How should a person encounter the selected data?", [], { dynamicOptions: "presentation", forKinds: ["data"] }),
           select("surfaceRole", "Surface role", "Can a workflow target this section as a named surface?", ["ordinary section", "workflow section", "tab", "wizard step"], { forKinds: ["section"] }),
           select("navigationSource", "Navigation source", "Which canonical destinations supply this navigation?", ["application pages", "current-page surfaces", "workflow steps", "custom destinations"], { forKinds: ["navigation"] }),
@@ -110,7 +110,8 @@
           text("visibleRoles", "Visible to roles", "Which roles see this action? Leave blank for all roles; separate names with commas."),
           text("visibleConditions", "Visible in conditions", "Which page conditions show this action? Leave blank for all conditions; separate names with commas."),
           select("effect", "Business effect", "What does this control do?", ["acts on data", "changes the page", "both"]),
-          select("dataRef", "Data definition", "Which B03 data definition does this control read or change?", [], { dynamicOptions: "data", allowUnresolved: true }),
+          select("dataRef", "Data definition", "Which B03 or Data Dictionary definition does this control read or change?", [], { dynamicOptions: "data", allowUnresolved: true }),
+          select("sourceRouteRef", "Source route", "Which Data Dictionary source route supplies this control, or should routing be selected by conditions?", [], { dynamicOptions: "sourceRoutes", allowUnresolved: true }),
           select("serverData", "Server-only data", "Does it use information only the server knows?", ["yes", "no", "unknown"]),
           text("leadsTo", "Leads to", "Where does it lead?"),
           textarea("confirmation", "Confirm or undo", "What confirmation or undo must exist?")

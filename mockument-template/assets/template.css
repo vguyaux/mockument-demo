@@ -162,11 +162,12 @@ a { color: inherit; }
 .block-status-nav[data-filter="devQa"] .gate-line:not([data-gate="devQa"]) { opacity: .12; }
 
 .application-settings { max-width: 1080px; margin: 0 auto 22px; border: 1px solid var(--line); border-radius: 12px; background: var(--panel); padding: 16px 18px; display: grid; grid-template-columns: minmax(0, 1fr) minmax(260px, 420px); gap: 24px; align-items: end; }
-.app-overview { max-width: 1080px; margin: 0 auto 22px; border: 1px solid var(--line); border-radius: 12px; background: var(--panel); padding: 16px 18px; display: grid; gap: 14px; }
+.app-overview, .data-section, .data-method-card { max-width: 1080px; margin: 0 auto 22px; border: 1px solid var(--line); border-radius: 12px; background: var(--panel); padding: 16px 18px; display: grid; gap: 14px; }
 .overview-head { display: flex; justify-content: space-between; gap: 14px; align-items: start; }
 .overview-head h2 { margin: 4px 0 5px; }
 .overview-head p { margin: 0; color: var(--text-3); }
 .overview-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 8px; }
+.data-cards { max-width: 1080px; margin: 0 auto 22px; }
 .overview-cards > div { border: 1px solid var(--line); border-radius: 8px; padding: 10px; background: var(--panel-2); }
 .overview-cards strong { display: block; font-size: 20px; }
 .overview-cards span { color: var(--text-3); font-size: 10px; text-transform: uppercase; letter-spacing: .06em; }
@@ -177,6 +178,33 @@ a { color: inherit; }
 .overview-registers li + li { margin-top: 6px; }
 .overview-registers span { color: var(--text-3); }
 .table-link { border: 0; padding: 0; background: transparent; color: var(--accent); font: inherit; cursor: pointer; text-align: left; }
+.data-document-head { margin-top: 22px; }
+.data-method-card { border-color: color-mix(in srgb, var(--accent) 35%, var(--line)); background: color-mix(in srgb, var(--accent) 7%, var(--panel)); }
+.data-method-card strong { font-size: 12px; text-transform: uppercase; letter-spacing: .08em; }
+.data-method-card p { margin: 0; color: var(--text-2); }
+.data-section { scroll-margin-top: 18px; }
+.data-section-head { display: flex; justify-content: space-between; gap: 14px; align-items: start; border-bottom: 1px solid var(--line); padding-bottom: 12px; }
+.data-section-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; align-items: center; }
+.data-view-toggle button { white-space: nowrap; }
+.data-section-head h2 { margin: 4px 0; font-size: 20px; }
+.data-section-head p { margin: 0; color: var(--text-3); font-size: 11px; max-width: 760px; }
+.data-records { display: grid; gap: 7px; }
+.data-record { border: 1px solid var(--line); border-radius: 9px; background: var(--panel-2); overflow: hidden; }
+.data-record summary { display: grid; grid-template-columns: auto minmax(130px, .7fr) minmax(160px, 1.3fr) auto; align-items: center; gap: 10px; padding: 10px 12px; cursor: pointer; }
+.data-record summary:hover { background: var(--panel-3); }
+.data-record summary strong { font-size: 11px; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.data-record summary small { color: var(--text-3); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.data-record-body { padding: 12px; border-top: 1px solid var(--line); background: var(--panel); }
+.data-honesty-bar { padding-bottom: 12px; margin-bottom: 12px; }
+.data-record-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.data-table-wrap { overflow: auto; border: 1px solid var(--line); border-radius: 9px; background: var(--panel); max-height: 70vh; }
+.data-table { width: max-content; min-width: 100%; border-collapse: collapse; font-size: 11px; }
+.data-table th, .data-table td { border: 1px solid var(--line); padding: 5px; vertical-align: top; min-width: 150px; }
+.data-table th { position: sticky; top: 0; z-index: 1; background: var(--panel-2); color: var(--text-2); text-align: left; font-size: 9px; text-transform: uppercase; letter-spacing: .05em; }
+.data-table td:first-child, .data-table th:first-child { position: sticky; left: 0; z-index: 2; background: var(--panel-2); min-width: 104px; }
+.data-table th:first-child { z-index: 3; }
+.data-table input, .data-table select { min-width: 140px; padding: 6px 7px; font-size: 11px; border-radius: 5px; }
+.data-table .remove-row { white-space: nowrap; }
 .application-settings h2 { margin: 3px 0 4px; font-size: 18px; }
 .application-settings p { margin: 0; color: var(--text-3); font-size: 11px; max-width: 580px; }
 .reviewer-settings { grid-column: 1 / -1; border-top: 1px solid var(--line); padding-top: 14px; }
@@ -251,6 +279,9 @@ h2 { margin: 0; }
 .review-evidence span { display: block; margin-bottom: 3px; color: var(--text-3); font-size: 8px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; }
 .review-evidence input { padding: 6px 7px; font-size: 9px; }
 .human-review-confirm { display: flex; align-items: center; gap: 7px; margin-top: 8px; color: var(--text-3); font-size: 9px; }
+.human-review-date { display: grid; gap: 2px; margin-top: 7px; padding-top: 7px; border-top: 1px solid var(--line); }
+.human-review-date span { color: var(--text-3); font-size: 8px; text-transform: uppercase; letter-spacing: .06em; }
+.human-review-date strong { color: var(--text-2); font-size: 10px; font-weight: 600; }
 .review-toggle { width: 31px; height: 17px; flex: 0 0 auto; border: 0; border-radius: 999px; background: var(--line-strong); padding: 2px; cursor: pointer; transition: background .15s ease; }
 .review-toggle i { display: block; width: 13px; height: 13px; border-radius: 50%; background: #fff; transition: transform .15s ease; }
 .review-toggle.is-on { background: var(--required); }

@@ -3,8 +3,8 @@
 
   const BLOCKS = window.MOCKUMENT_BLOCKS || [];
   const STORAGE_KEY = "honest-mockument-template-state";
-  const SCHEMA_VERSION = 29;
-  const TEMPLATE_VERSION = "0.31.0";
+  const SCHEMA_VERSION = 32;
+  const TEMPLATE_VERSION = "0.35.0";
   const FIDELITY_NOTE = "Structure only, example data, nothing here is proof that the application works.";
   const THEME_KEY = "mockument-theme";
   const THEME_CYCLE = ["system", "dark", "light"];
@@ -13,6 +13,7 @@
     B07: "Memory", B08: "Changes", B09: "Connections", B10: "Workflows", B11: "Copy",
     B12: "Records", B13: "Contract"
   };
+  const DATA_SECTION_ID = "__all_data__";
   const BACKING_MARKERS = ["proposed", "required", "unanswered", "observed", "out of scope"];
   const markerClass = value => String(value || "proposed").replace(/\s+/g, "-");
   const $ = (selector, root = document) => root.querySelector(selector);
@@ -26,6 +27,8 @@
   let mockChoice = { role: "default role", state: "default", reviewMode: "clean" };
   let activeGateFilter = null;
   let activeResize = null;
+  let dataDictionaryAnchor = "";
+  let dataDictionaryViews = {};
   let toastTimer;
 
   function updateBlockHash() {
@@ -176,12 +179,22 @@
   function createPage(id, name, route, built = true, isSettings = false) {
     const blocks = {};
     BLOCKS.forEach(definition => { blocks[definition.id] = initialBlock(definition); });
-    const today = new Date().toISOString().slice(0, 10);
-    blocks.B01.values = { ...blocks.B01.values, name, route, buildStatus: "new", version: "0.1", updated: today, owner: "" };
+    blocks.B01.values = { ...blocks.B01.values, name, route, buildStatus: "new", version: "0.1" };
     blocks.B04.values.defaultRole = "default role";
     const page = { id, name, route, built, isSettings, parentId: null, templateVersion: TEMPLATE_VERSION, schemaVersion: SCHEMA_VERSION, blocks, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
     ensureLayout(page);
     return page;
+  }
+
+  function emptyDataDictionary() {
+    return { sourceWorkbook: "", importedAt: "", seeded: false, catalog: [], routes: [], providers: [], feeds: [], usages: [], questions: [] };
+  }
+
+  function initialDataDictionary() {
+    if (!window.MOCKUMENT_IMPORTED_DATA_DICTIONARY) return emptyDataDictionary();
+    const seeded = JSON.parse(JSON.stringify(window.MOCKUMENT_IMPORTED_DATA_DICTIONARY));
+    seeded.seeded = true;
+    return seeded;
   }
 
   function createInitialState() {
@@ -189,12 +202,49 @@
     return {
       schemaVersion: SCHEMA_VERSION,
       templateVersion: TEMPLATE_VERSION,
-      app: { name: "Application Name", domain: "", version: "0.1", reviewers: [], workflows: [] },
+      app: { name: "Application Name", domain: "", version: "0.1", reviewers: [], workflows: [], dataDictionary: initialDataDictionary() },
       pageOrder: ["settings"],
       pages: { settings },
       activePageId: "template",
       changeLog: [{ version: TEMPLATE_VERSION, date: new Date().toISOString(), note: "Initial canonical Template" }]
     };
+  }
+
+  function syncDataRecord(record, prefix, index) {
+    if (!record._id) record._id = record.id || `${prefix}-${String(index + 1).padStart(3, "0")}`;
+    if (!record.id) record.id = record._id;
+    if (!record._status) record._status = "todo";
+    if (record._accountable == null) record._accountable = "";
+    if (record._note == null) record._note = "";
+    return record;
+  }
+
+  function syncDataDictionary(app) {
+    if (!app.dataDictionary) app.dataDictionary = emptyDataDictionary();
+    const dictionary = app.dataDictionary;
+    ["catalog", "routes", "providers", "feeds", "usages", "questions"].forEach(key => { if (!Array.isArray(dictionary[key])) dictionary[key] = []; });
+    const seed = window.MOCKUMENT_IMPORTED_DATA_DICTIONARY;
+    const isEmpty = !dictionary.catalog.length && !dictionary.routes.length && !dictionary.providers.length && !dictionary.usages.length && !dictionary.questions.length;
+    if (isEmpty && seed && !dictionary.seeded) {
+      app.dataDictionary = JSON.parse(JSON.stringify(seed));
+      app.dataDictionary.seeded = true;
+      return syncDataDictionary(app);
+    }
+    if (dictionary.sourceWorkbook == null) dictionary.sourceWorkbook = "";
+    if (dictionary.importedAt == null) dictionary.importedAt = "";
+    if (dictionary.seeded == null) dictionary.seeded = false;
+    dictionary.catalog.forEach((record, index) => {
+      syncDataRecord(record, "DATA", index);
+      if (!record.cardinality) record.cardinality = "not yet defined";
+      if (!record.structure) record.structure = "not yet defined";
+      if (!record.rung) record.rung = "below L0";
+    });
+    dictionary.routes.forEach((record, index) => syncDataRecord(record, "SRC", index));
+    dictionary.providers.forEach((record, index) => syncDataRecord(record, "PROV", index));
+    dictionary.feeds.forEach((record, index) => syncDataRecord(record, "FEED", index));
+    dictionary.usages.forEach((record, index) => syncDataRecord(record, "USE", index));
+    dictionary.questions.forEach((record, index) => syncDataRecord(record, "DQ", index));
+    return dictionary;
   }
 
   function syncPage(page) {
@@ -220,7 +270,6 @@
       });
     });
     ensureLayout(page);
-    if (page.blocks.B01 && page.blocks.B01.values && !page.blocks.B01.values.updated) page.blocks.B01.values.updated = (page.updatedAt || new Date().toISOString()).slice(0, 10);
     page.schemaVersion = SCHEMA_VERSION;
     page.templateVersion = TEMPLATE_VERSION;
     return page;
@@ -256,6 +305,7 @@
     if (!next.app) next.app = { name: "Application Name", domain: "", version: "0.1", reviewers: [] };
     if (!Array.isArray(next.app.reviewers)) next.app.reviewers = [];
     if (!Array.isArray(next.app.workflows)) next.app.workflows = [];
+    syncDataDictionary(next.app);
     if (previousSchemaVersion < 6 && !next.changeLog.some(entry => entry.version === "0.7.0")) next.changeLog.push({ version: "0.7.0", date: new Date().toISOString(), note: "Added Settings reviewer names and per-stage human review confirmations for every block." });
     if (previousSchemaVersion < 7) {
       Object.values(next.pages).forEach(page => {
@@ -723,6 +773,36 @@
       });
       if (!next.changeLog.some(entry => entry.version === "0.30.0")) next.changeLog.push({ version: "0.30.0", date: new Date().toISOString(), note: "Added backing markers, role and condition visibility rules, planned pages, and generated application overview registers." });
     }
+    if (previousSchemaVersion < 30) {
+      Object.values(next.pages).forEach(page => {
+        if (page.blocks && page.blocks.B01 && page.blocks.B01.values) {
+          delete page.blocks.B01.values.owner;
+          delete page.blocks.B01.values.updated;
+        }
+        syncPage(page);
+      });
+      if (!next.changeLog.some(entry => entry.version === "0.33.0")) next.changeLog.push({ version: "0.33.0", date: new Date().toISOString(), note: "Removed page owner and page-updated fields from B01; ownership and dates are captured by Human check confirmations." });
+    }
+    if (previousSchemaVersion < 31) {
+      syncDataDictionary(next.app);
+      if (!next.changeLog.some(entry => entry.version === "0.34.0")) next.changeLog.push({ version: "0.34.0", date: new Date().toISOString(), note: "Added Data Dictionary: an application-level data catalog, source routes, providers, usages, and open data questions imported from the Buckler IDD workbook." });
+    }
+    if (previousSchemaVersion < 32) {
+      const data = syncDataDictionary(next.app);
+      const seed = window.MOCKUMENT_IMPORTED_DATA_DICTIONARY;
+      if (seed && Array.isArray(seed.feeds) && !data.feeds.length) data.feeds = JSON.parse(JSON.stringify(seed.feeds));
+      if (seed && Array.isArray(seed.routes)) {
+        (data.routes || []).forEach(route => {
+          const seededRoute = seed.routes.find(candidate => (candidate.id || candidate._id) === (route.id || route._id));
+          if (seededRoute) {
+            if (route.feedId == null || route.feedId === "") route.feedId = seededRoute.feedId || "";
+            if (route.feedName == null || route.feedName === "") route.feedName = seededRoute.feedName || "";
+          }
+        });
+      }
+      syncDataDictionary(next.app);
+      if (!next.changeLog.some(entry => entry.version === "0.35.0")) next.changeLog.push({ version: "0.35.0", date: new Date().toISOString(), note: "Split Provider Registry column F into Provider Feed records and linked Source Routes to exact feeds where the workbook allowed it." });
+    }
     return next;
   }
 
@@ -742,9 +822,7 @@
 
   function touchPage(page) {
     if (!page || !page.built || page.id === "template") return;
-    const now = new Date();
-    page.updatedAt = now.toISOString();
-    if (page.blocks && page.blocks.B01 && page.blocks.B01.values) page.blocks.B01.values.updated = now.toISOString().slice(0, 10);
+    page.updatedAt = new Date().toISOString();
   }
 
   function saveState(touch = true) {
@@ -757,8 +835,6 @@
     const page = createPage("template", "Template", "/template", true, false);
     page.blocks.B01.values.name = "Template";
     page.blocks.B01.values.route = "/template";
-    page.blocks.B01.values.updated = "";
-    page.blocks.B01.values.owner = "";
     page.blocks.B01.values.activity = "";
     templatePreview = page;
     return templatePreview;
@@ -815,6 +891,47 @@
     return `<select ${attributes} ${disabled ? "disabled" : ""}><option value="">${reviewers.length ? "Select person" : "Add people in Settings"}</option>${options.map(name => `<option value="${esc(name)}" ${value === name ? "selected" : ""}>${esc(name)}${!reviewers.includes(name) ? " (not in Settings)" : ""}</option>`).join("")}</select>`;
   }
 
+  function dictionary() {
+    return syncDataDictionary(state.app);
+  }
+
+  function dataCatalogOptions(value = "") {
+    const catalog = dictionary().catalog || [];
+    const exists = catalog.some(record => (record.id || record._id) === value);
+    const base = [
+      { value: "", label: "No global data field" },
+      { value: "Not yet defined", label: "Not yet defined" },
+      ...catalog.map(record => ({ value: record.id || record._id, label: `${record.id || record._id} — ${record.name || "Unnamed data"}${record.category ? ` · ${record.category}` : ""}` }))
+    ];
+    if (value && !exists && value !== "Not yet defined") base.push({ value, label: `${value} · not in Data Dictionary` });
+    return base;
+  }
+
+  function pageDataDefinitions(page) {
+    const pageRows = ((page && page.blocks && page.blocks.B03.values.data) || []).map(row => ({ ...row, source: "page" }));
+    const globalRows = (dictionary().catalog || []).map(row => ({ ...row, source: "global" }));
+    return [...pageRows, ...globalRows];
+  }
+
+  function selectedGlobalDataId(page, dataRef) {
+    const local = ((page && page.blocks && page.blocks.B03.values.data) || []).find(row => (row.id || row._id) === dataRef);
+    return (local && local.globalRef) || dataRef;
+  }
+
+  function sourceRouteOptions(page, row) {
+    const dataId = selectedGlobalDataId(page, row.dataRef);
+    const routes = (dictionary().routes || []).filter(route => !dataId || route.dataId === dataId);
+    const current = row.sourceRouteRef || "";
+    const exists = routes.some(route => (route.id || route._id) === current);
+    const choices = [
+      { value: "", label: dataId ? "Automatic by route conditions" : "Select data first" },
+      { value: "Not yet defined", label: "Not yet defined" },
+      ...routes.map(route => ({ value: route.id || route._id, label: `${route.id || route._id} — ${route.providerName || route.providerId || "Provider?"}${route.feedId ? ` · ${route.feedId}` : ""}${route.currency ? ` · ${route.currency}` : ""}${route.otherCondition ? ` · ${route.otherCondition}` : ""}` }))
+    ];
+    if (current && current !== "Not yet defined" && !exists) choices.push({ value: current, label: `${current} · missing route` });
+    return choices;
+  }
+
   function renderMenu() {
     const menu = $("#app-menu");
     const roots = state.pageOrder.map(id => state.pages[id]).filter(page => page && !page.parentId && !page.isSettings);
@@ -830,7 +947,25 @@
         ${children.length ? `<div class="submenu">${children.map(child => `<button class="menu-link ${state.activePageId === child.id ? "is-active" : ""}" data-open-page="${esc(child.id)}" type="button"><span class="menu-copy"><strong>${esc(child.name)}</strong><small>${child.built ? esc(child.route) : "not drawn"}</small></span></button>`).join("")}</div>` : ""}
       </div>`;
     };
-    menu.innerHTML = `<div class="menu-section-title">Pages of the system</div>
+    menu.innerHTML = `<div class="menu-section-title">Application</div>
+      <div class="menu-item-wrap">
+        <button class="menu-link ${state.activePageId === DATA_SECTION_ID ? "is-active" : ""}" data-open-data-section type="button">
+          <span class="menu-icon">D</span>
+          <span class="menu-copy"><strong>Data Dictionary</strong><small>catalog, feeds, routes</small></span>
+          <span class="menu-caret">6</span>
+        </button>
+        <div class="submenu">
+          ${[
+            ["catalog", "Data catalog"],
+            ["providers", "Provider registry"],
+            ["feeds", "Provider feeds"],
+            ["routes", "Source routes"],
+            ["usages", "Page usages"],
+            ["questions", "Data questions"]
+          ].map(([anchor, label]) => `<button class="menu-link ${state.activePageId === DATA_SECTION_ID && dataDictionaryAnchor === anchor ? "is-active" : ""}" data-open-data-section data-data-anchor="${anchor}" type="button"><span class="menu-copy"><strong>${label}</strong><small>Data Dictionary</small></span></button>`).join("")}
+        </div>
+      </div>
+      <div class="menu-section-title">Pages of the system</div>
       ${roots.length ? roots.map(item).join("") : `<div class="form-help" style="padding:8px">Copy Template to create the first page.</div>`}
       ${settings ? item(settings) : ""}`;
     $("#template-link").classList.toggle("is-active", state.activePageId === "template");
@@ -848,10 +983,10 @@
     const value = key => String(block.values[key] || "").trim();
     const rows = blockRows(definition, block);
     if (block.status !== "done") missing.push(`block is ${statusLabel(block.status)}`);
-    const unresolvedRows = rows.filter(row => row._status !== "done");
+    const unresolvedRows = definition.id === "B02" ? [] : rows.filter(row => row._status !== "done");
     if (unresolvedRows.length) missing.push(`${unresolvedRows.length} register row${unresolvedRows.length === 1 ? " is" : "s are"} not done`);
 
-    if (definition.id === "B01") ["name", "activity", "route", "owner"].forEach(key => { if (!value(key)) missing.push(`${key} is missing`); });
+    if (definition.id === "B01") ["name", "activity", "route", "buildStatus", "version"].forEach(key => { if (!value(key)) missing.push(`${key} is missing`); });
     if (definition.id === "B02" && !(block.values.roles || []).some(row => String(row.role || "").trim())) missing.push("no user role is recorded");
     if (definition.id === "B03") {
       const definitions = block.values.data || [];
@@ -882,7 +1017,7 @@
       if (untraced) missing.push(`${untraced} visible component${untraced === 1 ? " is" : "s are"} untraced`);
       const unresolvedByMarker = [...rows, ...panels, ...elements, ...(block.values.controls || [])].filter(row => row.marker === "unanswered" && !relatedHonestyRecords(page, row.id || row._id).some(record => record.type === "question")).length;
       if (unresolvedByMarker) missing.push(`${unresolvedByMarker} unanswered mock item${unresolvedByMarker === 1 ? " has" : "s have"} no related B12 question`);
-      const definitions = page.blocks.B03.values.data || [];
+      const definitions = pageDataDefinitions(page);
       const dataComponents = elements.filter(row => row.kind === "data");
       const unlinked = dataComponents.filter(row => !row.dataRef || row.dataRef === "Not yet defined" || !definitions.some(definition => (definition.id || definition._id) === row.dataRef)).length;
       const incompatible = dataComponents.filter(row => {
@@ -951,11 +1086,16 @@
     return !text || text === "not yet answered" || text === "not yet defined" || text === "Not yet defined";
   }
 
+  function humanConfirmed(block, gateKey) {
+    const review = block.humanReviews && block.humanReviews[gateKey];
+    return Boolean(review && review.reviewer && review.confirmed && review.reviewedContentHash === blockContentFingerprint(block, gateKey));
+  }
+
   function mockQaValidation(definition, block) {
     const missing = [];
     if (block.status !== "done") missing.push("block status is not Done");
     if (!String(block.accountable || "").trim()) missing.push("Assigned to is missing");
-    definition.fields.filter(field => fieldIsVisible(field, block.values)).forEach(field => {
+    definition.fields.filter(field => !field.hidden && fieldIsVisible(field, block.values)).forEach(field => {
       if (field.type !== "rows") {
         if (field.required && valueIsMissing(block.values[field.key])) missing.push(`${field.label} is missing`);
         return;
@@ -964,7 +1104,7 @@
       if (field.required && !rows.length) missing.push(`${field.label} has no records`);
       rows.forEach(row => {
         const rowId = row.id || row._id || "row";
-        if (row._status !== "done") missing.push(`${rowId} status is not Done`);
+        if (definition.id !== "B02" && row._status !== "done") missing.push(`${rowId} status is not Done`);
         field.fields.filter(column => (!column.forKinds || column.forKinds.includes(row.kind)) && (!column.forPresentations || column.forPresentations.includes(row.presentation)) && (!column.forTypes || column.forTypes.includes(row.type))).forEach(column => {
           if (column.required && valueIsMissing(row[column.key])) missing.push(`${rowId} ${column.label} is missing`);
         });
@@ -1005,21 +1145,24 @@
         ? { state: "missing", reason: `Missing ${walkMissing.join(", ")}.` }
         : { state: "ready", reason: "The block is marked Done and has enough information for a walk-through." };
 
+      const priorWalkConfirmed = humanConfirmed(block, "walk");
       const mockQaMissing = [...new Set([...mockQaValidation(definition, block), ...walkMissing.filter(item => item !== "block status is not Done")])];
+      if (!priorWalkConfirmed) mockQaMissing.unshift("Walk-through human check is not confirmed");
       const mockQa = mockQaMissing.length
         ? { state: "missing", reason: mockQaMissing.join("; ") + "." }
-        : { state: "ready", reason: "The block status is Done, it is assigned, and required fields are filled." };
+        : { state: "ready", reason: "Walk-through is confirmed, the block is assigned, and required fields are filled." };
 
+      const priorMockQaConfirmed = humanConfirmed(block, "mockQa");
       const buildMissing = buildValidation(definition, block, page);
+      if (!priorMockQaConfirmed) buildMissing.unshift("Mockument QA human check is not confirmed");
       let build;
-      if (!buildMissing.length) build = { state: "ready", reason: "This block is done and passes its build checks." };
-      else if (block.status !== "done" && (block.accountable || rows.some(row => row._accountable))) build = { state: "warning", reason: buildMissing.join("; ") + "." };
+      if (!buildMissing.length) build = { state: "ready", reason: "Mockument QA is confirmed and this block passes its build checks." };
       else build = { state: "missing", reason: buildMissing.join("; ") + "." };
 
       let devQa;
-      if (build.state !== "ready") devQa = { state: "na", reason: "Not reached: this block is not ready to build." };
-      else if (String(block.devQa.evidence || "").trim()) devQa = { state: "ready", reason: "Implementation evidence is recorded and ready for Development QA." };
-      else devQa = { state: "missing", reason: "Build-ready, but implementation evidence is missing." };
+      if (!humanConfirmed(block, "build")) devQa = { state: "missing", reason: "Development QA is not ready: the Build human check is not confirmed." };
+      else if (build.state !== "ready") devQa = { state: "missing", reason: "Development QA is not ready: this block is not ready to build." };
+      else devQa = { state: "ready", reason: "Build is ready and the Build human check is confirmed." };
 
       result[definition.id] = { walk, mockQa, build, devQa };
     });
@@ -1039,7 +1182,6 @@
       note: block.note,
       values: block.values
     };
-    if (gateKey === "devQa") content.implementationEvidence = block.devQa.evidence;
     const text = stableStringify(content);
     let hash = 2166136261;
     for (let index = 0; index < text.length; index += 1) {
@@ -1101,6 +1243,9 @@
       const options = [`<option value="">Select person</option>`, ...reviewers.map(name => `<option value="${esc(name)}" ${value === name ? "selected" : ""}>${esc(name)}</option>`), selectedIsMissing ? `<option value="${esc(value)}" selected>${esc(value)} · not in Settings</option>` : ""].join("");
       return `<select ${common}>${options}</select>`;
     }
+    if (field.type === "select" && field.dynamicOptions === "globalData") {
+      return `<select ${common}>${dataCatalogOptions(value).map(choice => `<option value="${esc(choice.value)}" ${value === choice.value ? "selected" : ""}>${esc(choice.label)}</option>`).join("")}</select>`;
+    }
     if (field.type === "select") return `<select ${common}>${field.choices.map(choice => `<option value="${esc(choice)}" ${value === choice ? "selected" : ""}>${esc(choice)}</option>`).join("")}</select>`;
     return `<input ${common} type="${field.inputType || "text"}" value="${esc(value || "")}" placeholder="${esc(field.placeholder || "")}">`;
   }
@@ -1128,7 +1273,7 @@
     return `<div class="repeater" data-inspect-field="${field.key}" data-block="${blockId}">
       <div class="repeater-head"><div><strong>${esc(field.label)}</strong><span>${esc(field.question)}</span></div><button class="button button--small" data-add-row data-block="${blockId}" data-field="${field.key}" type="button" ${disabled ? "disabled" : ""}>+ Add</button></div>
       ${rows.length ? rows.map((row, index) => `<div class="repeater-row" data-inspect-row data-block="${blockId}" data-field="${field.key}" data-row="${index}">
-        <div class="row-head"><span class="row-id">${esc(row._id || `${field.idPrefix}-${index + 1}`)}</span>${statusSelect(row._status || "todo", `data-row-status data-block="${blockId}" data-field="${field.key}" data-row="${index}"`, disabled)}<button class="remove-row" data-remove-row data-block="${blockId}" data-field="${field.key}" data-row="${index}" type="button" ${disabled ? "disabled" : ""}>Remove</button></div>
+        <div class="row-head"><span class="row-id">${esc(row._id || `${field.idPrefix}-${index + 1}`)}</span>${blockId === "B02" ? "" : statusSelect(row._status || "todo", `data-row-status data-block="${blockId}" data-field="${field.key}" data-row="${index}"`, disabled)}<button class="remove-row" data-remove-row data-block="${blockId}" data-field="${field.key}" data-row="${index}" type="button" ${disabled ? "disabled" : ""}>Remove</button></div>
         <div class="row-fields">${field.fields.map(column => `<label class="field ${column.type === "textarea" ? "field--wide" : ""}"><span>${esc(column.label)}</span>${fieldInput(column, row[column.key], blockId, disabled, index, field.key)}<small class="field-question">${esc(column.question)}</small></label>`).join("")}</div>
         <div class="row-accountability ${blockId === "B02" ? "row-accountability--single" : ""}">
           ${blockId === "B02" ? "" : `<label class="field"><span>Who must answer or accept</span><input data-row-meta="accountable" data-block="${blockId}" data-field="${field.key}" data-row="${index}" value="${esc(row._accountable || "")}" ${disabled ? "disabled" : ""}></label>`}
@@ -1305,6 +1450,14 @@
     const activeDecisions = (page.blocks.B12.values.records || []).filter(record => record.type === "decision" && record.decisionLifecycle === "active");
     const decisionRecord = activeDecisions.length ? JSON.stringify(activeDecisions, null, 2) : "  · No active decisions are recorded for this page.";
     const workflowRecord = workflows.length ? JSON.stringify(workflows, null, 2) : "  · This page does not participate in a canonical application workflow.";
+    const allDefinitions = pageDataDefinitions(page);
+    const allRoutes = dictionary().routes || [];
+    const dataReferences = [...(page.blocks.B04.values.elements || []), ...(page.blocks.B04.values.controls || [])].filter(record => record.dataRef && record.dataRef !== "Not yet defined").map(record => {
+      const definition = allDefinitions.find(candidate => (candidate.id || candidate._id) === record.dataRef) || {};
+      const route = allRoutes.find(candidate => (candidate.id || candidate._id) === record.sourceRouteRef) || null;
+      return { componentId: record.id || record._id, componentName: record.name || "", dataId: record.dataRef, dataName: definition.name || "", source: definition.source || "page", sourceRoute: route ? { id: route.id || route._id, provider: route.providerName || route.providerId || "", feedId: route.feedId || "", feedName: route.feedName || route.sourceFeed || "", condition: routeConditionSummary(route), nativeField: route.nativeField || "", transformation: route.transformation || "" } : "automatic/unselected" };
+    });
+    const dataReferenceRecord = dataReferences.length ? JSON.stringify(dataReferences, null, 2) : "  · No B04 components or controls select application data yet.";
     const list = value => String(value || "").split("\n").map(line => line.trim()).filter(Boolean).map(line => `  · ${line}`).join("\n") || "  · (nothing recorded yet)";
     return `You are building: ${page.blocks.B01.values.name || page.name} (${page.blocks.B01.values.route || page.route}) of ${state.app.name}.
 Source of truth: this page's machine-readable Mockument record. Stable IDs travel into tickets, commits and tests.
@@ -1313,6 +1466,10 @@ The Mockument is structural, uses example data, and does not prove that integrat
 APPLICATION WORKFLOW REFERENCES
 Use these stable page, surface, action, step, and transition IDs. Do not replace them with inferred name matching.
 ${workflowRecord}
+
+APPLICATION DATA REFERENCES
+Use these selected B03 / Data Dictionary field and source-route references. If the route is automatic/unselected, use source routing rules from Data Dictionary and stop if the required condition is missing.
+${dataReferenceRecord}
 
 ACTIVE DECISION PROVENANCE
 Treat these as binding context only where their Applied to references agree with the canonical blocks. Stop and ask if a decision conflicts with B03, B04, B11, or this contract.
@@ -1341,8 +1498,8 @@ Anything not covered above is unspecified. Add a question against this page rath
       const review = block.humanReviews[gate.key];
       const available = ai.state === "ready";
       const confirmedCurrent = review.confirmed && review.reviewedContentHash === blockContentFingerprint(block, gate.key);
-      const evidenceControl = gate.key === "devQa" ? `<label class="review-evidence"><span>Implementation evidence</span><input data-devqa-evidence data-block="${definition.id}" value="${esc(block.devQa.evidence || "")}" placeholder="URL, commit, test, or note"></label>` : "";
-      return `<div class="human-review-stage human-review-stage--${human.state}"><div class="human-review-stage-title"><span class="human-status-dot"></span><strong>${esc(labels[gate.key])}</strong></div>${reviewerSelect(review.reviewer, `data-human-reviewer data-block="${definition.id}" data-gate="${gate.key}"`)}${evidenceControl}<div class="human-review-confirm"><button class="review-toggle ${confirmedCurrent ? "is-on" : ""}" data-human-toggle data-block="${definition.id}" data-gate="${gate.key}" type="button" role="switch" aria-checked="${confirmedCurrent}" ${available && review.reviewer ? "" : "disabled"}><i></i></button><span>${confirmedCurrent ? "Confirmed" : human.state === "warning" ? "Needs confirmation" : available ? "Not reviewed" : "Unavailable"}</span></div></div>`;
+      const confirmedDate = confirmedCurrent && review.confirmedAt ? new Date(review.confirmedAt).toLocaleString() : "—";
+      return `<div class="human-review-stage human-review-stage--${human.state}"><div class="human-review-stage-title"><span class="human-status-dot"></span><strong>${esc(labels[gate.key])}</strong></div>${reviewerSelect(review.reviewer, `data-human-reviewer data-block="${definition.id}" data-gate="${gate.key}"`)}<div class="human-review-confirm"><button class="review-toggle ${confirmedCurrent ? "is-on" : ""}" data-human-toggle data-block="${definition.id}" data-gate="${gate.key}" type="button" role="switch" aria-checked="${confirmedCurrent}" ${available && review.reviewer ? "" : "disabled"}><i></i></button><span>${confirmedCurrent ? "Confirmed" : human.state === "warning" ? "Needs confirmation" : available ? "Not reviewed" : "Unavailable"}</span></div><div class="human-review-date"><span>Confirmed at</span><strong>${esc(confirmedDate)}</strong></div></div>`;
     }).join("")}</div></div>`;
   }
 
@@ -1356,13 +1513,13 @@ Anything not covered above is unspecified. Add a question against this page rath
         <span class="block-number">${definition.id}</span><span class="block-title">${esc(definition.title)}</span><span class="block-owner">Answered by ${esc(definition.answeredBy)}</span>
       </div>
       <div class="block-form">
-        ${definition.custom === "mock" ? renderMock(page, templateMode) : ""}
-        ${definition.custom === "workflowParticipation" ? renderWorkflowParticipation(page) : ""}
         <div class="honesty-bar">
           <label class="honesty-field"><span>Block status</span>${statusSelect(block.status, `data-block-status="${definition.id}" data-block="${definition.id}"`, templateMode)}</label>
           <label class="honesty-field"><span>Assigned to</span>${reviewerSelect(block.accountable || "", `data-block-meta="accountable" data-block="${definition.id}"`, templateMode)}</label>
           <label class="honesty-field"><span>Status note</span><input data-block-meta="note" data-block="${definition.id}" value="${esc(block.note || "")}" ${templateMode ? "disabled" : ""}></label>
         </div>
+        ${definition.custom === "mock" ? renderMock(page, templateMode) : ""}
+        ${definition.custom === "workflowParticipation" ? renderWorkflowParticipation(page) : ""}
         <div class="form-grid">${formFields}</div>
         ${definition.custom === "contract" ? `<div style="height:16px"></div><div class="contract">${esc(buildContract(page))}</div>` : ""}
       </div>
@@ -1470,6 +1627,234 @@ Anything not covered above is unspecified. Add a question against this page rath
     return `<nav class="block-pager" aria-label="Move between Mockument blocks"><button class="button button--small" data-previous-block type="button" ${previous ? "" : "disabled"}>← ${previous ? `${esc(previous.id)} ${esc(BLOCK_SUMMARIES[previous.id])}` : "Previous"}</button><span><strong>${esc(BLOCKS[index].id)}</strong> ${esc(BLOCK_SUMMARIES[BLOCKS[index].id])}<button class="block-view-link" data-toggle-block-view type="button">View all blocks</button></span><button class="button button--small" data-next-block type="button" ${next ? "" : "disabled"}>${next ? `${esc(next.id)} ${esc(BLOCK_SUMMARIES[next.id])}` : "Next"} →</button></nav>`;
   }
 
+  function routeConditionSummary(route) {
+    return [route.country, route.currency, route.securityType, route.assetClass, route.jurisdiction, route.otherCondition].map(value => String(value || "").trim()).filter(Boolean).join(" · ") || "condition not specified";
+  }
+
+  function dataFieldControl(section, index, key, value, options = {}) {
+    const attrs = `data-data-field="${esc(key)}" data-data-section="${esc(section)}" data-data-index="${index}"`;
+    if (options.type === "textarea") return `<textarea ${attrs} rows="${options.rows || 2}" placeholder="${esc(options.placeholder || "")}">${esc(value || "")}</textarea>`;
+    if (options.choices) return `<select ${attrs}>${options.choices.map(choice => `<option value="${esc(choice)}" ${value === choice ? "selected" : ""}>${esc(choice)}</option>`).join("")}</select>`;
+    return `<input ${attrs} value="${esc(value || "")}" placeholder="${esc(options.placeholder || "")}">`;
+  }
+
+  function dataFieldLabel(section, index, record, key, label, options = {}) {
+    return `<label class="field ${options.wide ? "field--wide" : ""}"><span>${esc(label)}</span>${dataFieldControl(section, index, key, record[key], options)}</label>`;
+  }
+
+  function dataTableColumns(section) {
+    const common = { catalog: ["id", "name", "category", "meaning", "cardinality", "structure", "dataType", "format", "decimals", "nullRule", "example", "rung", "rawSource"],
+      providers: ["id", "name", "domains", "scope", "currency", "feeds", "delivery", "cadence", "owner", "notes"],
+      feeds: ["id", "providerId", "providerName", "name", "feedKey", "delivery", "cadence", "scope", "currency", "originalColumnF", "notes"],
+      routes: ["id", "dataId", "routeName", "providerId", "providerName", "feedId", "feedName", "country", "currency", "securityType", "assetClass", "jurisdiction", "otherCondition", "sourceFeed", "nativeField", "nativeType", "dbField", "transformation", "refreshCadence", "visibleWhen", "verified", "notes"],
+      usages: ["id", "pageId", "pageName", "componentId", "section", "tab", "context", "displayLabel", "dataId", "routeId", "requiredness", "providerText", "sourceText", "nativeFieldText", "dbFieldText", "calculated", "transformationText", "refreshCadence", "visibleWhen", "notes"],
+      questions: ["id", "type", "statement", "affects", "owner", "neededBy", "answer", "notes"] };
+    const labels = { id: "ID", name: "Name", category: "Category", meaning: "Meaning", cardinality: "Cardinality", structure: "Structure", dataType: "Data type", format: "Format", decimals: "Decimals", nullRule: "Null rule", example: "Example", rung: "Rung", rawSource: "Raw source", domains: "Domains", scope: "Scope", currency: "Currency", feeds: "Column F feeds", delivery: "Delivery", cadence: "Cadence", owner: "Owner", notes: "Notes", providerId: "Provider ID", providerName: "Provider", feedKey: "Feed key", originalColumnF: "Original column F", dataId: "Data ID", routeName: "Route name", feedId: "Feed ID", feedName: "Feed", country: "Country", securityType: "Security type", assetClass: "Asset class", jurisdiction: "Jurisdiction", otherCondition: "Other condition", sourceFeed: "Source feed text", nativeField: "Native field", nativeType: "Native type", dbField: "DB field", transformation: "Transformation", refreshCadence: "Refresh", visibleWhen: "Visible when", verified: "Verified", pageId: "Page ID", pageName: "Page", componentId: "B04 component", section: "Section", tab: "Tab", context: "Context", displayLabel: "Display label", routeId: "Route ID", requiredness: "Backing", providerText: "Provider text", sourceText: "Source text", nativeFieldText: "Native text", dbFieldText: "DB text", calculated: "Calculated", transformationText: "Calc text", type: "Type", statement: "Statement", affects: "Affects", neededBy: "Needed by", answer: "Answer" };
+    const choices = { cardinality: ["not yet defined", "one", "many"], structure: ["not yet defined", "value", "record"], rung: ["below L0", "L0 exists", "L1 display", "L2 sourced", "L3 verified"], type: ["question", "decision", "observation", "scope"] };
+    return (common[section] || []).map(key => ({ key, label: labels[key] || key, choices: choices[key] }));
+  }
+
+  function dataTableControl(section, index, column, value) {
+    const attrs = `data-data-field="${esc(column.key)}" data-data-section="${esc(section)}" data-data-index="${index}"`;
+    if (column.choices) return `<select ${attrs}>${column.choices.map(choice => `<option value="${esc(choice)}" ${value === choice ? "selected" : ""}>${esc(choice)}</option>`).join("")}</select>`;
+    return `<input ${attrs} value="${esc(value || "")}">`;
+  }
+
+  function renderDataTable(section, records) {
+    const columns = dataTableColumns(section);
+    return `<div class="data-table-wrap"><table class="data-table"><thead><tr><th>Status</th><th>Assigned</th><th>Status note</th>${columns.map(column => `<th>${esc(column.label)}</th>`).join("")}<th></th></tr></thead><tbody>${records.length ? records.map((record, index) => `<tr><td>${statusSelect(record._status || "todo", `data-data-status data-data-section="${section}" data-data-index="${index}"`)}</td><td>${reviewerSelect(record._accountable || "", `data-data-meta="accountable" data-data-section="${section}" data-data-index="${index}"`)}</td><td><input data-data-meta="note" data-data-section="${section}" data-data-index="${index}" value="${esc(record._note || "")}"></td>${columns.map(column => `<td>${dataTableControl(section, index, column, record[column.key])}</td>`).join("")}<td><button class="remove-row" data-remove-data-record data-data-section="${esc(section)}" data-data-index="${index}" type="button">Remove</button></td></tr>`).join("") : `<tr><td colspan="${columns.length + 4}">No records yet.</td></tr>`}</tbody></table></div>`;
+  }
+
+  function renderDataRecordHonesty(section, index, record) {
+    return `<div class="honesty-bar data-honesty-bar">
+      <label class="honesty-field"><span>Status</span>${statusSelect(record._status || "todo", `data-data-status data-data-section="${section}" data-data-index="${index}"`)}</label>
+      <label class="honesty-field"><span>Assigned to</span>${reviewerSelect(record._accountable || "", `data-data-meta="accountable" data-data-section="${section}" data-data-index="${index}"`)}</label>
+      <label class="honesty-field"><span>Status note</span><input data-data-meta="note" data-data-section="${section}" data-data-index="${index}" value="${esc(record._note || "")}"></label>
+    </div>`;
+  }
+
+  function dataRecordCounts() {
+    const data = dictionary();
+    const routeByData = (data.routes || []).reduce((map, route) => { const key = route.dataId || ""; map[key] = (map[key] || 0) + 1; return map; }, {});
+    const usageByData = (data.usages || []).reduce((map, usage) => { const key = usage.dataId || ""; map[key] = (map[key] || 0) + 1; return map; }, {});
+    const feedByProvider = (data.feeds || []).reduce((map, feed) => { const key = feed.providerId || ""; map[key] = (map[key] || 0) + 1; return map; }, {});
+    const routeByFeed = (data.routes || []).reduce((map, route) => { const key = route.feedId || ""; map[key] = (map[key] || 0) + 1; return map; }, {});
+    const routeIssues = (data.routes || []).filter(route => !route.providerId || !route.sourceFeed || !route.nativeField || !route.transformation || ([route.country, route.currency, route.securityType, route.assetClass, route.jurisdiction, route.otherCondition].every(value => !String(value || "").trim()))).length;
+    const multiTextRoutes = (data.routes || []).filter(route => /[,/\n]/.test(`${route.providerId || ""} ${route.providerName || ""}`)).length;
+    const unlinkedRouteFeeds = (data.routes || []).filter(route => !route.feedId).length;
+    const missingMetricUsages = (data.usages || []).filter(usage => !usage.dataId).length;
+    return { routeByData, usageByData, feedByProvider, routeByFeed, routeIssues, multiTextRoutes, unlinkedRouteFeeds, missingMetricUsages };
+  }
+
+  function nextDictionaryRecordId(section) {
+    const prefixes = { catalog: "DATA", routes: "SRC", providers: "PROV", feeds: "FEED", usages: "USE", questions: "DQ" };
+    const prefix = prefixes[section] || "REC";
+    const highest = (dictionary()[section] || []).reduce((max, record) => {
+      const match = String(record.id || record._id || "").match(new RegExp(`^${prefix}-(\\d+)$`));
+      return match ? Math.max(max, Number(match[1])) : max;
+    }, 0);
+    return `${prefix}-${String(highest + 1).padStart(3, "0")}`;
+  }
+
+  function renderCatalogRecord(record, index, counts) {
+    const routeCount = counts.routeByData[record.id] || 0;
+    const usageCount = counts.usageByData[record.id] || 0;
+    return `<details class="data-record"><summary><span class="row-id">${esc(record.id || record._id)}</span><strong>${esc(record.name || "Unnamed data field")}</strong><small>${esc(record.category || "No category")} · ${routeCount} route${routeCount === 1 ? "" : "s"} · ${usageCount} use${usageCount === 1 ? "" : "s"}</small><span class="status-chip status--${esc(record._status || "todo")}"><span class="status-dot"></span>${esc(statusLabel(record._status || "todo"))}</span></summary>
+      <div class="data-record-body">${renderDataRecordHonesty("catalog", index, record)}<div class="data-record-grid">
+        ${dataFieldLabel("catalog", index, record, "id", "Data ID")}
+        ${dataFieldLabel("catalog", index, record, "name", "Name")}
+        ${dataFieldLabel("catalog", index, record, "meaning", "Business meaning", { type: "textarea", wide: true })}
+        ${dataFieldLabel("catalog", index, record, "category", "Category")}
+        ${dataFieldLabel("catalog", index, record, "dataType", "Data type")}
+        ${dataFieldLabel("catalog", index, record, "cardinality", "Cardinality", { choices: ["not yet defined", "one", "many"] })}
+        ${dataFieldLabel("catalog", index, record, "structure", "Structure", { choices: ["not yet defined", "value", "record"] })}
+        ${dataFieldLabel("catalog", index, record, "format", "Display format")}
+        ${dataFieldLabel("catalog", index, record, "decimals", "Decimals")}
+        ${dataFieldLabel("catalog", index, record, "nullRule", "Null / empty rule")}
+        ${dataFieldLabel("catalog", index, record, "example", "Example")}
+        ${dataFieldLabel("catalog", index, record, "rung", "Rung", { choices: ["below L0", "L0 exists", "L1 display", "L2 sourced", "L3 verified"] })}
+        ${dataFieldLabel("catalog", index, record, "rawSource", "Raw source")}
+      </div></div></details>`;
+  }
+
+  function renderRouteRecord(record, index) {
+    return `<details class="data-record"><summary><span class="row-id">${esc(record.id || record._id)}</span><strong>${esc(record.dataId || "No data field")}</strong><small>${esc(record.providerName || record.providerId || "No provider")} · ${esc(routeConditionSummary(record))}</small><span class="status-chip status--${esc(record._status || "todo")}"><span class="status-dot"></span>${esc(statusLabel(record._status || "todo"))}</span></summary>
+      <div class="data-record-body">${renderDataRecordHonesty("routes", index, record)}<div class="data-record-grid">
+        ${dataFieldLabel("routes", index, record, "id", "Route ID")}
+        ${dataFieldLabel("routes", index, record, "dataId", "Data ID")}
+        ${dataFieldLabel("routes", index, record, "routeName", "Route name / catalog metric")}
+        ${dataFieldLabel("routes", index, record, "providerId", "Provider ID")}
+        ${dataFieldLabel("routes", index, record, "providerName", "Provider name")}
+        ${dataFieldLabel("routes", index, record, "feedId", "Provider feed ID")}
+        ${dataFieldLabel("routes", index, record, "feedName", "Provider feed name")}
+        ${dataFieldLabel("routes", index, record, "country", "Country")}
+        ${dataFieldLabel("routes", index, record, "currency", "Currency")}
+        ${dataFieldLabel("routes", index, record, "securityType", "Security type")}
+        ${dataFieldLabel("routes", index, record, "assetClass", "Asset class")}
+        ${dataFieldLabel("routes", index, record, "jurisdiction", "Jurisdiction")}
+        ${dataFieldLabel("routes", index, record, "otherCondition", "Other routing condition", { wide: true })}
+        ${dataFieldLabel("routes", index, record, "sourceFeed", "Source file / feed")}
+        ${dataFieldLabel("routes", index, record, "nativeField", "Provider native field")}
+        ${dataFieldLabel("routes", index, record, "nativeType", "Native type / format")}
+        ${dataFieldLabel("routes", index, record, "dbField", "DB field")}
+        ${dataFieldLabel("routes", index, record, "transformation", "Transformation", { type: "textarea", wide: true })}
+        ${dataFieldLabel("routes", index, record, "refreshCadence", "Refresh cadence")}
+        ${dataFieldLabel("routes", index, record, "visibleWhen", "Visible when")}
+        ${dataFieldLabel("routes", index, record, "verified", "Verified?")}
+        ${dataFieldLabel("routes", index, record, "notes", "Notes", { type: "textarea", wide: true })}
+      </div></div></details>`;
+  }
+
+  function renderProviderRecord(record, index, counts) {
+    const feedCount = counts.feedByProvider[record.id] || 0;
+    return `<details class="data-record"><summary><span class="row-id">${esc(record.id || record._id)}</span><strong>${esc(record.name || "Unnamed provider")}</strong><small>${esc(record.scope || "No scope")} · ${feedCount} feed${feedCount === 1 ? "" : "s"} · ${esc(record.cadence || "No cadence")}</small><span class="status-chip status--${esc(record._status || "todo")}"><span class="status-dot"></span>${esc(statusLabel(record._status || "todo"))}</span></summary>
+      <div class="data-record-body">${renderDataRecordHonesty("providers", index, record)}<div class="data-record-grid">
+        ${dataFieldLabel("providers", index, record, "id", "Provider ID")}
+        ${dataFieldLabel("providers", index, record, "name", "Provider name")}
+        ${dataFieldLabel("providers", index, record, "domains", "Data domains", { type: "textarea", wide: true })}
+        ${dataFieldLabel("providers", index, record, "scope", "Jurisdiction / scope")}
+        ${dataFieldLabel("providers", index, record, "currency", "Currency")}
+        ${dataFieldLabel("providers", index, record, "feeds", "Source file / feed names", { type: "textarea", wide: true })}
+        ${dataFieldLabel("providers", index, record, "delivery", "Delivery format")}
+        ${dataFieldLabel("providers", index, record, "cadence", "Update cadence")}
+        ${dataFieldLabel("providers", index, record, "owner", "Owner / contact")}
+        ${dataFieldLabel("providers", index, record, "notes", "Notes", { type: "textarea", wide: true })}
+      </div></div></details>`;
+  }
+
+  function renderFeedRecord(record, index, counts) {
+    const routeCount = counts.routeByFeed[record.id] || 0;
+    return `<details class="data-record"><summary><span class="row-id">${esc(record.id || record._id)}</span><strong>${esc(record.name || "Unnamed feed")}</strong><small>${esc(record.providerName || record.providerId || "No provider")} · ${routeCount} route${routeCount === 1 ? "" : "s"}</small><span class="status-chip status--${esc(record._status || "todo")}"><span class="status-dot"></span>${esc(statusLabel(record._status || "todo"))}</span></summary>
+      <div class="data-record-body">${renderDataRecordHonesty("feeds", index, record)}<div class="data-record-grid">
+        ${dataFieldLabel("feeds", index, record, "id", "Feed ID")}
+        ${dataFieldLabel("feeds", index, record, "providerId", "Provider ID")}
+        ${dataFieldLabel("feeds", index, record, "providerName", "Provider name")}
+        ${dataFieldLabel("feeds", index, record, "name", "Feed / file name")}
+        ${dataFieldLabel("feeds", index, record, "feedKey", "Feed key")}
+        ${dataFieldLabel("feeds", index, record, "delivery", "Delivery format")}
+        ${dataFieldLabel("feeds", index, record, "cadence", "Update cadence")}
+        ${dataFieldLabel("feeds", index, record, "scope", "Scope")}
+        ${dataFieldLabel("feeds", index, record, "currency", "Currency")}
+        ${dataFieldLabel("feeds", index, record, "originalColumnF", "Original Provider Registry column F", { type: "textarea", wide: true })}
+        ${dataFieldLabel("feeds", index, record, "notes", "Notes", { type: "textarea", wide: true })}
+      </div></div></details>`;
+  }
+
+  function renderUsageRecord(record, index) {
+    return `<details class="data-record"><summary><span class="row-id">${esc(record.id || record._id)}</span><strong>${esc(record.displayLabel || "Unnamed appearance")}</strong><small>${esc(record.pageName || record.pageId || "No page")} · ${esc(record.section || "No section")} · ${esc(record.dataId || "No data ID")}</small><span class="status-chip status--${esc(record._status || "todo")}"><span class="status-dot"></span>${esc(statusLabel(record._status || "todo"))}</span></summary>
+      <div class="data-record-body">${renderDataRecordHonesty("usages", index, record)}<div class="data-record-grid">
+        ${dataFieldLabel("usages", index, record, "id", "Usage ID")}
+        ${dataFieldLabel("usages", index, record, "pageId", "Page ID")}
+        ${dataFieldLabel("usages", index, record, "pageName", "Page name")}
+        ${dataFieldLabel("usages", index, record, "componentId", "B04 component ID")}
+        ${dataFieldLabel("usages", index, record, "section", "Section")}
+        ${dataFieldLabel("usages", index, record, "tab", "Tab")}
+        ${dataFieldLabel("usages", index, record, "context", "Context / period")}
+        ${dataFieldLabel("usages", index, record, "displayLabel", "Display label")}
+        ${dataFieldLabel("usages", index, record, "dataId", "Data ID")}
+        ${dataFieldLabel("usages", index, record, "routeId", "Source route ID")}
+        ${dataFieldLabel("usages", index, record, "requiredness", "Backing")}
+        ${dataFieldLabel("usages", index, record, "providerText", "Imported provider text")}
+        ${dataFieldLabel("usages", index, record, "sourceText", "Imported source text", { type: "textarea", wide: true })}
+        ${dataFieldLabel("usages", index, record, "nativeFieldText", "Imported native field", { type: "textarea", wide: true })}
+        ${dataFieldLabel("usages", index, record, "dbFieldText", "Imported DB field", { type: "textarea", wide: true })}
+        ${dataFieldLabel("usages", index, record, "transformationText", "Imported calculation / transformation", { type: "textarea", wide: true })}
+        ${dataFieldLabel("usages", index, record, "refreshCadence", "Refresh cadence")}
+        ${dataFieldLabel("usages", index, record, "visibleWhen", "Visible when")}
+        ${dataFieldLabel("usages", index, record, "notes", "Notes", { type: "textarea", wide: true })}
+      </div></div></details>`;
+  }
+
+  function renderQuestionRecord(record, index) {
+    return `<details class="data-record"><summary><span class="row-id">${esc(record.id || record._id)}</span><strong>${esc(record.type || "question")}</strong><small>${esc(record.statement || "No statement")}</small><span class="status-chip status--${esc(record._status || "todo")}"><span class="status-dot"></span>${esc(statusLabel(record._status || "todo"))}</span></summary>
+      <div class="data-record-body">${renderDataRecordHonesty("questions", index, record)}<div class="data-record-grid">
+        ${dataFieldLabel("questions", index, record, "id", "Question / decision ID")}
+        ${dataFieldLabel("questions", index, record, "type", "Type", { choices: ["question", "decision", "observation", "scope"] })}
+        ${dataFieldLabel("questions", index, record, "statement", "Statement", { type: "textarea", wide: true })}
+        ${dataFieldLabel("questions", index, record, "affects", "Affected records")}
+        ${dataFieldLabel("questions", index, record, "owner", "Owner")}
+        ${dataFieldLabel("questions", index, record, "neededBy", "Needed by")}
+        ${dataFieldLabel("questions", index, record, "answer", "Answer / decision", { type: "textarea", wide: true })}
+        ${dataFieldLabel("questions", index, record, "notes", "Notes", { type: "textarea", wide: true })}
+      </div></div></details>`;
+  }
+
+  function renderDataDictionary() {
+    document.title = `${state.app.name || "Application Name"} — Data Dictionary`;
+    const data = dictionary();
+    const counts = dataRecordCounts();
+    const imported = data.sourceWorkbook ? `Imported from ${data.sourceWorkbook}` : "No workbook imported yet";
+    const section = (key, title, description, renderer) => {
+      const mode = dataDictionaryViews[key] || "form";
+      const records = data[key] || [];
+      const body = mode === "table" ? renderDataTable(key, records) : `<div class="data-records">${records.map((record, index) => renderer(record, index, counts)).join("") || `<p class="repeater-empty">No records yet.</p>`}</div>`;
+      return `<section class="data-section" id="data-${esc(key)}"><div class="data-section-head"><div><span class="eyebrow">${esc(key)}</span><h2>${esc(title)}</h2><p>${esc(description)}</p></div><div class="data-section-actions"><div class="segment data-view-toggle"><button class="${mode === "form" ? "is-on" : ""}" data-data-view="form" data-data-section-view="${esc(key)}" type="button">Look in form</button><button class="${mode === "table" ? "is-on" : ""}" data-data-view="table" data-data-section-view="${esc(key)}" type="button">Look in tables</button></div><button class="button button--small" data-add-data-record="${esc(key)}" type="button">+ Add</button></div></div>${body}</section>`;
+    };
+    $("#document").innerHTML = `<header class="document-head data-document-head"><span class="eyebrow">Application source of truth</span><h1>Data Dictionary</h1><p class="document-lede">Application-level data dictionary for canonical fields, provider feeds, source routes, page usages and unresolved data questions. One field may have many source routes; each route must state the condition under which it applies.</p><div class="meta-strip"><span class="meta-chip">${esc(imported)}</span><span class="meta-chip">${esc((data.catalog || []).length)} fields</span><span class="meta-chip">${esc((data.providers || []).length)} providers</span><span class="meta-chip">${esc((data.feeds || []).length)} feeds</span><span class="meta-chip">${esc((data.routes || []).length)} source routes</span><span class="meta-chip">${esc((data.usages || []).length)} usages</span></div></header>
+      <section class="data-method-card"><strong>Honest data rule</strong><p>Do not guess the source. If a metric can come from two places, keep one canonical field and create separate source routes with explicit country, currency, security type, asset class, jurisdiction, or other routing conditions. Provider Registry column F is split into Provider feeds, and routes should link to exact Feed IDs wherever possible.</p></section>
+      <div class="overview-cards data-cards"><div><strong>${esc((data.catalog || []).length)}</strong><span>canonical fields</span></div><div><strong>${esc((data.feeds || []).length)}</strong><span>provider feeds</span></div><div><strong>${esc((data.routes || []).length)}</strong><span>source routes</span></div><div><strong>${esc(counts.unlinkedRouteFeeds)}</strong><span>routes without feed ID</span></div><div><strong>${esc(counts.routeIssues)}</strong><span>routes needing QA</span></div><div><strong>${esc(counts.missingMetricUsages)}</strong><span>usages without data ID</span></div></div>
+      ${section("catalog", "Data catalog", "Canonical fields/metrics. This replaces the Metric Catalog sheet and is what B03/B04 should select from.", renderCatalogRecord)}
+      ${section("providers", "Provider registry", "Data providers and internal sources. Provider facts belong here, not duplicated beside every field.", renderProviderRecord)}
+      ${section("feeds", "Provider feeds", "Structured records created from Provider Registry column F. Source routes should point to these exact Feed IDs rather than repeating source-file text.", renderFeedRecord)}
+      ${section("routes", "Source routes", "One canonical field can have many source routes. Routes own provider, feed, native field, DB field, transformation, refresh and visibility timing.", renderRouteRecord)}
+      ${section("usages", "Page and component usages", "Where fields appear in the app. Later these will attach directly to B04 component IDs.", renderUsageRecord)}
+      ${section("questions", "Data questions, decisions and scope", "Open data issues generated from the workbook plus future human decisions.", renderQuestionRecord)}`;
+    if (dataDictionaryAnchor) setTimeout(() => {
+      const target = document.getElementById(`data-${dataDictionaryAnchor}`);
+      if (target && typeof target.scrollIntoView === "function") target.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 0);
+  }
+
+  function renderDataInspector() {
+    const data = dictionary();
+    const counts = dataRecordCounts();
+    $("#inspector").innerHTML = `<span class="inspector-kicker">DATA</span><h2>Data Dictionary</h2><div class="inspector-owner">Application-level source of truth</div>
+      <div class="inspector-section"><h3>Definition</h3><p>Canonical application data catalog, provider registry, provider feeds from column F, source routing matrix, screen/component usages, and unresolved data questions.</p></div>
+      <div class="inspector-section"><h3>Why it exists</h3><p>Mockups and builds must select known fields, feeds and routes instead of inventing provider, source, timing or calculation details after the screen is drawn.</p></div>
+      <div class="inspector-section"><h3>Current honesty</h3><p>${esc((data.catalog || []).length)} fields, ${esc((data.providers || []).length)} providers, ${esc((data.feeds || []).length)} feeds, ${esc((data.routes || []).length)} routes, ${esc((data.usages || []).length)} usages.</p></div>
+      <div class="inspector-section"><h3>Data QA</h3><div class="readiness-details"><div class="readiness-detail readiness-detail--${counts.routeIssues ? "missing" : "ready"}"><b>R</b><span><strong>Routes</strong><small>${counts.routeIssues ? `${counts.routeIssues} route records are missing provider/source/native field/transformation or routing conditions.` : "Source routes have minimum routing evidence."}</small></span></div><div class="readiness-detail readiness-detail--${counts.unlinkedRouteFeeds ? "missing" : "ready"}"><b>F</b><span><strong>Feeds</strong><small>${counts.unlinkedRouteFeeds ? `${counts.unlinkedRouteFeeds} source routes do not yet point at an exact Provider Feed ID.` : "Every source route points at a provider feed."}</small></span></div><div class="readiness-detail readiness-detail--${counts.missingMetricUsages ? "missing" : "ready"}"><b>U</b><span><strong>Usages</strong><small>${counts.missingMetricUsages ? `${counts.missingMetricUsages} usage records do not yet point at a canonical data ID.` : "Every usage points at a canonical field."}</small></span></div></div></div>`;
+  }
+
   function renderApplicationOverview() {
     const pages = state.pageOrder.map(id => state.pages[id]).filter(page => page && !page.isSettings);
     const built = pages.filter(page => page.built);
@@ -1502,6 +1887,7 @@ Anything not covered above is unspecified. Add a question against this page rath
   }
 
   function renderDocument() {
+    if (state.activePageId === DATA_SECTION_ID) { renderDataDictionary(); return; }
     const page = activePage();
     if (!page) { state.activePageId = "template"; saveState(); return render(); }
     if (!page.built) {
@@ -1559,16 +1945,20 @@ Anything not covered above is unspecified. Add a question against this page rath
       let control;
       if (column.type === "textarea") control = `<textarea ${attributes} rows="3">${esc(row[column.key] || "")}</textarea>`;
       else if (column.type === "select" && column.dynamicOptions === "data") {
-        const definitions = page.blocks.B03.values.data || [];
+        const definitions = pageDataDefinitions(page);
         const choices = [
           { value: "", label: "No data definition required" },
           { value: "Not yet defined", label: "Not yet defined" },
-          ...definitions.map(definition => ({ value: definition.id || definition._id, label: `${definition.id || definition._id} — ${definition.name || "Unnamed data"} · ${definition.cardinality || "?"} ${definition.structure || "?"}` }))
+          ...definitions.map(definition => ({ value: definition.id || definition._id, label: `${definition.source === "global" ? "Data Dictionary" : "B03"} · ${definition.id || definition._id} — ${definition.name || "Unnamed data"} · ${definition.cardinality || "?"} ${definition.structure || "?"}` }))
         ];
-        control = `<select ${attributes}>${choices.map(choice => `<option value="${esc(choice.value)}" ${row[column.key] === choice.value ? "selected" : ""}>${esc(choice.label)}</option>`).join("")}<option value="__create_data__">+ Create a new data definition</option></select>`;
+        control = `<select ${attributes}>${choices.map(choice => `<option value="${esc(choice.value)}" ${row[column.key] === choice.value ? "selected" : ""}>${esc(choice.label)}</option>`).join("")}<option value="__create_data__">+ Create a new B03 page data definition</option></select>`;
+      }
+      else if (column.type === "select" && column.dynamicOptions === "sourceRoutes") {
+        const choices = sourceRouteOptions(page, row);
+        control = `<select ${attributes}>${choices.map(choice => `<option value="${esc(choice.value)}" ${row[column.key] === choice.value ? "selected" : ""}>${esc(choice.label)}</option>`).join("")}</select>`;
       }
       else if (column.type === "select" && column.dynamicOptions === "presentation") {
-        const definition = (page.blocks.B03.values.data || []).find(candidate => (candidate.id || candidate._id) === row.dataRef);
+        const definition = pageDataDefinitions(page).find(candidate => (candidate.id || candidate._id) === row.dataRef);
         let choices = ["not yet defined"];
         if (definition && definition.cardinality === "one" && definition.structure === "value") choices.push("displayed value", "input", "status", "metric");
         if (definition && definition.cardinality === "one" && definition.structure === "record") choices.push("summary", "details", "form");
@@ -1592,6 +1982,7 @@ Anything not covered above is unspecified. Add a question against this page rath
 
   function renderInspector() {
     const inspector = $("#inspector");
+    if (state.activePageId === DATA_SECTION_ID) { renderDataInspector(); return; }
     const page = activePage();
     if (!page) return;
     let definition = BLOCKS.find(block => block.id === selection.blockId) || BLOCKS[0];
@@ -1692,12 +2083,44 @@ Anything not covered above is unspecified. Add a question against this page rath
     }
     else if (target.dataset.recordField) {
       found.row[target.dataset.recordField] = target.value;
-      if (target.dataset.recordField === "dataRef" && found.row.kind === "data") found.row.presentation = "not yet defined";
+      if (target.dataset.recordField === "dataRef") {
+        found.row.sourceRouteRef = "";
+        if (found.row.kind === "data") found.row.presentation = "not yet defined";
+      }
     }
     else if (target.dataset.recordMeta === "status") found.row._status = target.value;
     else if (target.dataset.recordMeta) found.row[`_${target.dataset.recordMeta}`] = target.value;
     page.updatedAt = new Date().toISOString();
     saveState();
+  }
+
+  function addDictionaryRecord(section) {
+    const data = dictionary();
+    if (!data[section]) return;
+    const id = nextDictionaryRecordId(section);
+    const record = syncDataRecord({ id, _id: id, _status: "todo", _accountable: "", _note: "" }, section === "routes" ? "SRC" : section === "providers" ? "PROV" : section === "feeds" ? "FEED" : section === "usages" ? "USE" : section === "questions" ? "DQ" : "DATA", data[section].length);
+    if (section === "catalog") Object.assign(record, { name: "New data field", category: "", meaning: "", cardinality: "not yet defined", structure: "not yet defined", dataType: "", format: "", decimals: "", nullRule: "", example: "", rung: "below L0", rawSource: "Mockument" });
+    if (section === "routes") Object.assign(record, { dataId: "", routeName: "", country: "", currency: "", securityType: "", assetClass: "", jurisdiction: "", otherCondition: "", providerId: "", providerName: "", feedId: "", feedName: "", sourceFeed: "", nativeField: "", nativeType: "", dbField: "", transformation: "", refreshCadence: "", visibleWhen: "", verified: "", notes: "", rawSource: "Mockument" });
+    if (section === "providers") Object.assign(record, { name: "New provider", domains: "", scope: "", currency: "", feeds: "", delivery: "", cadence: "", owner: "", notes: "", rawSource: "Mockument" });
+    if (section === "feeds") Object.assign(record, { providerId: "", providerName: "", name: "New provider feed", feedKey: "", delivery: "", cadence: "", scope: "", currency: "", originalColumnF: "", notes: "", rawSource: "Mockument" });
+    if (section === "usages") Object.assign(record, { pageId: "", pageName: "", componentId: "", section: "", tab: "", context: "", displayLabel: "New data usage", dataId: "", routeId: "", requiredness: "proposed", providerText: "", sourceText: "", nativeFieldText: "", dbFieldText: "", calculated: "", transformationText: "", refreshCadence: "", visibleWhen: "", notes: "", rawSource: "Mockument" });
+    if (section === "questions") Object.assign(record, { type: "question", statement: "New data question", affects: "", owner: "", neededBy: "", answer: "", notes: "", rawSource: "Mockument" });
+    data[section].push(record);
+  }
+
+  function updateDictionaryField(target) {
+    const data = dictionary();
+    const section = target.dataset.dataSection;
+    const record = data[section] && data[section][Number(target.dataset.dataIndex)];
+    if (!record) return;
+    if (target.dataset.dataStatus !== undefined) record._status = target.value;
+    else if (target.dataset.dataMeta === "accountable") record._accountable = target.value;
+    else if (target.dataset.dataMeta === "note") record._note = target.value;
+    else if (target.dataset.dataField) {
+      record[target.dataset.dataField] = target.value;
+      if (target.dataset.dataField === "id") record._id = target.value || record._id;
+    }
+    saveState(false);
   }
 
   function updateWorkflowField(target) {
@@ -2007,14 +2430,22 @@ Anything not covered above is unspecified. Add a question against this page rath
       renderInspector();
     }
     const openPage = event.target.closest("[data-open-page]");
-    if (openPage) { previewMode = false; state.activePageId = openPage.dataset.openPage; selectBlock("B01"); saveState(); render(); return; }
-    if (event.target.closest("#template-link")) { previewMode = false; state.activePageId = "template"; selectBlock("B01"); saveState(); render(); return; }
+    if (openPage) { previewMode = false; state.activePageId = openPage.dataset.openPage; dataDictionaryAnchor = ""; selectBlock("B01"); saveState(); render(); return; }
+    const openDataSection = event.target.closest("[data-open-data-section]");
+    if (openDataSection) { previewMode = false; state.activePageId = DATA_SECTION_ID; dataDictionaryAnchor = openDataSection.dataset.dataAnchor || ""; saveState(); render(); return; }
+    if (event.target.closest("#template-link")) { previewMode = false; state.activePageId = "template"; dataDictionaryAnchor = ""; selectBlock("B01"); saveState(); render(); return; }
     if (event.target.closest("#new-page-button, [data-open-new-page]")) { openNewPageDialog(); return; }
     if (event.target.closest("#planned-page-button, [data-add-planned-page]")) { addPlannedPage(); return; }
     if (event.target.closest("#export-button")) { exportJson(state, `${slugify(state.app.name)}-mockument.json`); return; }
     if (event.target.closest("#theme-button")) { cycleTheme(); return; }
     if (event.target.closest("[data-open-preview]")) { previewMode = true; selectBlock("B04"); render(); return; }
     if (event.target.closest("[data-exit-preview]")) { previewMode = false; selectBlock("B04"); render(); revealActiveBlock(); return; }
+    const dataView = event.target.closest("[data-data-view]");
+    if (dataView) { dataDictionaryViews[dataView.dataset.dataSectionView] = dataView.dataset.dataView; dataDictionaryAnchor = dataView.dataset.dataSectionView; render(); return; }
+    const addDataRecord = event.target.closest("[data-add-data-record]");
+    if (addDataRecord) { addDictionaryRecord(addDataRecord.dataset.addDataRecord); dataDictionaryAnchor = addDataRecord.dataset.addDataRecord; saveState(); render(); return; }
+    const removeDataRecord = event.target.closest("[data-remove-data-record]");
+    if (removeDataRecord && confirm("Remove this data-dictionary record?")) { dictionary()[removeDataRecord.dataset.dataSection].splice(Number(removeDataRecord.dataset.dataIndex), 1); saveState(); render(); return; }
     if (event.target.closest("[data-add-reviewer]")) { state.app.reviewers.push(""); saveState(); render(); return; }
     if (event.target.closest("[data-add-workflow]")) { const id = nextWorkflowId(); state.app.workflows.push({ id, name: "New workflow", startStepId: "", steps: [], note: "" }); saveState(); render(); return; }
     const removeWorkflow = event.target.closest("[data-remove-workflow]");
@@ -2118,6 +2549,7 @@ Anything not covered above is unspecified. Add a question against this page rath
   });
 
   document.addEventListener("input", event => {
+    if (event.target.matches("[data-data-field], [data-data-meta], [data-data-status]")) updateDictionaryField(event.target);
     if (event.target.matches("[data-workflow-field], [data-step-field], [data-transition-field]")) updateWorkflowField(event.target);
     if (event.target.matches("[data-reviewer-index]")) updateReviewerName(event.target);
     if (event.target.matches("[data-app-setting]")) updateAppSetting(event.target);
@@ -2128,6 +2560,13 @@ Anything not covered above is unspecified. Add a question against this page rath
   });
 
   document.addEventListener("change", event => {
+    if (event.target.matches("[data-data-field], [data-data-meta], [data-data-status]")) {
+      updateDictionaryField(event.target);
+      const scrollY = window.scrollY;
+      render();
+      window.scrollTo(0, scrollY);
+      return;
+    }
     if (event.target.matches("[data-workflow-field], [data-step-field], [data-transition-field]")) {
       updateWorkflowField(event.target);
       const scrollY = window.scrollY;

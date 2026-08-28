@@ -890,15 +890,15 @@ support sequential work; a block hash supports deep links. An explicit all-block
 printing, browser search and full-document review.</p>
 <p>The consequences are practical:</p>
 <ul>
-<li>Every page has one owner, one version and one readiness state.</li>
+<li>Every page has one version and a readiness state; human ownership is recorded in the Human check boxes.</li>
 <li>Two people can work on two pages without conflict.</li>
 <li>A page can be sent to somebody on its own and still make sense.</li>
 <li>The register pages — questions, fields, routes — can be assembled mechanically from the set.</li>
 </ul>
 <h2 id="15-the-thirteen-blocks">15. The thirteen blocks</h2><p>Every page carries the same thirteen blocks in the same order. Blocks B01–B02 are identity, B03 defines the
 available business data, B04 is the mock and its records, B05–B10 complete the specification, and B11–B13 are the honesty apparatus. Each block names who answers it.</p>
-<h3 id="identity">Identity</h3><p><strong>B01 · Page header.</strong> Name, business activity, route, build status, version, date and owner, followed
-by the readiness stages. Business activity explains what work the page supports, why someone opens it,
+<h3 id="identity">Identity</h3><p><strong>B01 · Page header.</strong> Name, business activity, route, build status and version, followed
+by the readiness stages. Page ownership and review dates live in the Human check boxes, not as page-edit timestamps. Business activity explains what work the page supports, why someone opens it,
 and what they should leave with. <em>Answered by the page owner.</em></p>
 <p><strong>B02 · Roles.</strong> Every listed role can access the page. Record what differs between roles and what
 each must <em>not</em> see; omit roles that cannot access the page. The B02 block assignee owns the role
@@ -1087,6 +1087,7 @@ job name.</p>
 and, when one fails, exactly what is in the way. A stage cannot turn green merely because someone touched a field: the block must be marked Done, assigned where appropriate, and contain the required data for that stage.</p>
 <h3 id="gate-1-ready-to-walk-through">Gate 1 — ready to walk through</h3><ul>
 <li>Every block's status is <strong>Done</strong>; a block cannot be walk-through ready while its own owner still calls it To Do or WIP.</li>
+<li>Mockument QA does not become ready until the Walk-through human check is confirmed; Build does not become ready until the Mockument QA human check is confirmed.</li>
 <li>Every page names the step it represents.</li>
 <li>Every element and control carries a status.</li>
 <li>Every open question names who must answer it.</li>
@@ -1234,7 +1235,7 @@ built page as a test identifier.</li>
 <p>That last point is what keeps the specification alive after the build starts. When <code>EL-07</code> exists in
 the spec, in the ticket and in the test, a change to any of the three is visible in the others. When it
 exists only in prose, the specification becomes historical within a fortnight.</p>
-<h2 id="27-change-versioning-and-write-back">27. Change, versioning and write-back</h2><p><strong>Every page carries a version, a date and an owner.</strong> A review is repeatable only if a reader can see
+<h2 id="27-change-versioning-and-write-back">27. Change, versioning and write-back</h2><p><strong>Every page carries a version, while ownership and dates are captured by human checks.</strong> A review is repeatable only if a reader can see
 what moved since last time.</p>
 <p><strong>Accepted proposals are written back.</strong> When somebody accepts a proposal that concerns business
 meaning, the status changes from <em>proposed</em> to <em>required</em> and the underlying description is updated.
@@ -1271,7 +1272,7 @@ specification is rendered from it.</p>
 </thead>
 <tbody><tr>
 <td><code>page</code></td>
-<td><code>id</code> <code>name</code> <code>activity</code> <code>route</code> <code>buildStatus</code> <code>version</code> <code>updated</code> <code>owner</code></td>
+<td><code>id</code> <code>name</code> <code>activity</code> <code>route</code> <code>buildStatus</code> <code>version</code></td>
 </tr>
 <tr>
 <td><code>availableTo[]</code></td>
@@ -1565,8 +1566,6 @@ contract.</p>
         &quot;route&quot;: { &quot;type&quot;: &quot;string&quot; },
         &quot;build_status&quot;: { &quot;enum&quot;: [&quot;new&quot;, &quot;modify&quot;, &quot;existing&quot;] },
         &quot;version&quot;: { &quot;type&quot;: &quot;string&quot; },
-        &quot;updated&quot;: { &quot;type&quot;: &quot;string&quot; },
-        &quot;owner&quot;: { &quot;type&quot;: &quot;string&quot; },
         &quot;available_to&quot;: {
           &quot;description&quot;: &quot;Every listed role can access the page; roles without access are omitted.&quot;,
           &quot;type&quot;: &quot;array&quot;, &quot;minItems&quot;: 1,
