@@ -915,10 +915,13 @@ navigation, local navigation, primary content, details or inspector, utility, or
 panels carry a stable ID plus a human-readable description so reviewers can understand the region without
 relying on the number alone. Sibling panels and sibling rows can store responsive percentage sizes; dragging
 a divider changes the percentage rather than creating a fixed pixel layout. Visible order can change, but
-reordering never changes the stable ID. Content sections sit inside rows or panels, then
-hold static content, data-bound components, navigation, notices and actions. Navigation is an optional component sourced from application pages,
-current-page surfaces, workflow steps or explicit stable destinations. A data-bound component selects B03
-before choosing a compatible presentation; list items and table columns remain explicit.</p>
+reordering never changes the stable ID. Each row, panel, section, component and action also records why it
+exists — required, proposed, unanswered, observed or out of scope — separately from its work status. Role
+and page-condition visibility rules can hide or reveal any mock item during walkthrough. Content sections
+sit inside rows or panels, then hold static content, data-bound components, navigation, notices and actions.
+Navigation is an optional component sourced from application pages, current-page surfaces, workflow steps or
+explicit stable destinations. A data-bound component selects B03 before choosing a compatible presentation;
+list items and table columns remain explicit.</p>
 <p>The standing fidelity qualification is permanent system text on every mock and an explicit rule in the build contract; it is not a reviewed page block.</p>
 <h3>The remaining specification</h3><p><strong>B05 · Page conditions.</strong> The default condition is automatic. Record only a named departure from default
 that materially changes the page’s message, major visibility, available business actions, ability to
@@ -963,8 +966,9 @@ content, nested inspectors and footers can coexist without inventing a fixed she
 sections are addressable B10 workflow surfaces.</p>
 <p>The authoring view keeps the composer, records and inspector visible. The Preview control temporarily replaces the full browser tab with the rendered canvas only, so reviewers can judge the page as a screen rather than as a specification. A small diagonal arrow in the top-right returns to B04.</p>
 <p>Three review controls sit above every mock.</p>
-<p><strong>Role.</strong> Switching role hides and reveals elements according to the permissions block, so &quot;what does a
-supervisor see?&quot; is answered by looking rather than by reading. What a role must <em>not</em> see is stated
+<p><strong>Role.</strong> Switching role hides and reveals rows, panels, sections, components and actions according to
+B04 visibility rules and the permissions block, so &quot;what does a supervisor see?&quot; is answered by looking
+rather than by reading. What a role must <em>not</em> see is stated
 beside it.</p>
 <p><strong>Page condition.</strong> Default is always available. Any additional option is a B05 page-level condition,
 not a sort order, filter, column arrangement or other component setting. Selecting a condition annotates
@@ -1079,9 +1083,10 @@ job name.</p>
 <p><strong>Provenance — who supplies it:</strong> held by us · a provider · the user · computed · nobody knows.</p>
 <p>Nuance that does not fit the vocabulary goes in an adjacent note, never in the vocabulary field itself.</p>
 <hr>
-<h1 id="part-6--readiness">Part 6 · Readiness</h1><h2 id="21-the-three-gates">21. The three gates</h2><p>Readiness is computed from the specification, not asserted in a meeting. Each page reports three gates
-and, when one fails, exactly what is in the way.</p>
+<h1 id="part-6--readiness">Part 6 · Readiness</h1><h2 id="21-the-three-gates">21. The three gates</h2><p>Readiness is computed from the specification, not asserted in a meeting. Each page reports staged gates
+and, when one fails, exactly what is in the way. A stage cannot turn green merely because someone touched a field: the block must be marked Done, assigned where appropriate, and contain the required data for that stage.</p>
 <h3 id="gate-1-ready-to-walk-through">Gate 1 — ready to walk through</h3><ul>
+<li>Every block's status is <strong>Done</strong>; a block cannot be walk-through ready while its own owner still calls it To Do or WIP.</li>
 <li>Every page names the step it represents.</li>
 <li>Every element and control carries a status.</li>
 <li>Every open question names who must answer it.</li>
@@ -1274,11 +1279,11 @@ specification is rendered from it.</p>
 </tr>
 <tr>
 <td><code>rows[]</code></td>
-<td><code>id</code> <code>name</code> <code>description</code> <code>role</code> <code>status</code> <code>trace</code> <code>note</code></td>
+<td><code>id</code> <code>name</code> <code>description</code> <code>role</code> <code>marker</code> <code>visibleRoles</code> <code>visibleConditions</code> <code>status</code> <code>trace</code> <code>note</code></td>
 </tr>
 <tr>
 <td><code>panels[]</code></td>
-<td><code>id</code> <code>name</code> <code>description</code> <code>role</code> <code>width</code> <code>status</code> <code>trace</code> <code>note</code></td>
+<td><code>id</code> <code>name</code> <code>description</code> <code>role</code> <code>marker</code> <code>visibleRoles</code> <code>visibleConditions</code> <code>width</code> <code>status</code> <code>trace</code> <code>note</code></td>
 </tr>
 <tr>
 <td><code>layout[]</code></td>
@@ -1286,11 +1291,11 @@ specification is rendered from it.</p>
 </tr>
 <tr>
 <td><code>components[]</code></td>
-<td><code>id</code> <code>kind</code> <code>name</code> <code>shows</code> <code>dataRef</code> <code>presentation</code> <code>itemTemplate</code> <code>columns</code> <code>navigationSource</code> <code>navigationTargets</code> <code>status</code> <code>trace</code> <code>note</code></td>
+<td><code>id</code> <code>kind</code> <code>marker</code> <code>visibleRoles</code> <code>visibleConditions</code> <code>name</code> <code>shows</code> <code>dataRef</code> <code>presentation</code> <code>itemTemplate</code> <code>columns</code> <code>navigationSource</code> <code>navigationTargets</code> <code>status</code> <code>trace</code> <code>note</code></td>
 </tr>
 <tr>
 <td><code>controls[]</code></td>
-<td><code>id</code> <code>name</code> <code>effect</code> (acts on data / alters the screen / both) <code>serverData</code> <code>leadsTo</code> <code>href</code> <code>confirm</code> <code>status</code> <code>trace</code></td>
+<td><code>id</code> <code>name</code> <code>marker</code> <code>visibleRoles</code> <code>visibleConditions</code> <code>effect</code> (acts on data / alters the screen / both) <code>serverData</code> <code>leadsTo</code> <code>href</code> <code>confirm</code> <code>status</code> <code>trace</code></td>
 </tr>
 <tr>
 <td><code>data[]</code></td>

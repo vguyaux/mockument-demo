@@ -3,8 +3,8 @@
 
   const BLOCKS = window.MOCKUMENT_BLOCKS || [];
   const STORAGE_KEY = "honest-mockument-template-state";
-  const SCHEMA_VERSION = 28;
-  const TEMPLATE_VERSION = "0.29.0";
+  const SCHEMA_VERSION = 29;
+  const TEMPLATE_VERSION = "0.31.0";
   const FIDELITY_NOTE = "Structure only, example data, nothing here is proof that the application works.";
   const THEME_KEY = "mockument-theme";
   const THEME_CYCLE = ["system", "dark", "light"];
@@ -13,6 +13,8 @@
     B07: "Memory", B08: "Changes", B09: "Connections", B10: "Workflows", B11: "Copy",
     B12: "Records", B13: "Contract"
   };
+  const BACKING_MARKERS = ["proposed", "required", "unanswered", "observed", "out of scope"];
+  const markerClass = value => String(value || "proposed").replace(/\s+/g, "-");
   const $ = (selector, root = document) => root.querySelector(selector);
   const $$ = (selector, root = document) => Array.from(root.querySelectorAll(selector));
   const esc = value => String(value == null ? "" : value).replace(/[&<>"']/g, char => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[char]));
@@ -218,6 +220,7 @@
       });
     });
     ensureLayout(page);
+    if (page.blocks.B01 && page.blocks.B01.values && !page.blocks.B01.values.updated) page.blocks.B01.values.updated = (page.updatedAt || new Date().toISOString()).slice(0, 10);
     page.schemaVersion = SCHEMA_VERSION;
     page.templateVersion = TEMPLATE_VERSION;
     return page;
@@ -645,16 +648,16 @@
           const navigationPanelId = "PNL-01";
           const contentPanelId = "PNL-02";
           mock.panels.push(
-            { _id: navigationPanelId, _status: "wip", _accountable: "Page owner", _note: "Migrated from the former fixed application menu", id: navigationPanelId, name: "Application navigation", description: "Migrated application menu region", role: "application navigation", width: "2", trace: "MIGRATED" },
-            { _id: contentPanelId, _status: "wip", _accountable: "Page owner", _note: "Migrated from the former fixed content area", id: contentPanelId, name: "Primary content", description: "Migrated primary content region", role: "primary content", width: "10", trace: "MIGRATED" }
+            { _id: navigationPanelId, _status: "wip", _accountable: "Page owner", _note: "Migrated from the former fixed application menu", id: navigationPanelId, name: "Application navigation", description: "Migrated application menu region", role: "application navigation", marker: "proposed", visibleRoles: "", visibleConditions: "", width: "2", trace: "MIGRATED" },
+            { _id: contentPanelId, _status: "wip", _accountable: "Page owner", _note: "Migrated from the former fixed content area", id: contentPanelId, name: "Primary content", description: "Migrated primary content region", role: "primary content", marker: "proposed", visibleRoles: "", visibleConditions: "", width: "10", trace: "MIGRATED" }
           );
           mock.layout.forEach(section => { section.panelId = contentPanelId; });
           const highest = (mock.elements || []).reduce((max, row) => { const match = String(row.id || row._id || "").match(/^EL-(\d+)$/); return match ? Math.max(max, Number(match[1])) : max; }, 0);
           const sectionId = `EL-${String(highest + 1).padStart(2, "0")}`;
           const navigationId = `EL-${String(highest + 2).padStart(2, "0")}`;
           mock.elements.push(
-            { _id: sectionId, _status: "wip", _accountable: "Page owner", _note: "Migrated navigation container", id: sectionId, kind: "section", name: "Application menu", shows: "", dataRef: "", presentation: "", surfaceRole: "ordinary section", navigationSource: "application pages", navigationTargets: "", trace: "MIGRATED" },
-            { _id: navigationId, _status: "wip", _accountable: "Page owner", _note: "Replaces the former fixed menu", id: navigationId, kind: "navigation", name: "Application pages", shows: "", dataRef: "", presentation: "", surfaceRole: "ordinary section", navigationSource: "application pages", navigationTargets: "", trace: "MIGRATED" }
+            { _id: sectionId, _status: "wip", _accountable: "Page owner", _note: "Migrated navigation container", id: sectionId, kind: "section", marker: "proposed", visibleRoles: "", visibleConditions: "", name: "Application menu", shows: "", dataRef: "", presentation: "", surfaceRole: "ordinary section", navigationSource: "application pages", navigationTargets: "", trace: "MIGRATED" },
+            { _id: navigationId, _status: "wip", _accountable: "Page owner", _note: "Replaces the former fixed menu", id: navigationId, kind: "navigation", marker: "proposed", visibleRoles: "", visibleConditions: "", name: "Application pages", shows: "", dataRef: "", presentation: "", surfaceRole: "ordinary section", navigationSource: "application pages", navigationTargets: "", trace: "MIGRATED" }
           );
           mock.layout.unshift({ uid: `SECTION-${Date.now()}-${page.id}`, recordId: sectionId, panelId: navigationPanelId, columns: 1, items: [{ recordId: navigationId }] });
         }
@@ -677,7 +680,7 @@
         const hasLayoutRegions = mock.layout.some(node => ["row", "panel"].includes(node.type));
         if (!hasLayoutRegions && (mock.panels || []).length) {
           const rowId = nextRecordId(page, "ROW");
-          mock.rows.push({ _id: rowId, _status: "wip", _accountable: "Page owner", _note: "Migrated from the former panel-only canvas", id: rowId, name: "Main canvas row", description: "Migrated row containing the existing panels", role: "main area", trace: "MIGRATED" });
+          mock.rows.push({ _id: rowId, _status: "wip", _accountable: "Page owner", _note: "Migrated from the former panel-only canvas", id: rowId, name: "Main canvas row", description: "Migrated row containing the existing panels", role: "main area", marker: "proposed", visibleRoles: "", visibleConditions: "", trace: "MIGRATED" });
           mock.layout.unshift({ uid: `ROW-${Date.now()}-${page.id}`, type: "row", recordId: rowId, parentId: "canvas", items: [] });
           (mock.panels || []).forEach(panel => {
             const panelId = panel.id || panel._id;
@@ -708,6 +711,18 @@
       });
       if (!next.changeLog.some(entry => entry.version === "0.29.0")) next.changeLog.push({ version: "0.29.0", date: new Date().toISOString(), note: "Added responsive percentage sizing and drag handles for sibling panels and rows." });
     }
+    if (previousSchemaVersion < 29) {
+      Object.values(next.pages).forEach(page => {
+        const mock = page.blocks.B04.values;
+        [...(mock.rows || []), ...(mock.panels || []), ...(mock.elements || []), ...(mock.controls || [])].forEach(record => {
+          if (!BACKING_MARKERS.includes(record.marker)) record.marker = "proposed";
+          if (record.visibleRoles == null) record.visibleRoles = "";
+          if (record.visibleConditions == null) record.visibleConditions = "";
+        });
+        syncPage(page);
+      });
+      if (!next.changeLog.some(entry => entry.version === "0.30.0")) next.changeLog.push({ version: "0.30.0", date: new Date().toISOString(), note: "Added backing markers, role and condition visibility rules, planned pages, and generated application overview registers." });
+    }
     return next;
   }
 
@@ -723,9 +738,17 @@
 
   let state = loadState();
   let templatePreview = null;
-  saveState();
+  saveState(false);
 
-  function saveState() {
+  function touchPage(page) {
+    if (!page || !page.built || page.id === "template") return;
+    const now = new Date();
+    page.updatedAt = now.toISOString();
+    if (page.blocks && page.blocks.B01 && page.blocks.B01.values) page.blocks.B01.values.updated = now.toISOString().slice(0, 10);
+  }
+
+  function saveState(touch = true) {
+    if (touch) touchPage(state.pages && state.pages[state.activePageId]);
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
   }
 
@@ -758,6 +781,25 @@
 
   function statusLabel(status) {
     return status === "done" ? "Done" : status === "wip" ? "WIP" : "To Do";
+  }
+
+  function markerLabel(marker) {
+    return BACKING_MARKERS.includes(marker) ? marker : "proposed";
+  }
+
+  function listMatches(value, current) {
+    const list = String(value || "").split(/[\n,]+/).map(item => item.trim().toLowerCase()).filter(Boolean);
+    if (!list.length) return true;
+    return list.includes(String(current || "").trim().toLowerCase());
+  }
+
+  function visibleForChoice(record) {
+    return listMatches(record && record.visibleRoles, mockChoice.role) && listMatches(record && record.visibleConditions, mockChoice.state);
+  }
+
+  function markerBadge(row) {
+    const marker = markerLabel(row && row.marker);
+    return `<span class="mock-marker mock-marker--${esc(markerClass(marker))}">${esc(marker)}</span>`;
   }
 
   function statusSelect(value, attributes, disabled) {
@@ -838,6 +880,8 @@
       if (!elements.some(row => row.kind !== "section")) missing.push("no visible component is recorded");
       const untraced = elements.filter(row => row.kind !== "section" && !String(row.trace || "").trim()).length;
       if (untraced) missing.push(`${untraced} visible component${untraced === 1 ? " is" : "s are"} untraced`);
+      const unresolvedByMarker = [...rows, ...panels, ...elements, ...(block.values.controls || [])].filter(row => row.marker === "unanswered" && !relatedHonestyRecords(page, row.id || row._id).some(record => record.type === "question")).length;
+      if (unresolvedByMarker) missing.push(`${unresolvedByMarker} unanswered mock item${unresolvedByMarker === 1 ? " has" : "s have"} no related B12 question`);
       const definitions = page.blocks.B03.values.data || [];
       const dataComponents = elements.filter(row => row.kind === "data");
       const unlinked = dataComponents.filter(row => !row.dataRef || row.dataRef === "Not yet defined" || !definitions.some(definition => (definition.id || definition._id) === row.dataRef)).length;
@@ -898,6 +942,37 @@
     return missing;
   }
 
+  function fieldIsVisible(field, values) {
+    return !field.showWhen || values[field.showWhen.key] === field.showWhen.value;
+  }
+
+  function valueIsMissing(value) {
+    const text = String(value == null ? "" : value).trim();
+    return !text || text === "not yet answered" || text === "not yet defined" || text === "Not yet defined";
+  }
+
+  function mockQaValidation(definition, block) {
+    const missing = [];
+    if (block.status !== "done") missing.push("block status is not Done");
+    if (!String(block.accountable || "").trim()) missing.push("Assigned to is missing");
+    definition.fields.filter(field => fieldIsVisible(field, block.values)).forEach(field => {
+      if (field.type !== "rows") {
+        if (field.required && valueIsMissing(block.values[field.key])) missing.push(`${field.label} is missing`);
+        return;
+      }
+      const rows = block.values[field.key] || [];
+      if (field.required && !rows.length) missing.push(`${field.label} has no records`);
+      rows.forEach(row => {
+        const rowId = row.id || row._id || "row";
+        if (row._status !== "done") missing.push(`${rowId} status is not Done`);
+        field.fields.filter(column => (!column.forKinds || column.forKinds.includes(row.kind)) && (!column.forPresentations || column.forPresentations.includes(row.presentation)) && (!column.forTypes || column.forTypes.includes(row.type))).forEach(column => {
+          if (column.required && valueIsMissing(row[column.key])) missing.push(`${rowId} ${column.label} is missing`);
+        });
+      });
+    });
+    return missing;
+  }
+
   function calculateBlockReadiness(page) {
     const result = {};
     const data = page.blocks.B03.values.data || [];
@@ -906,35 +981,34 @@
     const roles = page.blocks.B02.values.roles || [];
     const conditions = page.blocks.B05.values.conditions || [];
     const questions = (page.blocks.B12.values.records || []).filter(row => row.type === "question");
-    const walkIds = new Set(["B01", "B02", "B03", "B04", "B05", "B12"]);
 
     BLOCKS.forEach(definition => {
       const block = page.blocks[definition.id];
       const rows = blockRows(definition, block);
-      let walk = { state: "na", reason: "Not required for the initial walk-through." };
-      if (walkIds.has(definition.id)) {
-        const missing = [];
-        if (definition.id === "B01" && !String(block.values.activity || "").trim()) missing.push("business activity");
-        if (definition.id === "B02" && !roles.some(row => String(row.role || "").trim())) missing.push("user role");
-        if (definition.id === "B03" && data.some(row => !String(row.name || "").trim())) missing.push("data definition name");
-        if (definition.id === "B04") {
-          if (!(block.values.layout || []).some(node => ["row", "panel"].includes(node.type))) missing.push("mock row or panel");
-          if (!(block.values.panels || []).length) missing.push("mock panel");
-          if (!(block.values.layout || []).some(node => (node.type || "section") === "section")) missing.push("content section");
-          if (!elements.some(row => row.kind !== "section" && String(row.name || "").trim())) missing.push("visible component");
-          if (elements.some(row => !["done", "wip", "todo"].includes(row._status))) missing.push("component work status");
-          if (controls.some(row => !["done", "wip", "todo"].includes(row._status))) missing.push("control work status");
-        }
-        if (definition.id === "B05" && conditions.some(row => !String(row.name || "").trim())) missing.push("unnamed page condition");
-        if (definition.id === "B12" && questions.some(row => String(row.statement || "").trim() && !String(row.answerOwner || "").trim())) missing.push("question owner");
-        walk = missing.length ? { state: "missing", reason: `Missing ${missing.join(", ")}.` } : { state: "ready", reason: "This block has enough information for a walk-through." };
+      const walkMissing = [];
+      if (block.status !== "done") walkMissing.push("block status is not Done");
+      if (definition.id === "B01" && !String(block.values.activity || "").trim()) walkMissing.push("business activity");
+      if (definition.id === "B02" && !roles.some(row => String(row.role || "").trim())) walkMissing.push("user role");
+      if (definition.id === "B03" && !data.length) walkMissing.push("data definition");
+      if (definition.id === "B03" && data.some(row => !String(row.name || "").trim())) walkMissing.push("data definition name");
+      if (definition.id === "B04") {
+        if (!(block.values.layout || []).some(node => ["row", "panel"].includes(node.type))) walkMissing.push("mock row or panel");
+        if (!(block.values.panels || []).length) walkMissing.push("mock panel");
+        if (!(block.values.layout || []).some(node => (node.type || "section") === "section")) walkMissing.push("content section");
+        if (!elements.some(row => row.kind !== "section" && String(row.name || "").trim())) walkMissing.push("visible component");
+        if (elements.some(row => !["done", "wip", "todo"].includes(row._status))) walkMissing.push("component work status");
+        if (controls.some(row => !["done", "wip", "todo"].includes(row._status))) walkMissing.push("control work status");
       }
+      if (definition.id === "B05" && conditions.some(row => !String(row.name || "").trim())) walkMissing.push("unnamed page condition");
+      if (definition.id === "B12" && questions.some(row => String(row.statement || "").trim() && !String(row.answerOwner || "").trim())) walkMissing.push("question owner");
+      const walk = walkMissing.length
+        ? { state: "missing", reason: `Missing ${walkMissing.join(", ")}.` }
+        : { state: "ready", reason: "The block is marked Done and has enough information for a walk-through." };
 
-      const blockOwned = block.status === "done" || Boolean(String(block.accountable || "").trim());
-      const ownerlessRows = rows.filter(row => row._status !== "done" && !String(row._accountable || "").trim() && !(definition.id === "B02" && block.accountable));
-      const mockQa = blockOwned && !ownerlessRows.length
-        ? { state: "ready", reason: block.status === "done" ? "The block is done." : "The unfinished block and its rows name who must complete or accept them." }
-        : { state: "missing", reason: `${!blockOwned ? "The block has no named owner. " : ""}${ownerlessRows.length ? `${ownerlessRows.length} unresolved row${ownerlessRows.length === 1 ? " has" : "s have"} no named owner.` : ""}`.trim() };
+      const mockQaMissing = [...new Set([...mockQaValidation(definition, block), ...walkMissing.filter(item => item !== "block status is not Done")])];
+      const mockQa = mockQaMissing.length
+        ? { state: "missing", reason: mockQaMissing.join("; ") + "." }
+        : { state: "ready", reason: "The block status is Done, it is assigned, and required fields are filled." };
 
       const buildMissing = buildValidation(definition, block, page);
       let build;
@@ -1018,8 +1092,15 @@
 
   function fieldInput(field, value, blockId, disabled, rowIndex = null, rowKey = null) {
     const attributes = `data-value-input data-block="${blockId}" data-field="${field.key}"${rowIndex == null ? "" : ` data-row="${rowIndex}" data-row-key="${rowKey}"`}`;
-    const common = `${attributes} ${disabled ? "disabled" : ""}`;
+    const locked = disabled || field.readOnly;
+    const common = `${attributes} ${locked ? "disabled" : ""}`;
     if (field.type === "textarea") return `<textarea ${common} rows="${field.rows || 3}" placeholder="${esc(field.placeholder || "")}">${esc(value || "")}</textarea>`;
+    if (field.type === "select" && field.dynamicOptions === "reviewers") {
+      const reviewers = (state.app.reviewers || []).map(name => String(name).trim()).filter(Boolean);
+      const selectedIsMissing = value && !reviewers.includes(value);
+      const options = [`<option value="">Select person</option>`, ...reviewers.map(name => `<option value="${esc(name)}" ${value === name ? "selected" : ""}>${esc(name)}</option>`), selectedIsMissing ? `<option value="${esc(value)}" selected>${esc(value)} · not in Settings</option>` : ""].join("");
+      return `<select ${common}>${options}</select>`;
+    }
     if (field.type === "select") return `<select ${common}>${field.choices.map(choice => `<option value="${esc(choice)}" ${value === choice ? "selected" : ""}>${esc(choice)}</option>`).join("")}</select>`;
     return `<input ${common} type="${field.inputType || "text"}" value="${esc(value || "")}" placeholder="${esc(field.placeholder || "")}">`;
   }
@@ -1065,14 +1146,15 @@
   function renderMockItem(page, item) {
     const row = mockRecord(page, item.recordId);
     if (!row) return `<div class="mock-element status--todo" data-mock-record="${esc(item.recordId)}"><div class="mock-label">${esc(item.recordId)}</div><div class="mock-name">Missing specification record</div></div>`;
+    if (!visibleForChoice(row)) return "";
     const id = row.id || row._id;
     const kind = id.startsWith("CTL-") ? "action" : (row.kind || "content");
     const presentation = row.presentation || "";
     const showIds = ["IDs", "honesty + IDs"].includes(mockChoice.reviewMode);
     const showHonesty = ["honesty", "honesty + IDs"].includes(mockChoice.reviewMode);
     const metadata = [showIds ? `${id} · ${kind === "data" && presentation ? presentation : kind}` : "", showHonesty ? statusLabel(row._status) : ""].filter(Boolean).join(" · ");
-    const label = metadata ? `<div class="mock-label">${esc(metadata)}</div>` : "";
-    if (kind === "action") return `<button class="mock-control status--${esc(row._status || "todo")}" type="button" data-mock-record="${esc(id)}">${esc(row.name || "Unnamed action")}${metadata ? `<small class="mock-inline-meta">${esc(metadata)}</small>` : ""}</button>`;
+    const label = metadata || showHonesty ? `<div class="mock-label">${metadata ? esc(metadata) : ""}${showHonesty ? markerBadge(row) : ""}</div>` : "";
+    if (kind === "action") return `<button class="mock-control status--${esc(row._status || "todo")}" type="button" data-mock-record="${esc(id)}">${esc(row.name || "Unnamed action")}${showHonesty ? markerBadge(row) : ""}${metadata ? `<small class="mock-inline-meta">${esc(metadata)}</small>` : ""}</button>`;
     if (kind === "data" && presentation === "input") return `<div class="mock-element mock-element--field status--${esc(row._status || "todo")}" data-mock-record="${esc(id)}">${label}<div class="mock-name">${esc(row.name || "Unnamed input")}</div><div class="mock-input">${esc(row.shows || "Value")}</div></div>`;
     if (kind === "data" && presentation === "list") return `<div class="mock-element status--${esc(row._status || "todo")}" data-mock-record="${esc(id)}">${label}<div class="mock-name">${esc(row.name || "Unnamed list")}</div><div class="mock-lines"><i></i><i></i><i></i></div></div>`;
     if (kind === "data" && presentation === "table") return `<div class="mock-element status--${esc(row._status || "todo")}" data-mock-record="${esc(id)}">${label}<div class="mock-name">${esc(row.name || "Unnamed table")}</div><div class="mock-table"><i></i><i></i><i></i><i></i><i></i><i></i></div></div>`;
@@ -1156,25 +1238,26 @@
     const segment = (name, values, current) => `<div class="segment">${values.map(value => `<button type="button" data-mock-choice="${name}" data-value="${esc(value)}" class="${value === current ? "is-on" : ""}">${esc(value)}</button>`).join("")}</div>`;
     const showIds = ["IDs", "honesty + IDs"].includes(mockChoice.reviewMode);
     const showHonesty = ["honesty", "honesty + IDs"].includes(mockChoice.reviewMode);
-    const childNodes = parentId => layout.filter(node => (node.parentId || node.panelId || "canvas") === parentId);
     const recordForNode = node => node.type === "row" ? (mock.rows || []).find(row => (row.id || row._id) === node.recordId) : node.type === "panel" ? (mock.panels || []).find(panel => (panel.id || panel._id) === node.recordId) : mockRecord(page, node.recordId);
+    const childNodes = parentId => layout.filter(node => (node.parentId || node.panelId || "canvas") === parentId).filter(node => visibleForChoice(recordForNode(node) || {}));
     const renderSectionNode = node => {
       const row = recordForNode(node) || {};
       const sectionMetadata = [showIds ? node.recordId : "", showHonesty ? statusLabel(row._status) : ""].filter(Boolean).join(" · ");
-      return `<section class="mock-layout-section status--${esc(row._status || "todo")}" data-mock-record="${esc(node.recordId)}"><div class="mock-layout-title">${sectionMetadata ? `<span>${esc(sectionMetadata)}</span>` : ""}${esc(row.name || "Unnamed content section")}</div><div class="mock-layout-grid" style="--mock-columns:${Number(node.columns) || 1}">${(node.items || []).map(item => renderMockItem(page, item)).join("") || `<div class="mock-empty">Empty section</div>`}</div></section>`;
+      const items = (node.items || []).map(item => renderMockItem(page, item)).join("");
+      return `<section class="mock-layout-section status--${esc(row._status || "todo")}" data-mock-record="${esc(node.recordId)}"><div class="mock-layout-title">${sectionMetadata ? `<span>${esc(sectionMetadata)}</span>` : ""}${showHonesty ? markerBadge(row) : ""}${esc(row.name || "Unnamed content section")}</div><div class="mock-layout-grid" style="--mock-columns:${Number(node.columns) || 1}">${items || `<div class="mock-empty">Empty section</div>`}</div></section>`;
     };
     const renderPanelNode = (node, panelIndex) => {
       const panel = recordForNode(node) || {};
       const panelId = node.recordId;
       const panelMetadata = [showIds ? `Panel ${panelIndex + 1} · ${panelId}` : "", showHonesty ? statusLabel(panel._status) : ""].filter(Boolean).join(" · ");
       const description = String(panel.description || "").trim();
-      return `<section class="mock-panel status--${esc(panel._status || "todo")}" data-mock-record="${esc(panelId)}"><div class="mock-panel-title">${panelMetadata ? `<span>${esc(panelMetadata)}</span>` : ""}<strong>${esc(panel.name || "Unnamed panel")}</strong>${description ? `<p>${esc(description)}</p>` : ""}<small>${esc(panel.role || "custom")}</small></div><div class="mock-panel-content">${renderLayoutChildren(panelId) || `<div class="mock-empty">Empty panel</div>`}</div></section>`;
+      return `<section class="mock-panel status--${esc(panel._status || "todo")}" data-mock-record="${esc(panelId)}"><div class="mock-panel-title">${panelMetadata ? `<span>${esc(panelMetadata)}</span>` : ""}<strong>${esc(panel.name || "Unnamed panel")}</strong>${showHonesty ? markerBadge(panel) : ""}${description ? `<p>${esc(description)}</p>` : ""}<small>${esc(panel.role || "custom")}</small></div><div class="mock-panel-content">${renderLayoutChildren(panelId) || `<div class="mock-empty">Empty panel</div>`}</div></section>`;
     };
     const renderRowNode = node => {
       const row = recordForNode(node) || {};
       const rowMetadata = [showIds ? node.recordId : "", showHonesty ? statusLabel(row._status) : ""].filter(Boolean).join(" · ");
       const description = String(row.description || "").trim();
-      return `<section class="mock-row status--${esc(row._status || "todo")}" data-mock-record="${esc(node.recordId)}"><div class="mock-row-title">${rowMetadata ? `<span>${esc(rowMetadata)}</span>` : ""}<strong>${esc(row.name || "Unnamed row")}</strong>${description ? `<p>${esc(description)}</p>` : ""}<small>${esc(row.role || "custom")}</small></div><div class="mock-row-content">${renderLayoutChildren(node.recordId) || `<div class="mock-empty">Empty row</div>`}</div></section>`;
+      return `<section class="mock-row status--${esc(row._status || "todo")}" data-mock-record="${esc(node.recordId)}"><div class="mock-row-title">${rowMetadata ? `<span>${esc(rowMetadata)}</span>` : ""}<strong>${esc(row.name || "Unnamed row")}</strong>${showHonesty ? markerBadge(row) : ""}${description ? `<p>${esc(description)}</p>` : ""}<small>${esc(row.role || "custom")}</small></div><div class="mock-row-content">${renderLayoutChildren(node.recordId) || `<div class="mock-empty">Empty row</div>`}</div></section>`;
     };
     function groupTracks(group, axis) {
       normalizeLayoutSizes(page, group, axis === "x" ? "panel" : "row");
@@ -1387,8 +1470,30 @@ Anything not covered above is unspecified. Add a question against this page rath
     return `<nav class="block-pager" aria-label="Move between Mockument blocks"><button class="button button--small" data-previous-block type="button" ${previous ? "" : "disabled"}>← ${previous ? `${esc(previous.id)} ${esc(BLOCK_SUMMARIES[previous.id])}` : "Previous"}</button><span><strong>${esc(BLOCKS[index].id)}</strong> ${esc(BLOCK_SUMMARIES[BLOCKS[index].id])}<button class="block-view-link" data-toggle-block-view type="button">View all blocks</button></span><button class="button button--small" data-next-block type="button" ${next ? "" : "disabled"}>${next ? `${esc(next.id)} ${esc(BLOCK_SUMMARIES[next.id])}` : "Next"} →</button></nav>`;
   }
 
+  function renderApplicationOverview() {
+    const pages = state.pageOrder.map(id => state.pages[id]).filter(page => page && !page.isSettings);
+    const built = pages.filter(page => page.built);
+    const planned = pages.filter(page => !page.built);
+    const pageRows = pages.map(page => {
+      if (!page.built) return `<tr><td>${esc(page.name)}</td><td><span class="status-chip status--todo">not drawn</span></td><td colspan="4">Planned page. Copy Template when ready.</td></tr>`;
+      const ai = calculateBlockReadiness(page);
+      const buildReady = BLOCKS.every(block => ai[block.id].build.state === "ready");
+      const questions = (page.blocks.B12.values.records || []).filter(record => record.type === "question").length;
+      const components = (page.blocks.B04.values.elements || []).filter(record => record.kind !== "section").length + (page.blocks.B04.values.controls || []).length;
+      return `<tr><td><button class="table-link" data-open-page="${esc(page.id)}" type="button">${esc(page.name)}</button></td><td><span class="status-chip status--${buildReady ? "done" : "wip"}">${buildReady ? "build ready" : "in progress"}</span></td><td>${esc((page.blocks.B04.values.rows || []).length)}</td><td>${esc((page.blocks.B04.values.panels || []).length)}</td><td>${esc(components)}</td><td>${esc(questions)}</td></tr>`;
+    }).join("");
+    const questions = built.flatMap(page => (page.blocks.B12.values.records || []).filter(record => record.type === "question").map(record => ({ page, record })));
+    const dataRows = built.flatMap(page => (page.blocks.B03.values.data || []).map(record => ({ page, record })));
+    const shared = built.flatMap(page => (page.blocks.B09.values.components || []).map(record => ({ page, record })));
+    return `<section class="app-overview"><div class="overview-head"><div><span class="eyebrow">Generated from pages</span><h2>Mockument overview</h2><p>Application-wide readiness, planned gaps, questions, data and shared component references.</p></div><button class="button button--small" data-add-planned-page type="button">+ Add planned page</button></div>
+      <div class="overview-cards"><div><strong>${built.length}</strong><span>drawn pages</span></div><div><strong>${planned.length}</strong><span>not drawn</span></div><div><strong>${questions.length}</strong><span>open questions</span></div><div><strong>${dataRows.length}</strong><span>data definitions</span></div><div><strong>${shared.length}</strong><span>shared components</span></div></div>
+      <div class="table-wrap"><table><thead><tr><th>Page</th><th>Status</th><th>Rows</th><th>Panels</th><th>Components</th><th>Questions</th></tr></thead><tbody>${pageRows || `<tr><td colspan="6">No application pages yet.</td></tr>`}</tbody></table></div>
+      <div class="overview-registers"><div><h3>Blocking questions</h3>${questions.length ? `<ul>${questions.slice(0, 12).map(({ page, record }) => `<li><button class="table-link" data-open-page="${esc(page.id)}" type="button">${esc(page.name)}</button> · <strong>${esc(record.id || record._id)}</strong> ${esc(record.statement || "Question not written yet")}</li>`).join("")}</ul>` : `<p>No questions recorded yet.</p>`}</div><div><h3>Data dictionary</h3>${dataRows.length ? `<ul>${dataRows.slice(0, 12).map(({ page, record }) => `<li><strong>${esc(record.id || record._id)}</strong> ${esc(record.name || "Unnamed data")} <span>${esc(page.name)}</span></li>`).join("")}</ul>` : `<p>No data definitions yet.</p>`}</div><div><h3>Shared components</h3>${shared.length ? `<ul>${shared.slice(0, 12).map(({ page, record }) => `<li><strong>${esc(record.id || record._id)}</strong> ${esc(record.name || "Unnamed component")} <span>${esc(page.name)}</span></li>`).join("")}</ul>` : `<p>No shared components referenced yet.</p>`}</div></div>
+    </section>`;
+  }
+
   function renderApplicationSettings() {
-    return `<section class="application-settings" aria-labelledby="application-settings-title">
+    return `${renderApplicationOverview()}<section class="application-settings" aria-labelledby="application-settings-title">
       <div><span class="eyebrow">Mockument-wide setting</span><h2 id="application-settings-title">Application identity</h2><p>The application name appears in the left column, mock navigation, exports, and before the page name in every browser tab.</p></div>
       <label class="field"><span>Application name</span><input data-app-setting="name" value="${esc(state.app.name || "Application Name")}" placeholder="Application Name"><small class="field-question">Example browser title: ${esc(state.app.name || "Application Name")} — Template</small></label>
       <div class="reviewer-settings"><div class="reviewer-settings-head"><div><strong>People working on this application</strong><span>These names appear in every human-review dropdown.</span></div><button class="button button--small" data-add-reviewer type="button">+ Add person</button></div><div class="reviewer-list">${(state.app.reviewers || []).length ? state.app.reviewers.map((name, index) => `<div class="reviewer-row"><input data-reviewer-index="${index}" value="${esc(name)}" placeholder="Person's name"><button class="remove-row" data-remove-reviewer="${index}" type="button">Remove</button></div>`).join("") : `<p class="repeater-empty">No people added yet.</p>`}</div></div>
@@ -1441,6 +1546,11 @@ Anything not covered above is unspecified. Add a question against this page rath
     return null;
   }
 
+  function relatedHonestyRecords(page, recordId) {
+    const needle = String(recordId || "").toLowerCase();
+    return (page.blocks.B12.values.records || []).filter(record => [record.affects, record.appliedTo, record.blocks, record.statement].some(value => String(value || "").toLowerCase().includes(needle)));
+  }
+
   function inspectorRecordEditor(found, disabled) {
     const row = found.row;
     const page = activePage();
@@ -1470,12 +1580,14 @@ Anything not covered above is unspecified. Add a question against this page rath
       else control = `<input ${attributes} value="${esc(row[column.key] || "")}">`;
       return `<label class="field"><span>${esc(column.label)}</span>${control}<small class="field-question">${esc(column.question)}</small></label>`;
     }).join("");
+    const recordId = row.id || row._id;
+    const related = relatedHonestyRecords(page, recordId);
     return `<div class="inspector-section"><h3>Edit selected mock record</h3><div class="inspector-edit">
-      <label class="field"><span>Work status</span>${statusSelect(row._status || "todo", `data-record-meta="status" data-record-id="${esc(row.id || row._id)}"`, disabled)}</label>
+      <label class="field"><span>Work status</span>${statusSelect(row._status || "todo", `data-record-meta="status" data-record-id="${esc(recordId)}"`, disabled)}</label>
       ${inputs}
-      <label class="field"><span>Who must answer or accept</span><input data-record-meta="accountable" data-record-id="${esc(row.id || row._id)}" value="${esc(row._accountable || "")}" ${disabled ? "disabled" : ""}></label>
-      <label class="field"><span>Status note</span><textarea data-record-meta="note" data-record-id="${esc(row.id || row._id)}" ${disabled ? "disabled" : ""}>${esc(row._note || "")}</textarea></label>
-    </div></div>`;
+      <label class="field"><span>Who must answer or accept</span><input data-record-meta="accountable" data-record-id="${esc(recordId)}" value="${esc(row._accountable || "")}" ${disabled ? "disabled" : ""}></label>
+      <label class="field"><span>Status note</span><textarea data-record-meta="note" data-record-id="${esc(recordId)}" ${disabled ? "disabled" : ""}>${esc(row._note || "")}</textarea></label>
+    </div></div><div class="inspector-section"><h3>Related decisions, questions and scope</h3>${related.length ? `<div class="related-records">${related.map(record => `<div><span class="mock-marker mock-marker--${esc(markerClass(record.type === "scope" ? "out of scope" : record.type === "question" ? "unanswered" : record.type === "observation" ? "observed" : "required"))}">${esc(record.type)}</span><strong>${esc(record.id || record._id || "B12")}</strong><p>${esc(record.statement || "No statement recorded")}</p></div>`).join("")}</div>` : `<p>No B12 record references ${esc(recordId)} yet.</p>`}</div>`;
   }
 
   function renderInspector() {
@@ -1677,6 +1789,21 @@ Anything not covered above is unspecified. Add a question against this page rath
     setTimeout(() => $("#new-page-form [name=name]").focus(), 0);
   }
 
+  function addPlannedPage() {
+    const name = String(prompt("Planned page name") || "").trim();
+    if (!name) return;
+    const id = uniqueId(slugify(name));
+    const page = createPage(id, name, `/${slugify(name)}`, false, false);
+    state.pages[id] = page;
+    const settingsIndex = state.pageOrder.indexOf("settings");
+    state.pageOrder.splice(settingsIndex < 0 ? state.pageOrder.length : settingsIndex, 0, id);
+    state.activePageId = id;
+    selectBlock("B01");
+    saveState();
+    render();
+    showToast(`${name} added as not drawn`);
+  }
+
   function createFromTemplate(name, route, parentId, existingId = null) {
     const id = existingId || uniqueId(slugify(name));
     const page = createPage(id, name, route || `/${slugify(name)}`, true, existingId === "settings");
@@ -1710,7 +1837,7 @@ Anything not covered above is unspecified. Add a question against this page rath
   function addRowRegion(page, parentId = "canvas") {
     const mock = page.blocks.B04.values;
     const id = nextRecordId(page, "ROW");
-    mock.rows.push({ _id: id, _status: "todo", _accountable: "Page owner", _note: "", id, name: `Row ${mock.rows.length + 1}`, description: "", role: parentId === "canvas" ? "content band" : "custom", trace: "" });
+    mock.rows.push({ _id: id, _status: "todo", _accountable: "Page owner", _note: "", id, name: `Row ${mock.rows.length + 1}`, description: "", role: parentId === "canvas" ? "content band" : "custom", marker: "proposed", visibleRoles: "", visibleConditions: "", trace: "" });
     mock.layout.push({ uid: `ROW-${Date.now()}-${id}`, type: "row", recordId: id, parentId, sizePercent: 20, items: [] });
     normalizeAllLayoutSizes(page);
     selection = { kind: "record", recordId: id, blockId: "B04" };
@@ -1719,7 +1846,7 @@ Anything not covered above is unspecified. Add a question against this page rath
   function addPanel(page, parentId = "canvas") {
     const mock = page.blocks.B04.values;
     const id = nextRecordId(page, "PNL");
-    mock.panels.push({ _id: id, _status: "todo", _accountable: "Page owner", _note: "", id, name: `Panel ${mock.panels.length + 1}`, description: "", role: mock.panels.length ? "custom" : "primary content", width: "1", trace: "" });
+    mock.panels.push({ _id: id, _status: "todo", _accountable: "Page owner", _note: "", id, name: `Panel ${mock.panels.length + 1}`, description: "", role: mock.panels.length ? "custom" : "primary content", marker: "proposed", visibleRoles: "", visibleConditions: "", width: "1", trace: "" });
     mock.layout.push({ uid: `PANEL-${Date.now()}-${id}`, type: "panel", recordId: id, parentId, sizePercent: 20, items: [] });
     normalizeAllLayoutSizes(page);
     selection = { kind: "record", recordId: id, blockId: "B04" };
@@ -1727,7 +1854,7 @@ Anything not covered above is unspecified. Add a question against this page rath
 
   function addLayoutSection(page, parentId) {
     const id = nextRecordId(page, "EL");
-    page.blocks.B04.values.elements.push({ _id: id, _status: "todo", _accountable: "Page owner", _note: "", id, kind: "section", name: "New content section", shows: "", dataRef: "", presentation: "", surfaceRole: "ordinary section", navigationSource: "application pages", navigationTargets: "", trace: "" });
+    page.blocks.B04.values.elements.push({ _id: id, _status: "todo", _accountable: "Page owner", _note: "", id, kind: "section", marker: "proposed", visibleRoles: "", visibleConditions: "", name: "New content section", shows: "", dataRef: "", presentation: "", surfaceRole: "ordinary section", navigationSource: "application pages", navigationTargets: "", trace: "" });
     page.blocks.B04.values.layout.push({ uid: `SECTION-${Date.now()}-${id}`, type: "section", recordId: id, parentId, columns: 1, items: [] });
     selection = { kind: "record", recordId: id, blockId: "B04" };
   }
@@ -1738,8 +1865,8 @@ Anything not covered above is unspecified. Add a question against this page rath
     const isAction = type === "action";
     const id = nextRecordId(page, isAction ? "CTL" : "EL");
     const names = { content: "New static content", data: "New data component", navigation: "New navigation", notice: "New notice", action: "New action" };
-    if (isAction) page.blocks.B04.values.controls.push({ _id: id, _status: "todo", _accountable: "Business user", _note: "", id, name: names[type], effect: "acts on data", dataRef: "", serverData: "unknown", leadsTo: "", confirmation: "" });
-    else page.blocks.B04.values.elements.push({ _id: id, _status: "todo", _accountable: "Business user", _note: "", id, kind: type, name: names[type], shows: "", dataRef: type === "data" ? "Not yet defined" : "", presentation: type === "data" ? "not yet defined" : "", surfaceRole: "ordinary section", navigationSource: "application pages", navigationTargets: "", trace: "" });
+    if (isAction) page.blocks.B04.values.controls.push({ _id: id, _status: "todo", _accountable: "Business user", _note: "", id, name: names[type], marker: "proposed", visibleRoles: "", visibleConditions: "", effect: "acts on data", dataRef: "", serverData: "unknown", leadsTo: "", confirmation: "" });
+    else page.blocks.B04.values.elements.push({ _id: id, _status: "todo", _accountable: "Business user", _note: "", id, kind: type, marker: "proposed", visibleRoles: "", visibleConditions: "", name: names[type], shows: "", dataRef: type === "data" ? "Not yet defined" : "", presentation: type === "data" ? "not yet defined" : "", surfaceRole: "ordinary section", navigationSource: "application pages", navigationTargets: "", trace: "" });
     page.blocks.B04.values.layout[sectionIndex].items.push({ recordId: id });
     selection = { kind: "record", recordId: id, blockId: "B04" };
   }
@@ -1883,6 +2010,7 @@ Anything not covered above is unspecified. Add a question against this page rath
     if (openPage) { previewMode = false; state.activePageId = openPage.dataset.openPage; selectBlock("B01"); saveState(); render(); return; }
     if (event.target.closest("#template-link")) { previewMode = false; state.activePageId = "template"; selectBlock("B01"); saveState(); render(); return; }
     if (event.target.closest("#new-page-button, [data-open-new-page]")) { openNewPageDialog(); return; }
+    if (event.target.closest("#planned-page-button, [data-add-planned-page]")) { addPlannedPage(); return; }
     if (event.target.closest("#export-button")) { exportJson(state, `${slugify(state.app.name)}-mockument.json`); return; }
     if (event.target.closest("#theme-button")) { cycleTheme(); return; }
     if (event.target.closest("[data-open-preview]")) { previewMode = true; selectBlock("B04"); render(); return; }

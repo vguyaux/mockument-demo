@@ -162,6 +162,21 @@ a { color: inherit; }
 .block-status-nav[data-filter="devQa"] .gate-line:not([data-gate="devQa"]) { opacity: .12; }
 
 .application-settings { max-width: 1080px; margin: 0 auto 22px; border: 1px solid var(--line); border-radius: 12px; background: var(--panel); padding: 16px 18px; display: grid; grid-template-columns: minmax(0, 1fr) minmax(260px, 420px); gap: 24px; align-items: end; }
+.app-overview { max-width: 1080px; margin: 0 auto 22px; border: 1px solid var(--line); border-radius: 12px; background: var(--panel); padding: 16px 18px; display: grid; gap: 14px; }
+.overview-head { display: flex; justify-content: space-between; gap: 14px; align-items: start; }
+.overview-head h2 { margin: 4px 0 5px; }
+.overview-head p { margin: 0; color: var(--text-3); }
+.overview-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 8px; }
+.overview-cards > div { border: 1px solid var(--line); border-radius: 8px; padding: 10px; background: var(--panel-2); }
+.overview-cards strong { display: block; font-size: 20px; }
+.overview-cards span { color: var(--text-3); font-size: 10px; text-transform: uppercase; letter-spacing: .06em; }
+.overview-registers { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; }
+.overview-registers > div { border: 1px solid var(--line); border-radius: 8px; padding: 10px; background: var(--panel-2); }
+.overview-registers h3 { margin: 0 0 8px; font-size: 12px; }
+.overview-registers ul { margin: 0; padding-left: 18px; color: var(--text-2); font-size: 11px; }
+.overview-registers li + li { margin-top: 6px; }
+.overview-registers span { color: var(--text-3); }
+.table-link { border: 0; padding: 0; background: transparent; color: var(--accent); font: inherit; cursor: pointer; text-align: left; }
 .application-settings h2 { margin: 3px 0 4px; font-size: 18px; }
 .application-settings p { margin: 0; color: var(--text-3); font-size: 11px; max-width: 580px; }
 .reviewer-settings { grid-column: 1 / -1; border-top: 1px solid var(--line); padding-top: 14px; }
@@ -323,12 +338,19 @@ input:focus, textarea:focus, select:focus { border-color: var(--accent); box-sha
 .mock-condition small { color: var(--mock-muted); font-size: 9px; }
 .mock-element { border: 1px solid var(--mock-border); background: var(--mock-surface); padding: 10px; margin-bottom: 9px; cursor: pointer; }
 .mock-element:hover, .mock-element.is-selected { outline: 2px solid var(--accent); outline-offset: 1px; }
-.mock-label { text-transform: uppercase; letter-spacing: .08em; font-size: 8px; color: var(--mock-muted); }
+.mock-label { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; text-transform: uppercase; letter-spacing: .08em; font-size: 8px; color: var(--mock-muted); }
+.mock-marker { display: inline-flex; width: max-content; border-radius: 999px; padding: 2px 5px; font: 700 8px ui-monospace, monospace; text-transform: uppercase; letter-spacing: .04em; background: var(--panel-3); color: var(--text-2); }
+.mock-marker--required { background: color-mix(in srgb, var(--required) 22%, transparent); color: var(--required); }
+.mock-marker--proposed { background: color-mix(in srgb, var(--proposed) 22%, transparent); color: var(--proposed); }
+.mock-marker--unanswered { background: color-mix(in srgb, var(--unanswered) 22%, transparent); color: var(--unanswered); }
+.mock-marker--observed { background: color-mix(in srgb, var(--accent) 22%, transparent); color: var(--accent); }
+.mock-marker--out-of-scope { background: color-mix(in srgb, var(--text-3) 22%, transparent); color: var(--text-3); }
 .mock-name { font-weight: 700; margin-top: 3px; }
 .mock-actions { display: flex; flex-wrap: wrap; gap: 7px; }
 .mock-control { border: 1px solid var(--mock-border); background: var(--mock-control); color: var(--mock-text); padding: 6px 9px; font-size: 10px; cursor: pointer; }
 .mock-control:hover, .mock-control.is-selected { outline: 2px solid var(--accent); }
 .mock-inline-meta { display: block; margin-top: 2px; color: var(--mock-muted); font: 7px ui-monospace, monospace; text-transform: uppercase; letter-spacing: .04em; }
+.mock-control .mock-marker { margin-left: 6px; vertical-align: middle; }
 .honesty-on :is(.mock-row, .mock-panel, .mock-element, .mock-control, .mock-layout-section).status--done { background: color-mix(in srgb, var(--required) 20%, var(--mock-surface)); border-color: var(--required); }
 .honesty-on :is(.mock-row, .mock-panel, .mock-element, .mock-control, .mock-layout-section).status--wip { background: color-mix(in srgb, var(--proposed) 22%, var(--mock-surface)); border-color: var(--proposed); }
 .honesty-on :is(.mock-row, .mock-panel, .mock-element, .mock-control, .mock-layout-section).status--todo { background: color-mix(in srgb, var(--unanswered) 20%, var(--mock-surface)); border-color: var(--unanswered); }
@@ -428,6 +450,10 @@ input:focus, textarea:focus, select:focus { border-color: var(--accent); box-sha
 .readiness-detail small { color: var(--text-3); font-size: 9px; line-height: 1.35; margin-top: 2px; }
 .inspector-record { display: grid; gap: 8px; }
 .inspector-record div { background: var(--panel-2); border-radius: 7px; padding: 8px; }
+.related-records { display: grid; gap: 8px; }
+.related-records > div { border: 1px solid var(--line); border-radius: 8px; padding: 8px; background: var(--panel-2); }
+.related-records strong { margin-left: 6px; font-size: 11px; }
+.related-records p { margin: 5px 0 0; color: var(--text-2); font-size: 11px; }
 .inspector-record span { display: block; color: var(--text-3); font-size: 9px; text-transform: uppercase; }
 .inspector-record strong { display: block; font-size: 11px; margin-top: 2px; overflow-wrap: anywhere; }
 .unbuilt { max-width: 720px; margin: 18vh auto 0; border: 1px dashed var(--line-strong); padding: 34px; border-radius: 12px; text-align: center; background: var(--panel); }

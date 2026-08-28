@@ -15,10 +15,10 @@
         text("name", "Page name", "What is this page called? This one value is also used for the menu label, page heading, and browser title.", { required: true, placeholder: "Template" }),
         textarea("activity", "Business activity", "What business activity does this page support, why does someone open it, and what should they leave with?", { required: true, rows: 4 }),
         text("route", "Route", "Where does this page live in the proposed app?", { required: true, placeholder: "/book-of-business" }),
-        select("buildStatus", "Build status", "Is this page new or a modification of an existing page?", ["new", "modification of an existing page"]),
-        text("version", "Version", "Which version of this page specification is this?", { placeholder: "0.1" }),
-        text("updated", "Updated", "When was this page last changed?", { inputType: "date" }),
-        text("owner", "Page owner", "Who keeps this page specification accurate?", { required: true })
+        select("buildStatus", "Build status", "Is this page new or a modification of an existing page?", ["new", "modification of an existing page"], { required: true }),
+        text("version", "Version", "Which version of this page specification is this?", { required: true, placeholder: "0.1" }),
+        text("updated", "Updated", "When was this page last changed? This is automatic.", { required: true, inputType: "date", readOnly: true }),
+        select("owner", "Page owner", "Who keeps this page specification accurate?", [], { required: true, dynamicOptions: "reviewers", allowUnresolved: true })
       ]
     },
     {
@@ -26,7 +26,7 @@
       definition: "List the roles that can access this page, what differs for each role, and what each role must not see. A role belongs here only when it can reach the page.",
       why: "Listing a role grants page access in the specification. Roles without access are omitted rather than documented one by one.",
       fields: [rows("roles", "Roles with access", "Which roles can access this page, and what differs between them?", [
-        text("role", "Role", "Which role can access this page?"),
+        text("role", "Role", "Which role can access this page?", { required: true }),
         textarea("differs", "What differs", "What changes for this role?"),
         textarea("mustNotSee", "Must not see", "What must this role never see?")
       ], { idPrefix: "ROLE" })]
@@ -37,10 +37,10 @@
       why: "Presentation should select known business data rather than silently inventing meaning, provenance, timing or calculations after it has been drawn.",
       fields: [rows("data", "Data definitions for this page", "What business data can this page use?", [
         text("id", "Data ID", "What stable ID addresses this definition?", { placeholder: "DATA-01" }),
-        text("name", "Business name", "What is this data called?"),
-        textarea("meaning", "Meaning", "What does it mean in business words?"),
-        select("cardinality", "Cardinality", "Does this definition describe one item or many?", ["not yet defined", "one", "many"]),
-        select("structure", "Structure", "Is each item an atomic value or a record with named attributes?", ["not yet defined", "value", "record"]),
+        text("name", "Business name", "What is this data called?", { required: true }),
+        textarea("meaning", "Meaning", "What does it mean in business words?", { required: true }),
+        select("cardinality", "Cardinality", "Does this definition describe one item or many?", ["not yet defined", "one", "many"], { required: true }),
+        select("structure", "Structure", "Is each item an atomic value or a record with named attributes?", ["not yet defined", "value", "record"], { required: true }),
         text("unit", "Unit or format", "What unit or display format does it use?"),
         text("asOf", "As of", "What point in time is this value as of?"),
         text("visibleWhen", "Available when", "When is it available to this page?"),
@@ -63,6 +63,9 @@
           text("name", "Row", "What is this row called?"),
           textarea("description", "Description", "What should appear next to this row reference so reviewers understand what this band represents?"),
           select("role", "Row role", "What purpose does this horizontal band serve?", ["header", "main area", "content band", "footer", "toolbar", "utility", "custom"]),
+          select("marker", "Backing", "Why is this row in the mock?", ["proposed", "required", "unanswered", "observed", "out of scope"]),
+          text("visibleRoles", "Visible to roles", "Which roles see this row? Leave blank for all roles; separate names with commas."),
+          text("visibleConditions", "Visible in conditions", "Which page conditions show this row? Leave blank for all conditions; separate names with commas."),
           text("trace", "Traces to", "Which requirement, decision, question, or scope record accounts for this row?")
         ], { idPrefix: "ROW", hidden: true }),
         rows("panels", "Panel records", "Canonical layout regions created by the mock composer and edited in the inspector.", [
@@ -70,12 +73,18 @@
           text("name", "Panel", "What is this panel called?"),
           textarea("description", "Description", "What should appear next to this panel reference so reviewers understand what this region represents?"),
           select("role", "Panel role", "What purpose does this region serve?", ["application navigation", "local or document navigation", "primary content", "details or inspector", "utility", "custom"]),
+          select("marker", "Backing", "Why is this panel in the mock?", ["proposed", "required", "unanswered", "observed", "out of scope"]),
+          text("visibleRoles", "Visible to roles", "Which roles see this panel? Leave blank for all roles; separate names with commas."),
+          text("visibleConditions", "Visible in conditions", "Which page conditions show this panel? Leave blank for all conditions; separate names with commas."),
           select("width", "Fallback width units", "If no percentage size is set yet, how many relative layout units does this panel occupy beside sibling panels?", ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"]),
           text("trace", "Traces to", "Which requirement, decision, question, or scope record accounts for this panel?")
         ], { idPrefix: "PNL", hidden: true }),
         rows("elements", "Component records", "Canonical content-section and component records created by the mock composer and edited in the inspector.", [
           text("id", "ID", "What stable ID addresses this content section or component?", { placeholder: "EL-01" }),
           select("kind", "Kind", "What structural kind is this?", ["content", "data", "navigation", "notice", "section"]),
+          select("marker", "Backing", "Why is this section or component in the mock?", ["proposed", "required", "unanswered", "observed", "out of scope"]),
+          text("visibleRoles", "Visible to roles", "Which roles see this section or component? Leave blank for all roles; separate names with commas."),
+          text("visibleConditions", "Visible in conditions", "Which page conditions show this section or component? Leave blank for all conditions; separate names with commas."),
           text("name", "Component or section", "What is this called?"),
           textarea("shows", "Shows or accepts", "What does it show or accept?"),
           select("dataRef", "Data definition", "Which B03 data definition supplies this component?", [], { dynamicOptions: "data", allowUnresolved: true, forKinds: ["data"] }),
@@ -97,6 +106,9 @@
         rows("controls", "Control records", "Canonical controls created by the mock composer and edited in the inspector.", [
           text("id", "ID", "What stable ID addresses this control?", { placeholder: "CTL-01" }),
           text("name", "Control", "What is the control called?"),
+          select("marker", "Backing", "Why is this action in the mock?", ["proposed", "required", "unanswered", "observed", "out of scope"]),
+          text("visibleRoles", "Visible to roles", "Which roles see this action? Leave blank for all roles; separate names with commas."),
+          text("visibleConditions", "Visible in conditions", "Which page conditions show this action? Leave blank for all conditions; separate names with commas."),
           select("effect", "Business effect", "What does this control do?", ["acts on data", "changes the page", "both"]),
           select("dataRef", "Data definition", "Which B03 data definition does this control read or change?", [], { dynamicOptions: "data", allowUnresolved: true }),
           select("serverData", "Server-only data", "Does it use information only the server knows?", ["yes", "no", "unknown"]),
