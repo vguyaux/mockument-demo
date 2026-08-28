@@ -3,15 +3,15 @@
 
   const BLOCKS = window.MOCKUMENT_BLOCKS || [];
   const STORAGE_KEY = "honest-mockument-template-state";
-  const SCHEMA_VERSION = 32;
-  const TEMPLATE_VERSION = "0.35.0";
+  const SCHEMA_VERSION = 34;
+  const TEMPLATE_VERSION = "0.37.0";
   const FIDELITY_NOTE = "Structure only, example data, nothing here is proof that the application works.";
   const THEME_KEY = "mockument-theme";
   const THEME_CYCLE = ["system", "dark", "light"];
   const BLOCK_SUMMARIES = {
     B01: "Page", B02: "Roles", B03: "Data", B04: "Mock", B05: "Conditions", B06: "Failures",
     B07: "Memory", B08: "Changes", B09: "Connections", B10: "Workflows", B11: "Copy",
-    B12: "Records", B13: "Contract"
+    B12: "Notes", B13: "Contract"
   };
   const DATA_SECTION_ID = "__all_data__";
   const BACKING_MARKERS = ["proposed", "required", "unanswered", "observed", "out of scope"];
@@ -803,6 +803,65 @@
       syncDataDictionary(next.app);
       if (!next.changeLog.some(entry => entry.version === "0.35.0")) next.changeLog.push({ version: "0.35.0", date: new Date().toISOString(), note: "Split Provider Registry column F into Provider Feed records and linked Source Routes to exact feeds where the workbook allowed it." });
     }
+    if (previousSchemaVersion < 33) {
+      Object.values(next.pages).forEach(page => {
+        const block = page.blocks && page.blocks.B07;
+        if (!block || !block.values) return;
+        const remembered = String(block.values.remembered || "").trim();
+        const duration = String(block.values.duration || "").trim();
+        const clearable = String(block.values.clearable || "").trim();
+        if (!Array.isArray(block.values.memories)) block.values.memories = [];
+        if (!block.values.memories.length && (remembered || duration || clearable)) {
+          block.values.memories.push({ _id: "MEM-01", _status: "todo", _accountable: block.accountable || "", _note: "Migrated from the former single B07 memory fields.", remembered, duration, clearable });
+        }
+        delete block.values.remembered;
+        delete block.values.duration;
+        delete block.values.clearable;
+        Object.values(block.humanReviews || {}).forEach(review => { review.confirmed = false; review.confirmedAt = ""; review.reviewedContentHash = ""; });
+        syncPage(page);
+      });
+      if (!next.changeLog.some(entry => entry.version === "0.36.0")) next.changeLog.push({ version: "0.36.0", date: new Date().toISOString(), note: "Changed B07 remembered-between-visits from one text box into separate memory records." });
+    }
+    if (previousSchemaVersion < 34) {
+      const workflowRowsByPage = {};
+      (next.app.workflows || []).forEach(workflow => {
+        (workflow.steps || []).forEach(step => {
+          const page = next.pages[step.pageId];
+          if (!page || page.isSettings || !page.blocks || !page.blocks.B10) return;
+          const incoming = (workflow.steps || []).flatMap(source => (source.transitions || []).filter(transition => transition.nextStepId === step.id).map(transition => `${source.id}${transition.condition ? ` · ${transition.condition}` : ""}`));
+          const outgoing = step.terminalOutcome ? "" : (step.transitions || []).map(transition => `${transition.triggerRef || "?"} → ${transition.nextStepId || "?"}${transition.condition ? ` (${transition.condition})` : ""}`).join("\n");
+          if (!workflowRowsByPage[page.id]) workflowRowsByPage[page.id] = [];
+          workflowRowsByPage[page.id].push({
+            _id: `WFP-${String(workflowRowsByPage[page.id].length + 1).padStart(2, "0")}`,
+            _status: "todo",
+            _accountable: page.blocks.B10.accountable || "",
+            _note: "Migrated from the former Settings application workflow graph.",
+            id: `WFP-${String(workflowRowsByPage[page.id].length + 1).padStart(2, "0")}`,
+            workflowId: workflow.id || "",
+            workflowName: workflow.name || "Migrated workflow",
+            stepId: step.id || "",
+            stepName: step.name || page.name || "Workflow step",
+            surfaceRef: step.surfaceId || "",
+            previous: incoming.join("\n") || (workflow.startStepId === step.id ? "Workflow start" : ""),
+            startsWhen: workflow.startStepId === step.id ? "Workflow start" : "",
+            next: outgoing,
+            terminalOutcome: step.terminalOutcome || "",
+            notes: step.note || workflow.note || ""
+          });
+        });
+      });
+      Object.values(next.pages).forEach(page => {
+        if (!page.blocks || !page.blocks.B10) return;
+        const block = page.blocks.B10;
+        if (!Array.isArray(block.values.workflows)) block.values.workflows = [];
+        if (!block.values.workflows.length && workflowRowsByPage[page.id]) block.values.workflows = workflowRowsByPage[page.id];
+        if (!block.values.workflowExpectation || block.values.workflowExpectation === "not yet answered") block.values.workflowExpectation = block.values.workflows.length ? "participates in workflow(s)" : "not yet answered";
+        Object.values(block.humanReviews || {}).forEach(review => { review.confirmed = false; review.confirmedAt = ""; review.reviewedContentHash = ""; });
+        syncPage(page);
+      });
+      next.app.workflows = [];
+      if (!next.changeLog.some(entry => entry.version === "0.37.0")) next.changeLog.push({ version: "0.37.0", date: new Date().toISOString(), note: "Moved workflow authoring out of Settings and back into B10 page-level workflow participation records." });
+    }
     return next;
   }
 
@@ -1039,7 +1098,12 @@
       const incomplete = (block.values.conditions || []).filter(row => !String(row.name || "").trim() || !String(row.when || "").trim() || !String(row.changes || "").trim()).length;
       if (incomplete) missing.push(`${incomplete} page condition${incomplete === 1 ? " is" : "s are"} missing its name, cause, or change from default`);
     }
-    if (definition.id === "B07" && !value("remembered")) missing.push("remembered behavior is missing");
+    if (definition.id === "B07") {
+      const memories = block.values.memories || [];
+      if (!memories.length) missing.push("no remembered item is recorded");
+      const incomplete = memories.filter(row => !String(row.remembered || "").trim() || !String(row.duration || "").trim() || !String(row.clearable || "").trim()).length;
+      if (incomplete) missing.push(`${incomplete} remembered item${incomplete === 1 ? " is" : "s are"} missing what, duration, or clearing behavior`);
+    }
     if (definition.id === "B08") {
       const expectation = value("updateExpectation");
       const updates = block.values.liveChanges || [];
@@ -1052,9 +1116,15 @@
       }
     }
     if (definition.id === "B10") {
-      const participating = (state.app.workflows || []).filter(workflow => (workflow.steps || []).some(step => step.pageId === page.id));
-      const issueCount = participating.reduce((count, workflow) => count + workflowIssues(workflow).length, 0);
-      if (issueCount) missing.push(`${issueCount} application workflow graph issue${issueCount === 1 ? " affects" : "s affect"} this page`);
+      const expectation = value("workflowExpectation");
+      const workflows = block.values.workflows || [];
+      if (!expectation || expectation === "not yet answered") missing.push("workflow participation is unanswered");
+      if (expectation === "no workflow participation" && workflows.length) missing.push("workflow records contradict no workflow participation");
+      if (expectation === "participates in workflow(s)") {
+        if (!workflows.length) missing.push("no workflow participation records are defined");
+        const incomplete = workflows.filter(row => !String(row.workflowName || "").trim() || !String(row.stepName || "").trim() || (!String(row.next || "").trim() && !String(row.terminalOutcome || "").trim())).length;
+        if (incomplete) missing.push(`${incomplete} workflow record${incomplete === 1 ? " is" : "s are"} missing workflow, step, next step, or terminal outcome`);
+      }
     }
     if (definition.id === "B12") {
       const records = block.values.records || [];
@@ -1066,7 +1136,7 @@
         if (row.type === "scope") return !row.scopeWhy;
         return true;
       }).length;
-      if (incomplete) missing.push(`${incomplete} honesty record${incomplete === 1 ? " is" : "s are"} missing required type-specific information`);
+      if (incomplete) missing.push(`${incomplete} note${incomplete === 1 ? " is" : "s are"} missing required type-specific information`);
     }
     if (definition.id === "B13") {
       if (!value("must")) missing.push("build instructions are missing");
@@ -1140,6 +1210,17 @@
         if (controls.some(row => !["done", "wip", "todo"].includes(row._status))) walkMissing.push("control work status");
       }
       if (definition.id === "B05" && conditions.some(row => !String(row.name || "").trim())) walkMissing.push("unnamed page condition");
+      if (definition.id === "B07") {
+        const memories = block.values.memories || [];
+        if (!memories.length) walkMissing.push("remembered item");
+        if (memories.some(row => !String(row.remembered || "").trim())) walkMissing.push("remembered item description");
+      }
+      if (definition.id === "B10") {
+        const expectation = block.values.workflowExpectation;
+        const workflowRows = block.values.workflows || [];
+        if (!expectation || expectation === "not yet answered") walkMissing.push("workflow participation answer");
+        if (expectation === "participates in workflow(s)" && !workflowRows.length) walkMissing.push("workflow record");
+      }
       if (definition.id === "B12" && questions.some(row => String(row.statement || "").trim() && !String(row.answerOwner || "").trim())) walkMissing.push("question owner");
       const walk = walkMissing.length
         ? { state: "missing", reason: `Missing ${walkMissing.join(", ")}.` }
@@ -1267,16 +1348,16 @@
 
   function renderRepeater(field, rows, blockId, disabled) {
     if (field.compact) return `<div class="repeater repeater--compact" data-inspect-field="${field.key}" data-block="${blockId}">
-      <div class="repeater-head"><div><strong>${esc(field.label)}</strong><span>${esc(field.question)}</span></div><button class="button button--small" data-add-row data-block="${blockId}" data-field="${field.key}" type="button" ${disabled ? "disabled" : ""}>+ Add data definition</button></div>
-      ${rows.length ? `<div class="compact-records">${rows.map((row, index) => `<div class="compact-record" data-inspect-row data-record-id="${esc(row.id || row._id)}" data-block="${blockId}" data-field="${field.key}" data-row="${index}"><span class="row-id">${esc(row.id || row._id)}</span><strong>${esc(field.key === "data" ? (row.name || "Unnamed data") : (row.statement || "Empty record"))}</strong><small>${esc(field.key === "data" ? `${row.cardinality || "?"} ${row.structure || "?"} · ${row.meaning || "Meaning not yet defined"}` : `${row.type || "?"}${row.affects ? ` · ${row.affects}` : ""}`)}</small><span class="status-chip status--${esc(row._status || "todo")}">${esc(statusLabel(row._status || "todo"))}</span><button class="remove-row" data-remove-row data-block="${blockId}" data-field="${field.key}" data-row="${index}" type="button" ${disabled ? "disabled" : ""}>Remove</button></div>`).join("")}</div>` : `<div class="repeater-empty">No data definitions yet. Add one here or create one while specifying a mock field.</div>`}
+      <div class="repeater-head"><div><strong>${esc(field.label)}</strong><span>${esc(field.question)}</span></div><button class="button button--small" data-add-row data-block="${blockId}" data-field="${field.key}" type="button" ${disabled ? "disabled" : ""}>${esc(field.addLabel || (field.key === "data" ? "+ Add data definition" : "+ Add note"))}</button></div>
+      ${rows.length ? `<div class="compact-records">${rows.map((row, index) => `<div class="compact-record" data-inspect-row data-record-id="${esc(row.id || row._id)}" data-block="${blockId}" data-field="${field.key}" data-row="${index}"><span class="row-id">${esc(row.id || row._id)}</span><strong>${esc(field.key === "data" ? (row.name || "Unnamed data") : (row.statement || "Empty note"))}</strong><small>${esc(field.key === "data" ? `${row.cardinality || "?"} ${row.structure || "?"} · ${row.meaning || "Meaning not yet defined"}` : `${row.type || "note"}${row.affects ? ` · ${row.affects}` : ""}`)}</small><span class="status-chip status--${esc(row._status || "todo")}">${esc(statusLabel(row._status || "todo"))}</span><button class="remove-row" data-remove-row data-block="${blockId}" data-field="${field.key}" data-row="${index}" type="button" ${disabled ? "disabled" : ""}>Remove</button></div>`).join("")}</div>` : `<div class="repeater-empty">${esc(field.emptyText || (field.key === "data" ? "No data definitions yet. Add one here or create one while specifying a mock field." : "No notes yet. Add one when something must remain visible."))}</div>`}
     </div>`;
     return `<div class="repeater" data-inspect-field="${field.key}" data-block="${blockId}">
       <div class="repeater-head"><div><strong>${esc(field.label)}</strong><span>${esc(field.question)}</span></div><button class="button button--small" data-add-row data-block="${blockId}" data-field="${field.key}" type="button" ${disabled ? "disabled" : ""}>+ Add</button></div>
       ${rows.length ? rows.map((row, index) => `<div class="repeater-row" data-inspect-row data-block="${blockId}" data-field="${field.key}" data-row="${index}">
         <div class="row-head"><span class="row-id">${esc(row._id || `${field.idPrefix}-${index + 1}`)}</span>${blockId === "B02" ? "" : statusSelect(row._status || "todo", `data-row-status data-block="${blockId}" data-field="${field.key}" data-row="${index}"`, disabled)}<button class="remove-row" data-remove-row data-block="${blockId}" data-field="${field.key}" data-row="${index}" type="button" ${disabled ? "disabled" : ""}>Remove</button></div>
         <div class="row-fields">${field.fields.map(column => `<label class="field ${column.type === "textarea" ? "field--wide" : ""}"><span>${esc(column.label)}</span>${fieldInput(column, row[column.key], blockId, disabled, index, field.key)}<small class="field-question">${esc(column.question)}</small></label>`).join("")}</div>
-        <div class="row-accountability ${blockId === "B02" ? "row-accountability--single" : ""}">
-          ${blockId === "B02" ? "" : `<label class="field"><span>Who must answer or accept</span><input data-row-meta="accountable" data-block="${blockId}" data-field="${field.key}" data-row="${index}" value="${esc(row._accountable || "")}" ${disabled ? "disabled" : ""}></label>`}
+        <div class="row-accountability ${["B02", "B05"].includes(blockId) ? "row-accountability--single" : ""}">
+          ${["B02", "B05"].includes(blockId) ? "" : `<label class="field"><span>Who must answer or accept</span><input data-row-meta="accountable" data-block="${blockId}" data-field="${field.key}" data-row="${index}" value="${esc(row._accountable || "")}" ${disabled ? "disabled" : ""}></label>`}
           <label class="field"><span>Status note</span><input data-row-meta="note" data-block="${blockId}" data-field="${field.key}" data-row="${index}" value="${esc(row._note || "")}" ${disabled ? "disabled" : ""}></label>
         </div>
       </div>`).join("") : `<div class="repeater-empty">Nothing recorded yet. An empty register is a visible question.</div>`}
@@ -1311,7 +1392,7 @@
         ...(page.blocks.B04.values.panels || []).map(candidate => candidate.name || candidate.id || candidate._id),
         ...(page.blocks.B04.values.elements || []).filter(candidate => candidate.kind === "section").map(candidate => candidate.name || candidate.id || candidate._id)
       ];
-      else if (row.navigationSource === "workflow steps") destinations = (state.app.workflows || []).flatMap(workflow => (workflow.steps || []).filter(step => step.pageId === page.id).map(step => `${workflow.name || workflow.id} · ${step.name || step.id}`));
+      else if (row.navigationSource === "workflow steps") destinations = page.blocks.B10.values.workflowExpectation === "participates in workflow(s)" ? (page.blocks.B10.values.workflows || []).map(workflow => `${workflow.workflowName || workflow.workflowId || "Workflow"} · ${workflow.stepName || workflow.stepId || "Step"}`) : [];
       else destinations = String(row.navigationTargets || "").split("\n").map(value => value.trim()).filter(Boolean);
       return `<nav class="mock-element mock-element--navigation status--${esc(row._status || "todo")}" data-mock-record="${esc(id)}">${label}<div class="mock-name">${esc(row.name || "Navigation")}</div><div class="mock-navigation-items">${destinations.length ? destinations.map(destination => `<span>${esc(destination)}</span>`).join("") : `<small>No destinations selected</small>`}</div></nav>`;
     }
@@ -1446,10 +1527,10 @@
 
   function buildContract(page) {
     const values = page.blocks.B13.values;
-    const workflows = (state.app.workflows || []).filter(workflow => (workflow.steps || []).some(step => step.pageId === page.id));
+    const workflows = page.blocks.B10.values.workflowExpectation === "participates in workflow(s)" ? (page.blocks.B10.values.workflows || []) : [];
     const activeDecisions = (page.blocks.B12.values.records || []).filter(record => record.type === "decision" && record.decisionLifecycle === "active");
     const decisionRecord = activeDecisions.length ? JSON.stringify(activeDecisions, null, 2) : "  · No active decisions are recorded for this page.";
-    const workflowRecord = workflows.length ? JSON.stringify(workflows, null, 2) : "  · This page does not participate in a canonical application workflow.";
+    const workflowRecord = workflows.length ? JSON.stringify(workflows, null, 2) : `  · ${page.blocks.B10.values.workflowExpectation === "no workflow participation" ? "This page explicitly has no workflow participation." : "Workflow participation is not answered for this page."}`;
     const allDefinitions = pageDataDefinitions(page);
     const allRoutes = dictionary().routes || [];
     const dataReferences = [...(page.blocks.B04.values.elements || []), ...(page.blocks.B04.values.controls || [])].filter(record => record.dataRef && record.dataRef !== "Not yet defined").map(record => {
@@ -1463,8 +1544,8 @@
 Source of truth: this page's machine-readable Mockument record. Stable IDs travel into tickets, commits and tests.
 The Mockument is structural, uses example data, and does not prove that integrations, rules, permissions, calculations, persistence, or performance work. Do not infer real behavior from the simulation.
 
-APPLICATION WORKFLOW REFERENCES
-Use these stable page, surface, action, step, and transition IDs. Do not replace them with inferred name matching.
+PAGE WORKFLOW REFERENCES
+Use these B10 stable workflow participation, page surface, action, step, and transition references. Do not replace them with inferred name matching.
 ${workflowRecord}
 
 APPLICATION DATA REFERENCES
@@ -1882,7 +1963,6 @@ Anything not covered above is unspecified. Add a question against this page rath
       <div><span class="eyebrow">Mockument-wide setting</span><h2 id="application-settings-title">Application identity</h2><p>The application name appears in the left column, mock navigation, exports, and before the page name in every browser tab.</p></div>
       <label class="field"><span>Application name</span><input data-app-setting="name" value="${esc(state.app.name || "Application Name")}" placeholder="Application Name"><small class="field-question">Example browser title: ${esc(state.app.name || "Application Name")} — Template</small></label>
       <div class="reviewer-settings"><div class="reviewer-settings-head"><div><strong>People working on this application</strong><span>These names appear in every human-review dropdown.</span></div><button class="button button--small" data-add-reviewer type="button">+ Add person</button></div><div class="reviewer-list">${(state.app.reviewers || []).length ? state.app.reviewers.map((name, index) => `<div class="reviewer-row"><input data-reviewer-index="${index}" value="${esc(name)}" placeholder="Person's name"><button class="remove-row" data-remove-reviewer="${index}" type="button">Remove</button></div>`).join("") : `<p class="repeater-empty">No people added yet.</p>`}</div></div>
-      ${renderWorkflowSettings()}
     </section>`;
   }
 
@@ -1977,7 +2057,7 @@ Anything not covered above is unspecified. Add a question against this page rath
       ${inputs}
       <label class="field"><span>Who must answer or accept</span><input data-record-meta="accountable" data-record-id="${esc(recordId)}" value="${esc(row._accountable || "")}" ${disabled ? "disabled" : ""}></label>
       <label class="field"><span>Status note</span><textarea data-record-meta="note" data-record-id="${esc(recordId)}" ${disabled ? "disabled" : ""}>${esc(row._note || "")}</textarea></label>
-    </div></div><div class="inspector-section"><h3>Related decisions, questions and scope</h3>${related.length ? `<div class="related-records">${related.map(record => `<div><span class="mock-marker mock-marker--${esc(markerClass(record.type === "scope" ? "out of scope" : record.type === "question" ? "unanswered" : record.type === "observation" ? "observed" : "required"))}">${esc(record.type)}</span><strong>${esc(record.id || record._id || "B12")}</strong><p>${esc(record.statement || "No statement recorded")}</p></div>`).join("")}</div>` : `<p>No B12 record references ${esc(recordId)} yet.</p>`}</div>`;
+    </div></div><div class="inspector-section"><h3>Related notes</h3>${related.length ? `<div class="related-records">${related.map(record => `<div><span class="mock-marker mock-marker--${esc(markerClass(record.type === "scope" ? "out of scope" : record.type === "question" ? "unanswered" : record.type === "observation" ? "observed" : "required"))}">${esc(record.type)}</span><strong>${esc(record.id || record._id || "B12")}</strong><p>${esc(record.statement || "No note recorded")}</p></div>`).join("")}</div>` : `<p>No B12 note references ${esc(recordId)} yet.</p>`}</div>`;
   }
 
   function renderInspector() {
@@ -2403,6 +2483,7 @@ Anything not covered above is unspecified. Add a question against this page rath
   document.addEventListener("mouseup", finishActiveResize);
 
   document.addEventListener("click", event => {
+    if (event.target.closest("select, input, textarea, label")) return;
     const openWorkflowStep = event.target.closest("[data-open-workflow-step]");
     if (openWorkflowStep) {
       const workflow = (state.app.workflows || []).find(candidate => candidate.id === openWorkflowStep.dataset.workflowId);

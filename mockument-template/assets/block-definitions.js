@@ -143,13 +143,13 @@
     },
     {
       id: "B07", group: "Specification", title: "Remembered between visits", answeredBy: "Business user",
-      definition: "State what the app remembers about this person between visits, for how long, and whether the person can clear it.",
-      why: "Remembered choices feel like facts about the world, so people rarely volunteer them unless asked directly.",
-      fields: [
-        textarea("remembered", "What is remembered", "What should the app remember about you between visits?"),
-        text("duration", "For how long", "How long should it remember this?"),
-        textarea("clearable", "Clearing it", "Can the person clear or reset what is remembered?")
-      ]
+      definition: "Record each remembered item separately: what the app remembers about this person between visits, for how long, and whether the person can clear it.",
+      why: "Remembered choices feel like facts about the world. Each memory needs its own record so duration, clearing behavior and ownership do not get hidden inside one paragraph.",
+      fields: [rows("memories", "Memory records", "What separate things should the app remember between visits?", [
+        textarea("remembered", "What is remembered", "What specific choice, state, filter, draft, identity, preference or fact is remembered?", { required: true }),
+        text("duration", "For how long", "How long should this one remembered item persist?", { required: true }),
+        textarea("clearable", "Clearing it", "Can the person clear or reset this one remembered item, and how?", { required: true })
+      ], { idPrefix: "MEM" })]
     },
     {
       id: "B08", group: "Specification", title: "Updates while the page is open", answeredBy: "Business user",
@@ -183,10 +183,24 @@
     },
     {
       id: "B10", group: "Specification", title: "Workflow participation", answeredBy: "Business user",
-      definition: "Show the canonical application workflows that reference this page, its rows, panels, sections, tabs, wizard steps, or actions.",
-      why: "Workflows cross page boundaries and therefore live at application level. B10 is generated from stable references rather than asking each page to repeat names and positions as text.",
-      custom: "workflowParticipation",
-      fields: []
+      definition: "Record the workflows this page participates in, including the page surface, step, trigger, previous step, next step, and terminal outcome where applicable.",
+      why: "Workflow references must stay beside the page they affect so reviewers can see whether the mock, controls and transitions agree. Empty participation is explicit rather than assumed.",
+      fields: [
+        select("workflowExpectation", "Workflow participation", "Does this page participate in a workflow?", ["not yet answered", "no workflow participation", "participates in workflow(s)"], { required: true }),
+        rows("workflows", "Workflow records", "Which workflows reference this page, row, panel, section, tab, wizard step, control or business event?", [
+          text("id", "Participation ID", "What stable ID addresses this workflow participation record?", { placeholder: "WFP-01" }),
+          text("workflowId", "Workflow ID", "What stable ID addresses the workflow itself?", { placeholder: "WF-01" }),
+          text("workflowName", "Workflow", "What is the workflow called?", { required: true }),
+          text("stepId", "Step ID", "What stable ID addresses this step in the workflow?", { placeholder: "STEP-01" }),
+          text("stepName", "Step", "What is this page's step called?", { required: true }),
+          text("surfaceRef", "Surface or action reference", "Which B04 row, panel, section, tab, wizard step or control does this workflow target? Leave blank for the page root."),
+          textarea("previous", "Previous", "Where can the workflow arrive from before this step?"),
+          textarea("startsWhen", "Starts or triggers when", "What user action or business event starts this step or moves out of it?"),
+          textarea("next", "Next", "Where can the workflow go after this step, including branch conditions?"),
+          text("terminalOutcome", "Terminal outcome", "If this ends the workflow, what outcome is reached?"),
+          textarea("notes", "Notes", "What should reviewers know about this workflow participation?")
+        ], { idPrefix: "WFP", showWhen: { key: "workflowExpectation", value: "participates in workflow(s)" } })
+      ]
     },
     {
       id: "B11", group: "Honesty", title: "Copy register", answeredBy: "Business user",
@@ -201,12 +215,12 @@
       ], { idPrefix: "COPY" })]
     },
     {
-      id: "B12", group: "Honesty", title: "Decisions, observations, questions and scope", answeredBy: "The person responsible for the selected record type",
-      definition: "Keep one typed honesty register. Every entry begins by declaring whether it is a decision, observation, question, or scope exclusion, then asks only the fields appropriate to that type.",
-      why: "One addressable register keeps discoveries and boundaries together without blurring their authority: decisions are accepted, observations are learned, questions remain unresolved, and scope exclusions are deliberate.",
-      fields: [rows("records", "Honesty register", "What must remain visible about this page?", [
-        select("type", "Type", "What kind of record is this?", ["decision", "observation", "question", "scope"]),
-        textarea("statement", "Record", "What was decided, observed, asked, or placed outside scope?"),
+      id: "B12", group: "Notes", title: "Notes", answeredBy: "The person responsible for the selected note",
+      definition: "Keep page notes visible and typed. Every note begins by declaring whether it is a decision, observation, question, or scope exclusion, then asks only the fields appropriate to that note type.",
+      why: "A page needs one visible place for notes that should not disappear into chat, memory, or private assumptions. Decisions, observations, questions and scope notes keep their authority clear while remaining easy to find.",
+      fields: [rows("records", "Notes", "What notes are related to this page?", [
+        select("type", "Note type", "What kind of note is this?", ["decision", "observation", "question", "scope"]),
+        textarea("statement", "Note", "What was decided, observed, asked, or placed outside scope?"),
         text("affects", "Affected records", "Which stable page, data, component, action, condition, workflow, or wording IDs does this affect?"),
         select("decisionScope", "Decision scope", "How broadly does this accepted decision apply?", ["this page", "application-wide", "data or source", "workflow"], { forTypes: ["decision"] }),
         text("decidedBy", "Decided by", "Who had authority to make or accept this decision?", { forTypes: ["decision"] }),
@@ -222,7 +236,7 @@
         text("answerOwner", "Who must answer", "Who owes the answer?", { forTypes: ["question"] }),
         text("neededBy", "Needed by", "When is the answer needed?", { inputType: "date", forTypes: ["question"] }),
         textarea("scopeWhy", "Why outside scope", "Why is this deliberately not answered here?", { forTypes: ["scope"] })
-      ], { idPrefix: "HON", compact: true })]
+      ], { idPrefix: "NOTE", compact: true, addLabel: "+ Add note", emptyText: "No notes yet. Add a note when a decision, observation, question or scope boundary must remain visible." })]
     },
     {
       id: "B13", group: "Honesty", title: "Build contract and machine-readable record", answeredBy: "Page owner and implementing agent",

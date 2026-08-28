@@ -51,17 +51,19 @@ B04 begins as a blank layout canvas; it no longer assumes a fixed application me
 - Click any row, panel, section or component and edit its canonical record in the permanent right inspector.
 - Open a full-browser Preview that shows only the mock canvas filling the tab; the small arrow in the top-right returns to B04.
 
-B04 owns canonical row, panel, component and action records without rendering repeated registers. A data-bound component derives valid presentation choices from its B03 definition: one value, one record, or a many-item list/table presentation. Lists require an item definition and tables require named columns. Its grouped **Review view** offers Clean, Honesty, IDs, and Honesty + IDs modes so status evidence, backing markers and stable references remain independently inspectable without permanent visual clutter. The inspector also lists B12 records that reference the selected mock item.
+B04 owns canonical row, panel, component and action records without rendering repeated registers. A data-bound component derives valid presentation choices from its B03 definition: one value, one record, or a many-item list/table presentation. Lists require an item definition and tables require named columns. Its grouped **Review view** offers Clean, Honesty, IDs, and Honesty + IDs modes so status evidence, backing markers and stable references remain independently inspectable without permanent visual clutter. The inspector also lists B12 notes that reference the selected mock item.
 
 B05 records only material page-level departures from the automatic default condition. Sorting, filtering, column movement, selection and expansion remain B04 component behavior. Selecting a B05 condition annotates the mock with its changed message, affected components, unavailable actions and next step.
 
+B07 records remembered-between-visits behavior as separate memory records. Each remembered item gets its own what/duration/clearing behavior instead of being buried in one text box.
+
 B08 explicitly records whether nothing changes without a person acting or refreshing, or whether meaningful information may change while the page remains open. Only the latter reveals update records. B04 owns immediate interaction results; B08 owns externally caused updates, notification timing and stale-work handling.
 
-B12 is one compact honesty register. Every record begins with a Decision, Observation, Question or Scope dropdown and reveals only the fields appropriate to that authority. Active decisions are included in B13’s build contract only when their applied canonical references are recorded.
+B12 is **Notes**. Every note begins with a Decision, Observation, Question or Scope dropdown and reveals only the fields appropriate to that note type. Active decision notes are included in B13’s build contract only when their applied canonical references are recorded.
 
 Settings includes a generated Mockument overview: all drawn and not-drawn pages, page readiness, blocking questions, page-level data references and shared component references.
 
-Application workflows are canonical graphs managed in Settings. Steps select real pages and optional B04 rows, panels, sections, tabs or wizard steps by stable ID. Transitions select real B04 actions or an explicit business event, support branch conditions and point to another stable step or a terminal outcome. B10 is a generated local participation view; graph validation catches missing, unreachable and unconnected references.
+Workflow participation is authored in B10 on each page. Each workflow record captures the workflow ID/name, step ID/name, targeted B04 surface or action, previous step, trigger, next step and terminal outcome. Settings no longer contains a workflow editor.
 
 ## Data and persistence
 

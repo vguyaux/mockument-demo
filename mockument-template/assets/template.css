@@ -2,36 +2,38 @@ html { scrollbar-gutter: stable; }
 
 :root {
   color-scheme: dark;
-  --bg: #0B0F14;
-  --panel: #111820;
-  --panel-2: #16202B;
-  --panel-3: #1C2836;
-  --line: #223142;
-  --line-strong: #2E4257;
-  --text: #F1F5F9;
-  --text-2: #94A3B8;
-  --text-3: #64748B;
-  --accent: #6366F1;
-  --accent-2: #22D3EE;
-  --accent-ink: #FFFFFF;
+  --near-black: #111111;
+  --near-white: #F3F3F3;
+  --bg: #111111;
+  --panel: #181818;
+  --panel-2: #202020;
+  --panel-3: #2A2A2A;
+  --line: #363636;
+  --line-strong: #4A4A4A;
+  --text: #F3F3F3;
+  --text-2: #C8C8C8;
+  --text-3: #8C8C8C;
+  --accent: #9A9A9A;
+  --accent-2: #B8B8B8;
+  --accent-ink: #F3F3F3;
   --required: #10B981;
   --proposed: #F59E0B;
   --unanswered: #F43F5E;
-  --scope: #64748B;
-  --observed: #A855F7;
-  --input: #0B0F14;
-  --code: #0B0F14;
-  --code-text: #94A3B8;
-  --mock-shell: #111820;
-  --mock-stage: #0B0F14;
-  --mock-surface: #111820;
-  --mock-surface-alt: #16202B;
-  --mock-text: #F1F5F9;
-  --mock-muted: #94A3B8;
-  --mock-border: #2E4257;
-  --mock-control: #1C2836;
-  --mock-placeholder: #223142;
-  --mock-notice: color-mix(in srgb, #F59E0B 12%, #111820);
+  --scope: #747474;
+  --observed: #9A9A9A;
+  --input: #141414;
+  --code: #141414;
+  --code-text: #C8C8C8;
+  --mock-shell: #181818;
+  --mock-stage: #111111;
+  --mock-surface: #181818;
+  --mock-surface-alt: #202020;
+  --mock-text: #F3F3F3;
+  --mock-muted: #C8C8C8;
+  --mock-border: #4A4A4A;
+  --mock-control: #292929;
+  --mock-placeholder: #343434;
+  --mock-notice: color-mix(in srgb, var(--text-2) 8%, var(--mock-surface));
   --radius: 10px;
   --menu-width: 248px;
   --inspector-width: 350px;
@@ -40,36 +42,38 @@ html { scrollbar-gutter: stable; }
 
 html[data-theme="light"] {
   color-scheme: light;
-  --bg: #F6F8FB;
-  --panel: #FFFFFF;
-  --panel-2: #F1F5F9;
-  --panel-3: #E8EEF6;
-  --line: #E2E8F0;
-  --line-strong: #CBD5E1;
-  --text: #0F172A;
-  --text-2: #475569;
-  --text-3: #7C8899;
-  --accent: #4F46E5;
-  --accent-2: #0891B2;
-  --accent-ink: #FFFFFF;
+  --near-black: #151515;
+  --near-white: #F5F5F5;
+  --bg: #F0F0F0;
+  --panel: #E8E8E8;
+  --panel-2: #DDDDDD;
+  --panel-3: #D2D2D2;
+  --line: #C4C4C4;
+  --line-strong: #A8A8A8;
+  --text: #151515;
+  --text-2: #404040;
+  --text-3: #767676;
+  --accent: #5E5E5E;
+  --accent-2: #777777;
+  --accent-ink: #F5F5F5;
   --required: #059669;
   --proposed: #B45309;
   --unanswered: #E11D48;
-  --scope: #64748B;
-  --observed: #7E22CE;
-  --input: #FFFFFF;
-  --code: #0F172A;
-  --code-text: #CBD5E1;
-  --mock-shell: #F1F5F9;
-  --mock-stage: #F6F8FB;
-  --mock-surface: #FFFFFF;
-  --mock-surface-alt: #F1F5F9;
-  --mock-text: #0F172A;
-  --mock-muted: #475569;
-  --mock-border: #CBD5E1;
-  --mock-control: #E8EEF6;
-  --mock-placeholder: #E2E8F0;
-  --mock-notice: color-mix(in srgb, #B45309 10%, #FFFFFF);
+  --scope: #777777;
+  --observed: #5E5E5E;
+  --input: #F5F5F5;
+  --code: #151515;
+  --code-text: #D8D8D8;
+  --mock-shell: #DDDDDD;
+  --mock-stage: #F0F0F0;
+  --mock-surface: #E8E8E8;
+  --mock-surface-alt: #DDDDDD;
+  --mock-text: #151515;
+  --mock-muted: #404040;
+  --mock-border: #A8A8A8;
+  --mock-control: #D2D2D2;
+  --mock-placeholder: #C4C4C4;
+  --mock-notice: color-mix(in srgb, var(--text-3) 8%, var(--mock-surface));
 }
 
 * { box-sizing: border-box; }
@@ -110,7 +114,7 @@ a { color: inherit; }
 .button:hover, .icon-button:hover { border-color: var(--text-3); background: var(--panel-3); }
 .button--primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); font-weight: 700; }
 .button--small { padding: 5px 8px; font-size: 12px; }
-.button--danger { color: var(--unanswered); }
+.button--danger { color: var(--text-2); }
 
 .app-menu { padding: 4px 10px 22px; flex: 1; }
 .menu-section-title { padding: 8px; color: var(--text-3); text-transform: uppercase; letter-spacing: .1em; font-weight: 700; font-size: 10px; }
@@ -218,7 +222,7 @@ a { color: inherit; }
 .workflow-card-head input, .workflow-step-head input { flex: 1; }
 .workflow-issues, .workflow-valid { display: grid; gap: 3px; padding: 8px 10px; border-radius: 6px; font-size: 10px; }
 .workflow-issues { background: var(--panel-3); color: var(--proposed); }
-.workflow-valid { background: var(--panel-3); color: var(--required); }
+.workflow-valid { background: var(--panel-3); color: var(--text-2); }
 .workflow-steps, .workflow-transitions { display: grid; gap: 8px; }
 .workflow-step { border-left: 3px solid var(--accent); background: var(--panel-2); padding: 10px; display: grid; gap: 10px; }
 .workflow-step-fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
@@ -283,7 +287,7 @@ h2 { margin: 0; }
 .human-review-date span { color: var(--text-3); font-size: 8px; text-transform: uppercase; letter-spacing: .06em; }
 .human-review-date strong { color: var(--text-2); font-size: 10px; font-weight: 600; }
 .review-toggle { width: 31px; height: 17px; flex: 0 0 auto; border: 0; border-radius: 999px; background: var(--line-strong); padding: 2px; cursor: pointer; transition: background .15s ease; }
-.review-toggle i { display: block; width: 13px; height: 13px; border-radius: 50%; background: #fff; transition: transform .15s ease; }
+.review-toggle i { display: block; width: 13px; height: 13px; border-radius: 50%; background: var(--near-white); transition: transform .15s ease; }
 .review-toggle.is-on { background: var(--required); }
 .review-toggle.is-on i { transform: translateX(14px); }
 .review-toggle:disabled { cursor: default; opacity: .38; }
@@ -320,7 +324,7 @@ input:focus, textarea:focus, select:focus { border-color: var(--accent); box-sha
 .row-accountability { margin-top: 10px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .row-accountability--single { grid-template-columns: 1fr; }
 .remove-row { border: 0; background: transparent; color: var(--text-3); cursor: pointer; }
-.remove-row:hover { color: var(--unanswered); }
+.remove-row:hover { color: var(--text); }
 
 .status-chip { display: inline-flex; align-items: center; gap: 6px; font-size: 10px; font-weight: 700; }
 .status-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--scope); }
@@ -332,7 +336,7 @@ input:focus, textarea:focus, select:focus { border-color: var(--accent); box-sha
 .mock-controls { display: flex; flex-wrap: wrap; gap: 8px; padding: 10px; border-bottom: 1px solid var(--line); background: var(--panel-2); }
 .segment { display: flex; gap: 2px; padding: 2px; border: 1px solid var(--line); border-radius: 7px; }
 .segment button { border: 0; background: transparent; padding: 5px 8px; border-radius: 5px; font-size: 10px; color: var(--text-3); cursor: pointer; }
-.segment button.is-on { background: var(--accent); color: #FFFFFF; }
+.segment button.is-on { background: var(--accent); color: var(--accent-ink); }
 .review-view { display: flex; align-items: center; gap: 6px; margin-left: auto; }
 .review-view > span { color: var(--text-3); font-size: 9px; text-transform: uppercase; letter-spacing: .06em; }
 .mock-stage { padding: 20px; min-height: 290px; display: grid; place-items: center; background: var(--mock-stage); }
@@ -371,10 +375,10 @@ input:focus, textarea:focus, select:focus { border-color: var(--accent); box-sha
 .mock-element:hover, .mock-element.is-selected { outline: 2px solid var(--accent); outline-offset: 1px; }
 .mock-label { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; text-transform: uppercase; letter-spacing: .08em; font-size: 8px; color: var(--mock-muted); }
 .mock-marker { display: inline-flex; width: max-content; border-radius: 999px; padding: 2px 5px; font: 700 8px ui-monospace, monospace; text-transform: uppercase; letter-spacing: .04em; background: var(--panel-3); color: var(--text-2); }
-.mock-marker--required { background: color-mix(in srgb, var(--required) 22%, transparent); color: var(--required); }
-.mock-marker--proposed { background: color-mix(in srgb, var(--proposed) 22%, transparent); color: var(--proposed); }
-.mock-marker--unanswered { background: color-mix(in srgb, var(--unanswered) 22%, transparent); color: var(--unanswered); }
-.mock-marker--observed { background: color-mix(in srgb, var(--accent) 22%, transparent); color: var(--accent); }
+.mock-marker--required { background: var(--panel-3); color: var(--text); }
+.mock-marker--proposed { background: var(--panel-3); color: var(--text-2); }
+.mock-marker--unanswered { background: var(--panel-3); color: var(--text-2); }
+.mock-marker--observed { background: var(--panel-3); color: var(--text-2); }
 .mock-marker--out-of-scope { background: color-mix(in srgb, var(--text-3) 22%, transparent); color: var(--text-3); }
 .mock-name { font-weight: 700; margin-top: 3px; }
 .mock-actions { display: flex; flex-wrap: wrap; gap: 7px; }
@@ -471,9 +475,9 @@ input:focus, textarea:focus, select:focus { border-color: var(--accent); box-sha
 .inspector-section p { color: var(--text-2); margin: 0; font-size: 12px; }
 .readiness-details { display: grid; gap: 7px; }
 .readiness-detail { display: grid; grid-template-columns: 22px 1fr; gap: 8px; align-items: start; padding: 8px; border: 1px solid var(--line); border-radius: 7px; background: var(--panel-2); }
-.readiness-detail > b { width: 22px; height: 22px; border-radius: 5px; display: grid; place-items: center; color: #fff; background: var(--line-strong); font-size: 10px; }
+.readiness-detail > b { width: 22px; height: 22px; border-radius: 5px; display: grid; place-items: center; color: var(--near-white); background: var(--line-strong); font-size: 10px; }
 .readiness-detail--ready > b { background: var(--required); }
-.readiness-detail--warning > b { background: var(--proposed); color: #241800; }
+.readiness-detail--warning > b { background: var(--proposed); color: var(--near-black); }
 .readiness-detail--missing > b { background: var(--unanswered); }
 .readiness-detail--na > b { background: var(--line-strong); }
 .readiness-detail span, .readiness-detail strong, .readiness-detail small { display: block; }
@@ -492,14 +496,14 @@ input:focus, textarea:focus, select:focus { border-color: var(--accent); box-sha
 .unbuilt p { color: var(--text-2); }
 
 .dialog { width: min(520px, calc(100vw - 28px)); border: 1px solid var(--line-strong); border-radius: 12px; background: var(--panel); color: var(--text); padding: 0; }
-.dialog::backdrop { background: rgba(0,0,0,.72); backdrop-filter: blur(3px); }
+.dialog::backdrop { background: color-mix(in srgb, var(--near-black) 72%, transparent); backdrop-filter: blur(3px); }
 .dialog form { padding: 20px; display: grid; gap: 14px; }
 .dialog-head { display: flex; justify-content: space-between; gap: 16px; }
 .dialog-head h2 { margin-top: 3px; }
 .dialog-close { border: 0; background: transparent; font-size: 24px; cursor: pointer; color: var(--text-3); }
 .dialog label { display: grid; gap: 6px; color: var(--text-2); font-size: 11px; font-weight: 600; }
 .dialog-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 4px; }
-.toast { position: fixed; left: 50%; bottom: 24px; transform: translate(-50%, 20px); opacity: 0; pointer-events: none; background: var(--text); color: #121417; padding: 8px 12px; border-radius: 7px; font-weight: 700; font-size: 11px; z-index: 20; transition: .18s ease; }
+.toast { position: fixed; left: 50%; bottom: 24px; transform: translate(-50%, 20px); opacity: 0; pointer-events: none; background: var(--text); color: var(--near-black); padding: 8px 12px; border-radius: 7px; font-weight: 700; font-size: 11px; z-index: 20; transition: .18s ease; }
 .toast.is-on { opacity: 1; transform: translate(-50%, 0); }
 
 @media (max-width: 1380px) {
