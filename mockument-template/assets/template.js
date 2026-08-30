@@ -1988,7 +1988,7 @@ Anything not covered above is unspecified. Add a question against this page rath
       <p class="document-lede">${templateMode ? "Interactive preview: try every field, dropdown, status and mock-composer action. Changes are temporary, are never copied into a new page, and reset when the browser reloads." : esc(page.blocks.B01.values.activity || "This page has no business activity yet.")}</p>
       <div class="meta-strip"><span class="meta-chip">${esc(route)}</span><span class="meta-chip">Template v${esc(page.templateVersion)}</span><span class="meta-chip">Schema v${esc(page.schemaVersion)}</span></div>
       <div class="document-toolbar">
-        ${templateMode ? `<button class="button button--primary" data-open-new-page type="button">Copy Template</button><button class="button" data-reset-template-preview type="button">Reset preview</button>` : `<button class="button" data-export-page type="button">Export this page</button>${page.isSettings ? "" : `<button class="button button--danger" data-delete-page="${esc(page.id)}" type="button">Delete page</button>`}`}
+        ${templateMode ? `<button class="button button--primary" data-open-new-page type="button">Copy Template</button><button class="button" data-reset-template-preview type="button">Reset preview</button>` : `<button class="button" data-export-page type="button">Export PDF</button>${page.isSettings ? "" : `<button class="button button--danger" data-delete-page="${esc(page.id)}" type="button">Delete page</button>`}`}
         <button class="button" data-toggle-block-view type="button">${showAllBlocks ? "Focus active block" : "View all blocks"}</button>
       </div>
     </header>${renderReadiness(page)}` : "";
@@ -2327,14 +2327,40 @@ Anything not covered above is unspecified. Add a question against this page rath
     showToast(`${name} created from Template`);
   }
 
-  function exportJson(data, filename) {
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = filename;
-    link.click();
-    URL.revokeObjectURL(url);
+  function renderPdfExportDocument() {
+    const pages = state.pageOrder.map(id => state.pages[id]).filter(page => page && !page.isSettings);
+    const pageDocument = page => {
+      if (!page.built) return `<article class="pdf-page-document"><header class="document-head"><span class="eyebrow">Application page · not drawn</span><h1>${esc(page.name)}</h1><p class="document-lede">This page belongs in the proposed system but does not have a Mockument yet.</p></header></article>`;
+      const title = page.blocks.B01.values.name || page.name;
+      const route = page.blocks.B01.values.route || page.route;
+      const aiStatuses = calculateBlockReadiness(page);
+      const humanStatuses = calculateHumanReadiness(page, aiStatuses);
+      return `<article class="pdf-page-document"><header class="document-head"><span class="eyebrow">Mockument page</span><h1>${esc(title)}</h1><p class="document-lede">${esc(page.blocks.B01.values.activity || "This page has no business activity yet.")}</p><div class="meta-strip"><span class="meta-chip">${esc(route)}</span><span class="meta-chip">Template v${esc(page.templateVersion)}</span><span class="meta-chip">Schema v${esc(page.schemaVersion)}</span></div></header>${renderReadiness(page)}<div class="block-list">${BLOCKS.map(definition => renderBlock(definition, page.blocks[definition.id], page, false, aiStatuses, humanStatuses)).join("")}</div></article>`;
+    };
+    return `<div class="pdf-export-document"><header class="document-head pdf-export-title"><span class="eyebrow">PDF export</span><h1>${esc(state.app.name || "Application Name")} Mockument</h1><p class="document-lede">All documentation blocks for the current Mockument. Use the browser print dialog to save this as a PDF.</p><div class="meta-strip"><span class="meta-chip">${esc(pages.length)} application page${pages.length === 1 ? "" : "s"}</span><span class="meta-chip">Exported ${esc(new Date().toLocaleString())}</span></div></header>${renderApplicationSettings()}${pages.map(pageDocument).join("") || `<p class="repeater-empty">No application pages yet.</p>`}</div>`;
+  }
+
+  function exportPdf() {
+    const previous = { activePageId: state.activePageId, showAllBlocks, previewMode, selection: { ...selection } };
+    previewMode = false;
+    showAllBlocks = true;
+    document.body.classList.add("is-exporting-pdf");
+    document.title = `${state.app.name || "Application Name"} — Mockument PDF`;
+    $("#document").innerHTML = renderPdfExportDocument();
+    $("#inspector").innerHTML = "";
+    const restore = () => {
+      document.body.classList.remove("is-exporting-pdf");
+      state.activePageId = previous.activePageId;
+      showAllBlocks = previous.showAllBlocks;
+      previewMode = previous.previewMode;
+      selection = previous.selection;
+      window.removeEventListener("afterprint", restore);
+      render();
+    };
+    window.addEventListener("afterprint", restore);
+    setTimeout(() => {
+      window.print();
+    }, 50);
   }
 
   function addRowRegion(page, parentId = "canvas") {
@@ -2517,8 +2543,7 @@ Anything not covered above is unspecified. Add a question against this page rath
     if (event.target.closest("#template-link")) { previewMode = false; state.activePageId = "template"; dataDictionaryAnchor = ""; selectBlock("B01"); saveState(); render(); return; }
     if (event.target.closest("#new-page-button, [data-open-new-page]")) { openNewPageDialog(); return; }
     if (event.target.closest("#planned-page-button, [data-add-planned-page]")) { addPlannedPage(); return; }
-    if (event.target.closest("#export-button")) { exportJson(state, `${slugify(state.app.name)}-mockument.json`); return; }
-    if (event.target.closest("#import-button")) { document.getElementById("import-file")?.click(); return; }
+    if (event.target.closest("#export-button")) { exportPdf(); return; }
     if (event.target.closest("#theme-button")) { cycleTheme(); return; }
     if (event.target.closest("[data-open-preview]")) { previewMode = true; selectBlock("B04"); render(); return; }
     if (event.target.closest("[data-exit-preview]")) { previewMode = false; selectBlock("B04"); render(); revealActiveBlock(); return; }
@@ -2618,7 +2643,7 @@ Anything not covered above is unspecified. Add a question against this page rath
     if (field) { selection = { kind: "field", blockId: field.dataset.block, fieldKey: field.dataset.inspectField }; updateBlockHash(); renderInspector(); return; }
     const block = event.target.closest("[data-inspect-block]");
     if (block) { selection = { kind: "block", blockId: block.dataset.inspectBlock }; updateBlockHash(); renderInspector(); $$(".block").forEach(node => node.classList.toggle("is-selected", node.id === selection.blockId)); $$(".block-jump button").forEach(node => node.classList.toggle("is-active", node.dataset.jumpBlock === selection.blockId)); return; }
-    if (event.target.closest("[data-export-page]")) { const page = activePage(); exportJson(page, `${slugify(page.name)}-mockument.json`); return; }
+    if (event.target.closest("[data-export-page]")) { exportPdf(); return; }
     const deleteButton = event.target.closest("[data-delete-page]");
     if (deleteButton && confirm("Delete this page and its local Mockument data?")) {
       const id = deleteButton.dataset.deletePage;
@@ -2716,27 +2741,6 @@ Anything not covered above is unspecified. Add a question against this page rath
     createFromTemplate(String(data.get("name")).trim(), String(data.get("route")).trim(), String(data.get("parentId")).trim());
     $("#new-page-dialog").close();
   });
-
-  const importFileInput = document.getElementById("import-file");
-  if (importFileInput) {
-    importFileInput.addEventListener("change", async event => {
-      const file = event.target.files && event.target.files[0];
-      if (!file) return;
-      try {
-        const imported = JSON.parse(await file.text());
-        if (!imported || typeof imported !== "object" || !imported.app || !Array.isArray(imported.pages)) throw new Error("This does not look like a Mockument export.");
-        if (!confirm(`Import ${imported.app?.name || "Mockument"}? This replaces the current browser-saved Mockument on this device.`)) return;
-        state = migrateState(imported);
-        saveState(state);
-        render();
-        showToast("Imported Mockument JSON");
-      } catch (error) {
-        showToast(`Import failed: ${error.message || error}`);
-      } finally {
-        importFileInput.value = "";
-      }
-    });
-  }
 
   window.addEventListener("hashchange", () => {
     const blockId = String(window.location.hash || "").replace(/^#/, "");

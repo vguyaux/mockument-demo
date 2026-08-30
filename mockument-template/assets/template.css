@@ -505,6 +505,58 @@ input:focus, textarea:focus, select:focus { border-color: var(--accent); box-sha
 .dialog-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 4px; }
 .toast { position: fixed; left: 50%; bottom: 24px; transform: translate(-50%, 20px); opacity: 0; pointer-events: none; background: var(--text); color: var(--near-black); padding: 8px 12px; border-radius: 7px; font-weight: 700; font-size: 11px; z-index: 20; transition: .18s ease; }
 .toast.is-on { opacity: 1; transform: translate(-50%, 0); }
+.pdf-export-title { border-bottom: 2px solid var(--line-strong); padding-bottom: 22px; }
+.pdf-page-document { max-width: 1080px; margin: 0 auto 42px; }
+
+@media print {
+  @page { margin: .55in; }
+  :root, html[data-theme="light"], html[data-theme="dark"] {
+    color-scheme: light;
+    --bg: #ffffff;
+    --panel: #ffffff;
+    --panel-2: #f7f7f7;
+    --panel-3: #eeeeee;
+    --line: #d0d0d0;
+    --line-strong: #888888;
+    --text: #111111;
+    --text-2: #333333;
+    --text-3: #666666;
+    --accent: #444444;
+    --accent-2: #555555;
+    --accent-ink: #ffffff;
+    --input: #ffffff;
+    --code: #f7f7f7;
+    --code-text: #111111;
+    --mock-shell: #ffffff;
+    --mock-stage: #f7f7f7;
+    --mock-surface: #ffffff;
+    --mock-surface-alt: #f3f3f3;
+    --mock-text: #111111;
+    --mock-muted: #333333;
+    --mock-border: #999999;
+    --mock-control: #eeeeee;
+    --mock-placeholder: #dddddd;
+  }
+  html, body { background: #ffffff !important; color: #111111 !important; font-size: 10pt; line-height: 1.35; }
+  .app-shell { display: block; min-height: auto; }
+  .menu-column, .inspector-column, .block-status-nav, .document-toolbar, .block-pager, .composer-head-actions, .composer-add-layout, .composer-add, .composer-move, .remove-row, .mock-controls, .mock-resize-handle, .toast { display: none !important; }
+  .document-column { --document-top-pad: 0; --document-top-offset: 0; padding: 0; }
+  .document-head, .block, .application-settings, .app-overview, .data-section, .data-method-card, .pdf-page-document { max-width: none; }
+  .pdf-export-title { break-after: page; }
+  .pdf-page-document { break-after: page; margin: 0; }
+  .pdf-page-document:last-child { break-after: auto; }
+  .document-head, .readiness, .block, .application-settings, .app-overview { break-inside: avoid; box-shadow: none !important; }
+  .block { margin: 0 0 18px; border-color: #cfcfcf; background: #ffffff; }
+  .block-head { position: static; top: auto; background: #eeeeee; color: #111111; }
+  .block-form, .human-review-footer, .repeater-row, .compact-record, .composer-region, .composer-section, .mock-shell { background: #ffffff; }
+  .form-grid, .row-fields, .row-accountability, .human-review-grid, .data-record-grid { gap: 8px; }
+  input, textarea, select { border: 0 !important; background: transparent !important; color: #111111 !important; box-shadow: none !important; padding: 0 !important; min-height: 0 !important; }
+  textarea { overflow: visible !important; resize: none !important; }
+  .field, .honesty-field { break-inside: avoid; }
+  .field-question, .form-help, .block-owner, .human-review-heading span { color: #555555 !important; }
+  .mock-shell, .mock-stage, .mock-panel, .mock-row, .mock-layout-section, .mock-element, .mock-control { border-color: #b8b8b8 !important; box-shadow: none !important; }
+  .contract { white-space: pre-wrap; color: #111111; background: #f7f7f7; border-color: #cfcfcf; }
+}
 
 @media (max-width: 1380px) {
   .readiness { grid-template-columns: repeat(2, minmax(0, 1fr)); }
