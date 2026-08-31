@@ -27,19 +27,24 @@
         <div><strong>Honest Mockument</strong><span id="app-name-small">Application Name</span></div>
       </div>
 
-      <div class="menu-actions">
-        <button class="button button--primary" id="new-page-button" type="button">+ Copy Template</button>
-        <button class="icon-button" id="planned-page-button" type="button" title="Add a planned page without drawing it yet">+ Planned</button>
-        <button class="icon-button" id="export-button" type="button" title="Print all Mockument blocks to PDF">Export PDF</button>
-        <button class="icon-button theme-button" id="theme-button" type="button" aria-label="Change color theme" title="Theme: system">◐</button>
-      </div>
-
       <nav class="app-menu" id="app-menu"></nav>
 
       <div class="menu-footer">
-        <button class="menu-link menu-link--template" id="template-link" type="button">
-          <span class="menu-icon">T</span>
-          <span><strong>Template</strong><small>Permanent page source</small></span>
+        <div class="menu-actions">
+          <button class="menu-action-link" id="new-page-button" type="button">
+            <span class="menu-icon">+</span><span>Copy Template</span>
+          </button>
+          <button class="menu-action-link" id="planned-page-button" type="button" title="Add a planned page without drawing it yet">
+            <span class="menu-icon">+</span><span>Planned</span>
+          </button>
+          <button class="menu-action-link" id="export-button" type="button" title="Print all Mockument blocks to PDF">
+            <span class="menu-icon">↓</span><span>Export PDF</span>
+          </button>
+          <button class="icon-button theme-button" id="theme-button" type="button" aria-label="Change color theme" title="Theme: system">◐</button>
+        </div>
+        <button class="menu-link" id="settings-link" data-open-page="settings" type="button">
+          <span class="menu-icon">S</span>
+          <span class="menu-copy"><strong>Settings</strong><small>Mockument-wide setup</small></span>
         </button>
       </div>
     </aside>

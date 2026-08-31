@@ -106,8 +106,27 @@ a { color: inherit; }
 .brand strong, .brand span { display: block; }
 .brand strong { font-size: 13px; }
 .brand span { color: var(--text-3); font-size: 11px; margin-top: 1px; }
-.menu-actions { padding: 14px; display: grid; grid-template-columns: 1fr auto auto; gap: 7px; }
-.theme-button { width: 38px; padding-left: 0; padding-right: 0; font-size: 15px; }
+.menu-actions { display: grid; grid-template-columns: 1fr auto; gap: 4px 7px; padding-bottom: 8px; margin-bottom: 8px; border-bottom: 1px solid var(--line); }
+.menu-action-link {
+  grid-column: 1;
+  width: 100%;
+  border: 0;
+  background: transparent;
+  border-radius: 7px;
+  padding: 7px 9px;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  color: var(--text-2);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+}
+.menu-action-link:hover { background: var(--panel-2); color: var(--text); }
+.menu-actions .theme-button { grid-column: 2; grid-row: 1 / span 3; align-self: start; }
+.theme-button { width: 32px; padding: 6px 0; font-size: 14px; }
 .button, .icon-button {
   border: 1px solid var(--line-strong); background: var(--panel-2); border-radius: 7px; padding: 8px 11px; cursor: pointer;
 }
@@ -116,8 +135,13 @@ a { color: inherit; }
 .button--small { padding: 5px 8px; font-size: 12px; }
 .button--danger { color: var(--text-2); }
 
-.app-menu { padding: 4px 10px 22px; flex: 1; }
+.app-menu { padding: 10px 10px 22px; flex: 1; }
 .menu-section-title { padding: 8px; color: var(--text-3); text-transform: uppercase; letter-spacing: .1em; font-weight: 700; font-size: 10px; }
+.menu-disclosure { margin: 10px 0 2px; }
+.menu-disclosure > summary { list-style: none; }
+.menu-disclosure > summary::-webkit-details-marker { display: none; }
+.menu-disclosure .menu-caret { transition: transform .15s ease; }
+.menu-disclosure:not([open]) .menu-caret { transform: rotate(-90deg); }
 .menu-item-wrap { margin: 2px 0; }
 .menu-link { width: 100%; border: 0; background: transparent; padding: 9px 9px; text-align: left; border-radius: 7px; display: flex; align-items: center; gap: 9px; cursor: pointer; color: var(--text-2); }
 .menu-link:hover { background: var(--panel-2); color: var(--text); }

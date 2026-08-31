@@ -23,6 +23,7 @@
   const initialHashBlock = window.location && /^#B\d{2}$/.test(window.location.hash || "") && BLOCKS.some(block => `#${block.id}` === window.location.hash) ? window.location.hash.slice(1) : "B01";
   let selection = { kind: "block", blockId: initialHashBlock };
   let showAllBlocks = false;
+  let dataDictionaryMenuOpen = true;
   let previewMode = false;
   let mockChoice = { role: "default role", state: "default", reviewMode: "clean" };
   let activeGateFilter = null;
@@ -1006,13 +1007,20 @@
         ${children.length ? `<div class="submenu">${children.map(child => `<button class="menu-link ${state.activePageId === child.id ? "is-active" : ""}" data-open-page="${esc(child.id)}" type="button"><span class="menu-copy"><strong>${esc(child.name)}</strong><small>${child.built ? esc(child.route) : "not drawn"}</small></span></button>`).join("")}</div>` : ""}
       </div>`;
     };
-    menu.innerHTML = `<div class="menu-section-title">Application</div>
+    menu.innerHTML = `<div class="menu-section-title">Document menu</div>
       <div class="menu-item-wrap">
-        <button class="menu-link ${state.activePageId === DATA_SECTION_ID ? "is-active" : ""}" data-open-data-section type="button">
+        <button class="menu-link menu-link--template ${state.activePageId === "template" ? "is-active" : ""}" id="template-link" type="button">
+          <span class="menu-icon">T</span>
+          <span class="menu-copy"><strong>Template</strong><small>Permanent page source</small></span>
+        </button>
+      </div>
+      ${roots.length ? roots.map(item).join("") : ""}
+      <details class="menu-disclosure" id="data-dictionary-menu" ${dataDictionaryMenuOpen ? "open" : ""}>
+        <summary class="menu-link ${state.activePageId === DATA_SECTION_ID ? "is-active" : ""}">
           <span class="menu-icon">D</span>
           <span class="menu-copy"><strong>Data Dictionary</strong><small>catalog, feeds, routes</small></span>
-          <span class="menu-caret">6</span>
-        </button>
+          <span class="menu-caret">▾</span>
+        </summary>
         <div class="submenu">
           ${[
             ["catalog", "Data catalog"],
@@ -1023,11 +1031,9 @@
             ["questions", "Data questions"]
           ].map(([anchor, label]) => `<button class="menu-link ${state.activePageId === DATA_SECTION_ID && dataDictionaryAnchor === anchor ? "is-active" : ""}" data-open-data-section data-data-anchor="${anchor}" type="button"><span class="menu-copy"><strong>${label}</strong><small>Data Dictionary</small></span></button>`).join("")}
         </div>
-      </div>
-      <div class="menu-section-title">Pages of the system</div>
-      ${roots.length ? roots.map(item).join("") : `<div class="form-help" style="padding:8px">Copy Template to create the first page.</div>`}
-      ${settings ? item(settings) : ""}`;
-    $("#template-link").classList.toggle("is-active", state.activePageId === "template");
+      </details>`;
+    const settingsLink = $("#settings-link");
+    if (settingsLink) settingsLink.classList.toggle("is-active", state.activePageId === "settings");
     $("#app-name-small").textContent = state.app.name || "Application Name";
   }
 
@@ -2741,6 +2747,10 @@ Anything not covered above is unspecified. Add a question against this page rath
     createFromTemplate(String(data.get("name")).trim(), String(data.get("route")).trim(), String(data.get("parentId")).trim());
     $("#new-page-dialog").close();
   });
+
+  document.addEventListener("toggle", event => {
+    if (event.target && event.target.id === "data-dictionary-menu") dataDictionaryMenuOpen = event.target.open;
+  }, true);
 
   window.addEventListener("hashchange", () => {
     const blockId = String(window.location.hash || "").replace(/^#/, "");
