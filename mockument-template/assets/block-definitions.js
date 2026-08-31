@@ -14,7 +14,7 @@
       fields: [
         text("name", "Page name", "What is this page called? This one value is also used for the menu label, page heading, and browser title.", { required: true, placeholder: "Template" }),
         textarea("activity", "Business activity", "What business activity does this page support, why does someone open it, and what should they leave with?", { required: true, rows: 4 }),
-        text("route", "Route", "Where does this page live in the proposed app?", { required: true, placeholder: "/book-of-business" }),
+        text("route", "Route", "Where does this page live in the proposed app?", { required: true, placeholder: "/example-page" }),
         select("buildStatus", "Build status", "Is this page new or a modification of an existing page?", ["new", "modification of an existing page"], { required: true }),
         text("version", "Version", "Which version of this page specification is this?", { required: true, placeholder: "0.1" })
       ]

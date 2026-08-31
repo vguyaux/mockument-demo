@@ -67,7 +67,7 @@ Workflow participation is authored in B10 on each page. Each workflow record cap
 
 ## Data, menu seed and persistence
 
-The app stores the working Mockument, including Data Dictionary, in browser `localStorage` under `honest-mockument-template-state`. The initial Buckler IDD workbook is converted into `assets/seed-data-dictionary.js` so new/local states start with the imported catalog, providers, provider feeds from column F, source lineage, screen usages and generated data questions.
+The app stores the working Mockument, including Data Dictionary, in browser `localStorage` under `honest-mockument-template-state`. The reusable template starts with an empty, market-neutral `assets/seed-data-dictionary.js`. Client- or industry-specific data dictionaries should be added only in project copies, not in the shared template.
 
 The demo application's committed main menu and sub-menu live in `assets/template-menu.js`. Edit that file when menu items should be part of the template and shared between GitHub Pages and local checkouts. The structure is:
 

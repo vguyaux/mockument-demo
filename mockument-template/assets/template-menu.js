@@ -5,7 +5,7 @@
   "use strict";
 
   window.MOCKUMENT_TEMPLATE_MENU = {
-    version: "2026-08-31-01",
+    version: "2026-08-31-02",
 
     // When this version changes, old browser-only menu state is discarded once.
     // This lets the committed file become the source of truth for demos.

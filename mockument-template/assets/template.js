@@ -853,7 +853,7 @@
     }
     if (previousSchemaVersion < 31) {
       syncDataDictionary(next.app);
-      if (!next.changeLog.some(entry => entry.version === "0.34.0")) next.changeLog.push({ version: "0.34.0", date: new Date().toISOString(), note: "Added Data Dictionary: an application-level data catalog, source routes, providers, usages, and open data questions imported from the Buckler IDD workbook." });
+      if (!next.changeLog.some(entry => entry.version === "0.34.0")) next.changeLog.push({ version: "0.34.0", date: new Date().toISOString(), note: "Added Data Dictionary: an application-level data catalog, source routes, providers, usages, and open data questions." });
     }
     if (previousSchemaVersion < 32) {
       const data = syncDataDictionary(next.app);
