@@ -30,6 +30,7 @@
   let activeResize = null;
   let dataDictionaryAnchor = "";
   let dataDictionaryViews = {};
+  let newPageMode = "copy";
   let toastTimer;
 
   function updateBlockHash() {
@@ -2368,33 +2369,23 @@ Anything not covered above is unspecified. Add a question against this page rath
     saveState();
   }
 
-  function openNewPageDialog() {
+  function openNewPageDialog(mode = "copy") {
+    newPageMode = mode === "planned" ? "planned" : "copy";
     const select = $("#parent-page-select");
-    const candidates = state.pageOrder.map(id => state.pages[id]).filter(page => page && !page.parentId && !page.isSettings && page.built);
-    select.innerHTML = `<option value="">Top-level menu</option>${candidates.map(page => `<option value="${esc(page.id)}">Submenu under ${esc(page.name)}</option>`).join("")}`;
+    const candidates = state.pageOrder.map(id => state.pages[id]).filter(page => page && !page.parentId && !page.isSettings);
+    select.innerHTML = `<option value="">Main menu section</option>${candidates.map(page => `<option value="${esc(page.id)}">Submenu under ${esc(page.name)}${page.built ? "" : " · not drawn"}</option>`).join("")}`;
     $("#new-page-form").reset();
+    $("#new-page-dialog-eyebrow").textContent = newPageMode === "planned" ? "Planned page" : "Copy Template";
+    $("#new-page-dialog-title").textContent = newPageMode === "planned" ? "Add a planned menu item" : "Create a Mockument page";
+    $("#new-page-submit-button").textContent = newPageMode === "planned" ? "Add planned page" : "Create page";
+    $("#new-page-placement-help").textContent = "Leave this as Main menu section to make the typed page name a main menu item. Choose an existing main section to create a submenu under it.";
     $("#new-page-dialog").showModal();
     setTimeout(() => $("#new-page-form [name=name]").focus(), 0);
   }
 
-  function addPlannedPage() {
-    const name = String(prompt("Planned page name") || "").trim();
-    if (!name) return;
-    const id = uniqueId(slugify(name));
-    const page = createPage(id, name, `/${slugify(name)}`, false, false);
-    state.pages[id] = page;
-    const settingsIndex = state.pageOrder.indexOf("settings");
-    state.pageOrder.splice(settingsIndex < 0 ? state.pageOrder.length : settingsIndex, 0, id);
-    state.activePageId = id;
-    selectBlock("B01");
-    saveState();
-    render();
-    showToast(`${name} added as not drawn`);
-  }
-
-  function createFromTemplate(name, route, parentId, existingId = null) {
+  function createFromTemplate(name, route, parentId, existingId = null, built = true) {
     const id = existingId || uniqueId(slugify(name));
-    const page = createPage(id, name, route || `/${slugify(name)}`, true, existingId === "settings");
+    const page = createPage(id, name, route || `/${slugify(name)}`, built, existingId === "settings");
     page.parentId = parentId || null;
     if (existingId && state.pages[existingId]) {
       page.parentId = state.pages[existingId].parentId || null;
@@ -2409,7 +2400,7 @@ Anything not covered above is unspecified. Add a question against this page rath
     saveState();
     render();
     $("#document-column").focus();
-    showToast(`${name} created from Template`);
+    showToast(built ? `${name} created from Template` : `${name} added as not drawn`);
   }
 
   function renderPdfExportDocument() {
@@ -2626,8 +2617,8 @@ Anything not covered above is unspecified. Add a question against this page rath
     const openDataSection = event.target.closest("[data-open-data-section]");
     if (openDataSection) { previewMode = false; state.activePageId = DATA_SECTION_ID; dataDictionaryAnchor = openDataSection.dataset.dataAnchor || ""; saveState(); render(); return; }
     if (event.target.closest("#template-link")) { previewMode = false; state.activePageId = "template"; dataDictionaryAnchor = ""; selectBlock("B01"); saveState(); render(); return; }
-    if (event.target.closest("#new-page-button, [data-open-new-page]")) { openNewPageDialog(); return; }
-    if (event.target.closest("#planned-page-button, [data-add-planned-page]")) { addPlannedPage(); return; }
+    if (event.target.closest("#new-page-button, [data-open-new-page]")) { openNewPageDialog("copy"); return; }
+    if (event.target.closest("#planned-page-button, [data-add-planned-page]")) { openNewPageDialog("planned"); return; }
     if (event.target.closest("#export-button")) { exportPdf(); return; }
     if (event.target.closest("#reset-demo-button") && confirm("Reset this browser to the committed template menu? Browser-only Mockument changes will be cleared.")) { resetToCommittedTemplate(); return; }
     if (event.target.closest("#theme-button")) { cycleTheme(); return; }
@@ -2824,7 +2815,9 @@ Anything not covered above is unspecified. Add a question against this page rath
     event.preventDefault();
     if (event.submitter && event.submitter.value === "cancel") { $("#new-page-dialog").close(); return; }
     const data = new FormData(event.currentTarget);
-    createFromTemplate(String(data.get("name")).trim(), String(data.get("route")).trim(), String(data.get("parentId")).trim());
+    const name = String(data.get("name")).trim();
+    if (!name) return;
+    createFromTemplate(name, String(data.get("route")).trim(), String(data.get("parentId")).trim(), null, newPageMode !== "planned");
     $("#new-page-dialog").close();
   });
 

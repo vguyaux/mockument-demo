@@ -65,8 +65,8 @@
     <form method="dialog" id="new-page-form">
       <div class="dialog-head">
         <div>
-          <span class="eyebrow">Copy Template</span>
-          <h2>Create a Mockument page</h2>
+          <span class="eyebrow" id="new-page-dialog-eyebrow">Copy Template</span>
+          <h2 id="new-page-dialog-title">Create a Mockument page</h2>
         </div>
         <button class="dialog-close" value="cancel" aria-label="Close">×</button>
       </div>
@@ -74,13 +74,13 @@
       <label>Route<input name="route" placeholder="/book-of-business"></label>
       <label>Menu placement
         <select name="parentId" id="parent-page-select">
-          <option value="">Top-level menu</option>
+          <option value="">Main menu section</option>
         </select>
       </label>
-      <p class="form-help">Choose a page to place this page beneath it as a submenu.</p>
+      <p class="form-help" id="new-page-placement-help">Leave this as Main menu section to create a new main item. Choose an existing main section to create a submenu under it.</p>
       <div class="dialog-actions">
         <button class="button" value="cancel">Cancel</button>
-        <button class="button button--primary" value="default">Create page</button>
+        <button class="button button--primary" id="new-page-submit-button" value="default">Create page</button>
       </div>
     </form>
   </dialog>
