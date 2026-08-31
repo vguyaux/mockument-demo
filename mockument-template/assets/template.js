@@ -1385,16 +1385,39 @@
     if (kind === "data" && presentation === "list") return `<div class="mock-element status--${esc(row._status || "todo")}" data-mock-record="${esc(id)}">${label}<div class="mock-name">${esc(row.name || "Unnamed list")}</div><div class="mock-lines"><i></i><i></i><i></i></div></div>`;
     if (kind === "data" && presentation === "table") return `<div class="mock-element status--${esc(row._status || "todo")}" data-mock-record="${esc(id)}">${label}<div class="mock-name">${esc(row.name || "Unnamed table")}</div><div class="mock-table"><i></i><i></i><i></i><i></i><i></i><i></i></div></div>`;
     if (kind === "navigation") {
-      let destinations = [];
-      if (row.navigationSource === "application pages") destinations = state.pageOrder.map(pageId => state.pages[pageId]).filter(Boolean).map(candidate => candidate.name);
-      else if (row.navigationSource === "current-page surfaces") destinations = [
-        ...(page.blocks.B04.values.rows || []).map(candidate => candidate.name || candidate.id || candidate._id),
-        ...(page.blocks.B04.values.panels || []).map(candidate => candidate.name || candidate.id || candidate._id),
-        ...(page.blocks.B04.values.elements || []).filter(candidate => candidate.kind === "section").map(candidate => candidate.name || candidate.id || candidate._id)
-      ];
-      else if (row.navigationSource === "workflow steps") destinations = page.blocks.B10.values.workflowExpectation === "participates in workflow(s)" ? (page.blocks.B10.values.workflows || []).map(workflow => `${workflow.workflowName || workflow.workflowId || "Workflow"} · ${workflow.stepName || workflow.stepId || "Step"}`) : [];
-      else destinations = String(row.navigationTargets || "").split("\n").map(value => value.trim()).filter(Boolean);
-      return `<nav class="mock-element mock-element--navigation status--${esc(row._status || "todo")}" data-mock-record="${esc(id)}">${label}<div class="mock-name">${esc(row.name || "Navigation")}</div><div class="mock-navigation-items">${destinations.length ? destinations.map(destination => `<span>${esc(destination)}</span>`).join("") : `<small>No destinations selected</small>`}</div></nav>`;
+      let navigationHtml = "";
+      if (row.navigationSource === "application pages") {
+        const pages = state.pageOrder.map(pageId => state.pages[pageId]).filter(candidate => candidate && !candidate.isSettings);
+        const pageIds = new Set(pages.map(candidate => candidate.id));
+        const childrenFor = parentId => pages.filter(candidate => candidate.parentId === parentId);
+        const hasCurrentChild = destination => childrenFor(destination.id).some(child => child.id === page.id || hasCurrentChild(child));
+        const renderDestination = (destination, depth = 0) => {
+          const children = childrenFor(destination.id);
+          const status = destination.built ? (destination.route || "") : "not drawn";
+          const activeChild = hasCurrentChild(destination);
+          return `<div class="mock-nav-group" style="--mock-nav-depth:${depth}">
+            <span class="mock-nav-link ${page.id === destination.id ? "is-current" : ""} ${activeChild ? "has-current-child" : ""}">
+              <span class="mock-nav-initial">${esc((destination.name || "?").slice(0, 1).toUpperCase())}</span>
+              <span class="mock-nav-copy"><strong>${esc(destination.name || "Unnamed page")}</strong><small>${esc(status)}</small></span>
+              ${children.length ? `<span class="mock-nav-count">${children.length}</span>` : ""}
+            </span>
+            ${children.length ? `<div class="mock-nav-children">${children.map(child => renderDestination(child, depth + 1)).join("")}</div>` : ""}
+          </div>`;
+        };
+        const roots = pages.filter(candidate => !candidate.parentId || !pageIds.has(candidate.parentId));
+        navigationHtml = roots.length ? roots.map(root => renderDestination(root)).join("") : `<small>No application pages yet</small>`;
+      } else {
+        let destinations = [];
+        if (row.navigationSource === "current-page surfaces") destinations = [
+          ...(page.blocks.B04.values.rows || []).map(candidate => candidate.name || candidate.id || candidate._id),
+          ...(page.blocks.B04.values.panels || []).map(candidate => candidate.name || candidate.id || candidate._id),
+          ...(page.blocks.B04.values.elements || []).filter(candidate => candidate.kind === "section").map(candidate => candidate.name || candidate.id || candidate._id)
+        ];
+        else if (row.navigationSource === "workflow steps") destinations = page.blocks.B10.values.workflowExpectation === "participates in workflow(s)" ? (page.blocks.B10.values.workflows || []).map(workflow => `${workflow.workflowName || workflow.workflowId || "Workflow"} · ${workflow.stepName || workflow.stepId || "Step"}`) : [];
+        else destinations = String(row.navigationTargets || "").split("\n").map(value => value.trim()).filter(Boolean);
+        navigationHtml = destinations.length ? destinations.map((destination, index) => `<span class="mock-nav-link ${index === 0 ? "is-current" : ""}"><span class="mock-nav-copy"><strong>${esc(destination)}</strong></span></span>`).join("") : `<small>No destinations selected</small>`;
+      }
+      return `<nav class="mock-element mock-element--navigation status--${esc(row._status || "todo")}" data-mock-record="${esc(id)}">${label}<div class="mock-name">${esc(row.name || "Navigation")}</div><div class="mock-navigation-items">${navigationHtml}</div></nav>`;
     }
     if (kind === "notice") return `<div class="mock-element mock-element--notice status--${esc(row._status || "todo")}" data-mock-record="${esc(id)}">${label}<div class="mock-name">${esc(row.name || "Notice")}</div>${row.shows ? `<div>${esc(row.shows)}</div>` : ""}</div>`;
     return `<div class="mock-element status--${esc(row._status || "todo")}" data-mock-record="${esc(id)}">${label}<div class="mock-name">${esc(row.name || "Unnamed element")}</div>${row.shows ? `<div>${esc(row.shows)}</div>` : ""}</div>`;

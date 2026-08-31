@@ -404,10 +404,21 @@ input:focus, textarea:focus, select:focus { border-color: var(--accent); box-sha
 .mock-table { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--mock-border); border: 1px solid var(--mock-border); margin-top: 7px; }
 .mock-table i { display: block; height: 13px; background: var(--mock-surface-alt); }
 .mock-element--notice { border-left: 4px solid var(--accent); background: var(--mock-notice); }
-.mock-element--navigation { background: var(--mock-surface-alt); }
-.mock-navigation-items { display: grid; gap: 3px; margin-top: 7px; }
-.mock-navigation-items span { display: block; padding: 5px 6px; border-radius: 4px; color: var(--mock-muted); font-size: 9px; }
-.mock-navigation-items span:first-child { background: var(--mock-control); color: var(--mock-text); }
+.mock-element--navigation { background: var(--mock-shell); padding: 8px; }
+.mock-element--navigation .mock-name { padding: 0 2px 5px; color: var(--mock-muted); font-size: 10px; text-transform: uppercase; letter-spacing: .06em; }
+.mock-navigation-items { display: grid; gap: 2px; margin-top: 4px; }
+.mock-navigation-items > small { color: var(--mock-muted); font-size: 9px; padding: 7px; }
+.mock-nav-group { display: grid; gap: 2px; }
+.mock-nav-children { display: grid; gap: 2px; margin-left: 17px; padding-left: 8px; border-left: 1px solid var(--mock-border); }
+.mock-nav-link { display: flex; align-items: center; gap: 7px; padding: 6px 7px; border: 1px solid transparent; border-radius: 6px; color: var(--mock-muted); font-size: 9px; }
+.mock-nav-link.is-current { background: var(--mock-control); border-color: var(--mock-border); color: var(--mock-text); }
+.mock-nav-link.has-current-child { color: var(--mock-text); }
+.mock-nav-initial { width: 18px; height: 18px; display: inline-grid; place-items: center; flex: 0 0 auto; border: 1px solid var(--mock-border); border-radius: 5px; font-size: 8px; font-weight: 800; }
+.mock-nav-copy { min-width: 0; flex: 1; display: grid; gap: 1px; }
+.mock-nav-copy strong, .mock-nav-copy small { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mock-nav-copy strong { font-size: 9px; font-weight: 700; }
+.mock-nav-copy small { color: var(--mock-muted); font-size: 7px; }
+.mock-nav-count { margin-left: auto; min-width: 16px; height: 16px; display: inline-grid; place-items: center; border-radius: 999px; background: var(--mock-surface-alt); color: var(--mock-muted); font-size: 8px; font-weight: 700; }
 .mock-empty { border: 1px dashed var(--mock-border); padding: 12px; color: var(--mock-muted); font-size: 10px; text-align: center; }
 .mock-caption { padding: 9px 12px; border-top: 1px solid var(--mock-border); background: var(--mock-shell); color: var(--mock-muted); font-size: 10px; }
 
