@@ -65,11 +65,35 @@ Settings includes a generated Mockument overview: all drawn and not-drawn pages,
 
 Workflow participation is authored in B10 on each page. Each workflow record captures the workflow ID/name, step ID/name, targeted B04 surface or action, previous step, trigger, next step and terminal outcome. Settings no longer contains a workflow editor.
 
-## Data and persistence
+## Data, menu seed and persistence
 
 The app stores the working Mockument, including Data Dictionary, in browser `localStorage` under `honest-mockument-template-state`. The initial Buckler IDD workbook is converted into `assets/seed-data-dictionary.js` so new/local states start with the imported catalog, providers, provider feeds from column F, source lineage, screen usages and generated data questions.
 
-Use **Export** to download the complete Mockument as JSON.
+The demo application's committed main menu and sub-menu live in `assets/template-menu.js`. Edit that file when menu items should be part of the template and shared between GitHub Pages and local checkouts. The structure is:
+
+```js
+window.MOCKUMENT_TEMPLATE_MENU = {
+  version: "2026-08-31-01",
+  resetLocalStateOnVersionChange: true,
+  app: { name: "Application Name" },
+  pages: [
+    {
+      id: "customers",
+      name: "Customers",
+      route: "/customers",
+      built: true,
+      children: [
+        { id: "customer-detail", name: "Customer detail", route: "/customers/detail", built: true },
+        { id: "customer-import", name: "Customer import", route: "/customers/import", built: false }
+      ]
+    }
+  ]
+};
+```
+
+When `version` changes, browser-only page/menu state is reset once so the committed file becomes the source of truth. Use **Reset Demo** to clear browser-only changes and reload the committed template menu.
+
+Use **Export PDF** to print the complete Mockument.
 
 ## App-wide changes
 

@@ -211,6 +211,72 @@
     };
   }
 
+  function templateMenuConfig() {
+    return window.MOCKUMENT_TEMPLATE_MENU && typeof window.MOCKUMENT_TEMPLATE_MENU === "object" ? window.MOCKUMENT_TEMPLATE_MENU : null;
+  }
+
+  function flattenTemplateMenu(items, parentId = null, rows = []) {
+    (Array.isArray(items) ? items : []).forEach(item => {
+      if (!item || typeof item !== "object") return;
+      const name = String(item.name || item.label || item.id || "").trim();
+      if (!name) return;
+      const id = slugify(item.id || name);
+      const route = String(item.route || `/${id}`).trim() || `/${id}`;
+      rows.push({ id, name, route, parentId, built: item.built !== false, activity: item.activity, buildStatus: item.buildStatus });
+      flattenTemplateMenu(item.children || item.submenu || item.pages, id, rows);
+    });
+    return rows;
+  }
+
+  function applyTemplateMenu(candidate) {
+    const config = templateMenuConfig();
+    if (!config) return candidate;
+    const version = String(config.version || "unversioned");
+    const shouldReset = Boolean(config.resetLocalStateOnVersionChange) && candidate.templateMenuVersion !== version;
+    const next = shouldReset ? createInitialState() : candidate;
+    const menuRows = flattenTemplateMenu(config.pages);
+    const menuIds = new Set(menuRows.map(page => page.id));
+
+    if (!next.app) next.app = { name: "Application Name", domain: "", version: "0.1", reviewers: [], workflows: [], dataDictionary: initialDataDictionary() };
+    if (config.app && typeof config.app === "object") {
+      ["name", "domain", "version"].forEach(key => {
+        if (config.app[key] != null && String(config.app[key]).trim()) next.app[key] = String(config.app[key]);
+      });
+    }
+
+    menuRows.forEach(seed => {
+      const page = next.pages[seed.id] || createPage(seed.id, seed.name, seed.route, seed.built, false);
+      page.id = seed.id;
+      page.name = seed.name;
+      page.route = seed.route;
+      page.built = seed.built;
+      page.isSettings = false;
+      page.parentId = seed.parentId;
+      page.templateMenuSeed = true;
+      if (page.blocks && page.blocks.B01 && page.blocks.B01.values) {
+        page.blocks.B01.values.name = seed.name;
+        page.blocks.B01.values.route = seed.route;
+        if (seed.activity != null) page.blocks.B01.values.activity = String(seed.activity);
+        if (seed.buildStatus) page.blocks.B01.values.buildStatus = seed.buildStatus;
+      }
+      next.pages[seed.id] = syncPage(page);
+    });
+
+    Object.values(next.pages).forEach(page => {
+      if (page && page.parentId && !next.pages[page.parentId]) page.parentId = null;
+    });
+
+    const settingsId = next.pages.settings ? "settings" : null;
+    const existingIds = (next.pageOrder || []).filter(id => id && id !== "settings" && !menuIds.has(id) && next.pages[id]);
+    const ordered = [...menuRows.map(page => page.id), ...existingIds, settingsId].filter(Boolean);
+    next.pageOrder = ordered.filter((id, index) => ordered.indexOf(id) === index);
+    if (!next.activePageId || (next.activePageId !== "template" && !next.pages[next.activePageId] && next.activePageId !== DATA_SECTION_ID)) next.activePageId = "template";
+    next.templateMenuVersion = version;
+    next.templateMenuSource = "assets/template-menu.js";
+    if (shouldReset) next.changeLog.push({ version, date: new Date().toISOString(), note: "Reset browser state from committed template menu seed." });
+    return next;
+  }
+
   function syncDataRecord(record, prefix, index) {
     if (!record._id) record._id = record.id || `${prefix}-${String(index + 1).padStart(3, "0")}`;
     if (!record.id) record.id = record._id;
@@ -869,10 +935,10 @@
   function loadState() {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
-      return raw ? migrateState(JSON.parse(raw)) : createInitialState();
+      return applyTemplateMenu(raw ? migrateState(JSON.parse(raw)) : createInitialState());
     } catch (error) {
       console.warn("Could not read local Mockument state", error);
-      return createInitialState();
+      return applyTemplateMenu(createInitialState());
     }
   }
 
@@ -889,6 +955,19 @@
     if (touch) touchPage(state.pages && state.pages[state.activePageId]);
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
   }
+
+  function resetToCommittedTemplate() {
+    localStorage.removeItem(STORAGE_KEY);
+    window.location.reload();
+  }
+
+  window.MockumentTemplate = {
+    storageKey: STORAGE_KEY,
+    resetToCommittedTemplate,
+    exportLocalState() {
+      return JSON.stringify(state, null, 2);
+    }
+  };
 
   function templatePage() {
     if (templatePreview) return templatePreview;
@@ -2550,6 +2629,7 @@ Anything not covered above is unspecified. Add a question against this page rath
     if (event.target.closest("#new-page-button, [data-open-new-page]")) { openNewPageDialog(); return; }
     if (event.target.closest("#planned-page-button, [data-add-planned-page]")) { addPlannedPage(); return; }
     if (event.target.closest("#export-button")) { exportPdf(); return; }
+    if (event.target.closest("#reset-demo-button") && confirm("Reset this browser to the committed template menu? Browser-only Mockument changes will be cleared.")) { resetToCommittedTemplate(); return; }
     if (event.target.closest("#theme-button")) { cycleTheme(); return; }
     if (event.target.closest("[data-open-preview]")) { previewMode = true; selectBlock("B04"); render(); return; }
     if (event.target.closest("[data-exit-preview]")) { previewMode = false; selectBlock("B04"); render(); revealActiveBlock(); return; }
