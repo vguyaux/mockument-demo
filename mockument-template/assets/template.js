@@ -192,11 +192,26 @@
     return { sourceWorkbook: "", importedAt: "", seeded: false, catalog: [], routes: [], providers: [], feeds: [], usages: [], questions: [] };
   }
 
-  function initialDataDictionary() {
-    if (!window.MOCKUMENT_IMPORTED_DATA_DICTIONARY) return emptyDataDictionary();
-    const seeded = JSON.parse(JSON.stringify(window.MOCKUMENT_IMPORTED_DATA_DICTIONARY));
+  function importedDataDictionarySeed() {
+    return window.MOCKUMENT_IMPORTED_DATA_DICTIONARY && typeof window.MOCKUMENT_IMPORTED_DATA_DICTIONARY === "object" ? window.MOCKUMENT_IMPORTED_DATA_DICTIONARY : null;
+  }
+
+  function dataDictionarySeedVersion(seed) {
+    if (!seed) return "";
+    return String(seed.version || seed.seedVersion || seed.importedAt || seed.sourceWorkbook || "unversioned");
+  }
+
+  function cloneImportedDataDictionary() {
+    const seed = importedDataDictionarySeed();
+    if (!seed) return emptyDataDictionary();
+    const seeded = JSON.parse(JSON.stringify(seed));
     seeded.seeded = true;
+    seeded.seedVersion = dataDictionarySeedVersion(seed);
     return seeded;
+  }
+
+  function initialDataDictionary() {
+    return cloneImportedDataDictionary();
   }
 
   function createInitialState() {
@@ -289,18 +304,19 @@
 
   function syncDataDictionary(app) {
     if (!app.dataDictionary) app.dataDictionary = emptyDataDictionary();
+    const seed = importedDataDictionarySeed();
+    const seedVersion = dataDictionarySeedVersion(seed);
     const dictionary = app.dataDictionary;
     ["catalog", "routes", "providers", "feeds", "usages", "questions"].forEach(key => { if (!Array.isArray(dictionary[key])) dictionary[key] = []; });
-    const seed = window.MOCKUMENT_IMPORTED_DATA_DICTIONARY;
     const isEmpty = !dictionary.catalog.length && !dictionary.routes.length && !dictionary.providers.length && !dictionary.usages.length && !dictionary.questions.length;
-    if (isEmpty && seed && !dictionary.seeded) {
-      app.dataDictionary = JSON.parse(JSON.stringify(seed));
-      app.dataDictionary.seeded = true;
+    if (seed && ((isEmpty && !dictionary.seeded) || (seed.resetLocalDataDictionaryOnVersionChange && dictionary.seedVersion !== seedVersion))) {
+      app.dataDictionary = cloneImportedDataDictionary();
       return syncDataDictionary(app);
     }
     if (dictionary.sourceWorkbook == null) dictionary.sourceWorkbook = "";
     if (dictionary.importedAt == null) dictionary.importedAt = "";
     if (dictionary.seeded == null) dictionary.seeded = false;
+    if (seed && !dictionary.seedVersion) dictionary.seedVersion = seedVersion;
     dictionary.catalog.forEach((record, index) => {
       syncDataRecord(record, "DATA", index);
       if (!record.cardinality) record.cardinality = "not yet defined";
