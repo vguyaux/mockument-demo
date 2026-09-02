@@ -2084,16 +2084,19 @@ Anything not covered above is unspecified. Add a question against this page rath
     const aiStatuses = calculateBlockReadiness(page);
     const humanStatuses = calculateHumanReadiness(page, aiStatuses);
     const showPageOverview = showAllBlocks || selection.blockId === "B01";
-    const pageOverview = showPageOverview ? `${page.isSettings ? renderApplicationSettings() : ""}<header class="document-head">
-      <span class="eyebrow">${templateMode ? "Canonical page source" : "Mockument page"}</span>
-      <h1>${esc(title)}</h1>
-      <p class="document-lede">${templateMode ? "Interactive preview: try every field, dropdown, status and mock-composer action. Changes are temporary, are never copied into a new page, and reset when the browser reloads." : esc(page.blocks.B01.values.activity || "This page has no business activity yet.")}</p>
-      <div class="meta-strip"><span class="meta-chip">${esc(route)}</span><span class="meta-chip">Template v${esc(page.templateVersion)}</span><span class="meta-chip">Schema v${esc(page.schemaVersion)}</span></div>
-      <div class="document-toolbar">
-        ${templateMode ? `<button class="button button--primary" data-open-new-page type="button">Copy Template</button><button class="button" data-reset-template-preview type="button">Reset preview</button>` : `<button class="button" data-export-page type="button">Export PDF</button>${page.isSettings ? "" : `<button class="button button--danger" data-delete-page="${esc(page.id)}" type="button">Delete page</button>`}`}
-        <button class="button" data-toggle-block-view type="button">${showAllBlocks ? "Focus active block" : "View all blocks"}</button>
+    const pageOverview = showPageOverview ? `${page.isSettings ? renderApplicationSettings() : ""}<header class="document-head document-head--with-readiness">
+      <div class="document-head-main">
+        <span class="eyebrow">${templateMode ? "Canonical page source" : "Mockument page"}</span>
+        <h1>${esc(title)}</h1>
+        <p class="document-lede">${templateMode ? "Interactive preview: try every field, dropdown, status and mock-composer action. Changes are temporary, are never copied into a new page, and reset when the browser reloads." : esc(page.blocks.B01.values.activity || "This page has no business activity yet.")}</p>
+        <div class="meta-strip"><span class="meta-chip">${esc(route)}</span><span class="meta-chip">Template v${esc(page.templateVersion)}</span><span class="meta-chip">Schema v${esc(page.schemaVersion)}</span></div>
+        <div class="document-toolbar">
+          ${templateMode ? `<button class="button button--primary" data-open-new-page type="button">Copy Template</button><button class="button" data-reset-template-preview type="button">Reset preview</button>` : `<button class="button" data-export-page type="button">Export PDF</button>${page.isSettings ? "" : `<button class="button button--danger" data-delete-page="${esc(page.id)}" type="button">Delete page</button>`}`}
+          <button class="button" data-toggle-block-view type="button">${showAllBlocks ? "Focus active block" : "View all blocks"}</button>
+        </div>
       </div>
-    </header>${renderReadiness(page)}` : "";
+      <aside class="document-head-readiness" aria-label="Page readiness">${renderReadiness(page)}</aside>
+    </header>` : "";
     $("#document").innerHTML = `${renderBlockJump(page, aiStatuses, humanStatuses)}${pageOverview}
     ${renderBlockPager()}
     <div class="block-list">${(showAllBlocks ? BLOCKS : BLOCKS.filter(definition => definition.id === selection.blockId)).map(definition => renderBlock(definition, page.blocks[definition.id], page, false, aiStatuses, humanStatuses)).join("")}</div>
@@ -2186,13 +2189,10 @@ Anything not covered above is unspecified. Add a question against this page rath
       } else extra = `<div class="inspector-section"><h3>No specification record</h3><p>This visible item has no record. Add it through the B04 Mock composer, or remove it from the mock.</p></div>`;
     }
     const block = page.blocks[definition.id];
-    const readiness = calculateBlockReadiness(page)[definition.id];
-    const readinessDetails = READINESS_GATES.map(gate => { const status = readiness[gate.key]; const label = status.state === "ready" ? "Ready" : status.state === "warning" ? "In progress" : status.state === "missing" ? "Missing" : "Not applicable"; return `<div class="readiness-detail readiness-detail--${status.state}"><b>${gate.short}</b><span><strong>${esc(gate.name)}</strong><small>${esc(label)} · ${esc(status.reason)}</small></span></div>`; }).join("");
     inspector.innerHTML = `<span class="inspector-kicker">${definition.id}</span><h2>${esc(definition.title)}</h2><div class="inspector-owner">Answered by ${esc(definition.answeredBy)}</div>
       <div class="inspector-section"><h3>Definition</h3><p>${esc(definition.definition)}</p></div>
       <div class="inspector-section"><h3>Why it exists</h3><p>${esc(definition.why)}</p></div>
       <div class="inspector-section"><h3>Current honesty</h3><p><span class="status-chip status--${esc(block.status)}"><span class="status-dot"></span>${esc(statusLabel(block.status))}</span>${block.accountable ? ` · ${esc(block.accountable)}` : ""}</p></div>
-      <div class="inspector-section"><h3>Block readiness</h3><div class="readiness-details">${readinessDetails}</div></div>
       ${extra}`;
   }
 
