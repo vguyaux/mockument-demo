@@ -216,11 +216,11 @@
     },
     {
       id: "B12", group: "Notes", title: "Notes", answeredBy: "The person responsible for the selected note",
-      definition: "Keep page notes visible and typed. Every note begins by declaring whether it is a decision, observation, question, or scope exclusion, then asks only the fields appropriate to that note type.",
-      why: "A page needs one visible place for notes that should not disappear into chat, memory, or private assumptions. Decisions, observations, questions and scope notes keep their authority clear while remaining easy to find.",
+      definition: "Keep page notes visible and typed. Every note begins by declaring whether it is a decision, observation, or question, then asks only the fields appropriate to that note type.",
+      why: "A page needs one visible place for notes that should not disappear into chat, memory, or private assumptions. Decisions, observations, and questions keep their authority clear while remaining easy to find.",
       fields: [rows("records", "Notes", "What notes are related to this page?", [
-        select("type", "Note type", "What kind of note is this?", ["decision", "observation", "question", "scope"]),
-        textarea("statement", "Note", "What was decided, observed, asked, or placed outside scope?"),
+        select("type", "Note type", "What kind of note is this?", ["decision", "observation", "question"]),
+        textarea("statement", "Note", "What was decided, observed, or asked?"),
         text("affects", "Affected records", "Which stable page, data, component, action, condition, workflow, or wording IDs does this affect?"),
         select("decisionScope", "Decision scope", "How broadly does this accepted decision apply?", ["this page", "application-wide", "data or source", "workflow"], { forTypes: ["decision"] }),
         text("decidedBy", "Decided by", "Who had authority to make or accept this decision?", { forTypes: ["decision"] }),
@@ -234,9 +234,8 @@
         textarea("questionWhy", "Why it matters", "Why does this question need an answer?", { forTypes: ["question"] }),
         text("blocks", "Blocks", "What review, decision, workflow, or build work does it block?", { forTypes: ["question"] }),
         text("answerOwner", "Who must answer", "Who owes the answer?", { forTypes: ["question"] }),
-        text("neededBy", "Needed by", "When is the answer needed?", { inputType: "date", forTypes: ["question"] }),
-        textarea("scopeWhy", "Why outside scope", "Why is this deliberately not answered here?", { forTypes: ["scope"] })
-      ], { idPrefix: "NOTE", compact: true, addLabel: "+ Add note", emptyText: "No notes yet. Add a note when a decision, observation, question or scope boundary must remain visible." })]
+        text("neededBy", "Needed by", "When is the answer needed?", { inputType: "date", forTypes: ["question"] })
+      ], { idPrefix: "NOTE", compact: true, addLabel: "+ Add note", emptyText: "No notes yet. Add a note when a decision, observation, or question must remain visible." })]
     },
     {
       id: "B13", group: "Honesty", title: "Build contract and machine-readable record", answeredBy: "Page owner and implementing agent",

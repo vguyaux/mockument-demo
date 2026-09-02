@@ -3,8 +3,8 @@
 
   const BLOCKS = window.MOCKUMENT_BLOCKS || [];
   const STORAGE_KEY = "honest-mockument-template-state";
-  const SCHEMA_VERSION = 35;
-  const TEMPLATE_VERSION = "0.38.0";
+  const SCHEMA_VERSION = 36;
+  const TEMPLATE_VERSION = "0.39.0";
   const FIDELITY_NOTE = "Structure only, example data, nothing here is proof that the application works.";
   const THEME_KEY = "mockument-theme";
   const THEME_CYCLE = ["system", "dark", "light"];
@@ -28,6 +28,7 @@
   let mockChoice = { role: "default role", state: "default", reviewMode: "clean" };
   let activeGateFilter = null;
   let activeResize = null;
+  let notesFilter = "all";
   let dataDictionaryAnchor = "";
   let dataDictionaryViews = {};
   let newPageMode = "copy";
@@ -943,6 +944,20 @@
       dataDictionaryAnchor = "";
       if (!next.changeLog.some(entry => entry.version === "0.38.0")) next.changeLog.push({ version: "0.38.0", date: new Date().toISOString(), note: "Cleared the default Data Dictionary content so each app can define its own data tables." });
     }
+    if (previousSchemaVersion < 36) {
+      Object.values(next.pages).forEach(page => {
+        const notes = page.blocks && page.blocks.B12 && page.blocks.B12.values && page.blocks.B12.values.records;
+        if (!Array.isArray(notes)) return;
+        notes.forEach(note => {
+          if (note.type === "scope") {
+            note.type = "observation";
+            note._note = [note._note, note.scopeWhy ? `Previous scope note: ${note.scopeWhy}` : "Previously marked as scope."].filter(Boolean).join(" · ");
+            delete note.scopeWhy;
+          }
+        });
+      });
+      if (!next.changeLog.some(entry => entry.version === "0.39.0")) next.changeLog.push({ version: "0.39.0", date: new Date().toISOString(), note: "Turned the right column into a page notes activity log and removed Scope as a note type." });
+    }
     return next;
   }
 
@@ -1217,7 +1232,6 @@
         if (row.type === "decision") return !row.decidedBy || !row.decidedWhen || !row.decisionScope || !row.decisionLifecycle || (row.decisionLifecycle === "active" && !String(row.appliedTo || "").trim());
         if (row.type === "observation") return !row.raisedBy || !row.observedWhen;
         if (row.type === "question") return !row.questionWhy || !row.blocks || !row.answerOwner;
-        if (row.type === "scope") return !row.scopeWhy;
         return true;
       }).length;
       if (incomplete) missing.push(`${incomplete} note${incomplete === 1 ? " is" : "s are"} missing required type-specific information`);
@@ -1828,7 +1842,7 @@ Anything not covered above is unspecified. Add a question against this page rath
       usages: ["id", "pageId", "pageName", "componentId", "section", "tab", "context", "displayLabel", "dataId", "routeId", "requiredness", "providerText", "sourceText", "nativeFieldText", "dbFieldText", "calculated", "transformationText", "refreshCadence", "visibleWhen", "notes"],
       questions: ["id", "type", "statement", "affects", "owner", "neededBy", "answer", "notes"] };
     const labels = { id: "ID", name: "Name", category: "Category", meaning: "Meaning", cardinality: "Cardinality", structure: "Structure", dataType: "Data type", format: "Format", decimals: "Decimals", nullRule: "Null rule", example: "Example", rung: "Rung", rawSource: "Raw source", domains: "Domains", scope: "Scope", currency: "Currency", feeds: "Column F feeds", delivery: "Delivery", cadence: "Cadence", owner: "Owner", notes: "Notes", providerId: "Provider ID", providerName: "Provider", feedKey: "Feed key", originalColumnF: "Original column F", dataId: "Data ID", routeName: "Route name", feedId: "Feed ID", feedName: "Feed", country: "Country", securityType: "Security type", assetClass: "Asset class", jurisdiction: "Jurisdiction", otherCondition: "Other condition", sourceFeed: "Source feed text", nativeField: "Native field", nativeType: "Native type", dbField: "DB field", transformation: "Transformation", refreshCadence: "Refresh", visibleWhen: "Visible when", verified: "Verified", pageId: "Page ID", pageName: "Page", componentId: "B04 component", section: "Section", tab: "Tab", context: "Context", displayLabel: "Display label", routeId: "Route ID", requiredness: "Backing", providerText: "Provider text", sourceText: "Source text", nativeFieldText: "Native text", dbFieldText: "DB text", calculated: "Calculated", transformationText: "Calc text", type: "Type", statement: "Statement", affects: "Affects", neededBy: "Needed by", answer: "Answer" };
-    const choices = { cardinality: ["not yet defined", "one", "many"], structure: ["not yet defined", "value", "record"], rung: ["below L0", "L0 exists", "L1 display", "L2 sourced", "L3 verified"], type: ["question", "decision", "observation", "scope"] };
+    const choices = { cardinality: ["not yet defined", "one", "many"], structure: ["not yet defined", "value", "record"], rung: ["below L0", "L0 exists", "L1 display", "L2 sourced", "L3 verified"], type: ["question", "decision", "observation"] };
     return (common[section] || []).map(key => ({ key, label: labels[key] || key, choices: choices[key] }));
   }
 
@@ -1987,7 +2001,7 @@ Anything not covered above is unspecified. Add a question against this page rath
     return `<details class="data-record"><summary><span class="row-id">${esc(record.id || record._id)}</span><strong>${esc(record.type || "question")}</strong><small>${esc(record.statement || "No statement")}</small><span class="status-chip status--${esc(record._status || "todo")}"><span class="status-dot"></span>${esc(statusLabel(record._status || "todo"))}</span></summary>
       <div class="data-record-body">${renderDataRecordHonesty("questions", index, record)}<div class="data-record-grid">
         ${dataFieldLabel("questions", index, record, "id", "Question / decision ID")}
-        ${dataFieldLabel("questions", index, record, "type", "Type", { choices: ["question", "decision", "observation", "scope"] })}
+        ${dataFieldLabel("questions", index, record, "type", "Type", { choices: ["question", "decision", "observation"] })}
         ${dataFieldLabel("questions", index, record, "statement", "Statement", { type: "textarea", wide: true })}
         ${dataFieldLabel("questions", index, record, "affects", "Affected records")}
         ${dataFieldLabel("questions", index, record, "owner", "Owner")}
@@ -2133,36 +2147,95 @@ Anything not covered above is unspecified. Add a question against this page rath
       ${inputs}
       <label class="field"><span>Who must answer or accept</span><input data-record-meta="accountable" data-record-id="${esc(recordId)}" value="${esc(row._accountable || "")}" ${disabled ? "disabled" : ""}></label>
       <label class="field"><span>Status note</span><textarea data-record-meta="note" data-record-id="${esc(recordId)}" ${disabled ? "disabled" : ""}>${esc(row._note || "")}</textarea></label>
-    </div></div><div class="inspector-section"><h3>Related notes</h3>${related.length ? `<div class="related-records">${related.map(record => `<div><span class="mock-marker mock-marker--${esc(markerClass(record.type === "scope" ? "out of scope" : record.type === "question" ? "unanswered" : record.type === "observation" ? "observed" : "required"))}">${esc(record.type)}</span><strong>${esc(record.id || record._id || "B12")}</strong><p>${esc(record.statement || "No note recorded")}</p></div>`).join("")}</div>` : `<p>No B12 note references ${esc(recordId)} yet.</p>`}</div>`;
+    </div></div><div class="inspector-section"><h3>Related notes</h3>${related.length ? `<div class="related-records">${related.map(record => `<div><span class="mock-marker mock-marker--${esc(markerClass(record.type === "question" ? "unanswered" : record.type === "observation" ? "observed" : "required"))}">${esc(record.type)}</span><strong>${esc(record.id || record._id || "B12")}</strong><p>${esc(record.statement || "No note recorded")}</p></div>`).join("")}</div>` : `<p>No B12 note references ${esc(recordId)} yet.</p>`}</div>`;
   }
 
-  function renderInspector() {
+  const NOTE_FILTERS = [
+    { key: "all", label: "All" },
+    { key: "decision", label: "Decisions" },
+    { key: "observation", label: "Observations" },
+    { key: "question", label: "Questions" },
+    { key: "log", label: "Log" }
+  ];
+
+  function noteTypeLabel(type) {
+    return { decision: "Decision", observation: "Observation", question: "Question" }[type] || "Note";
+  }
+
+  function noteDate(note) {
+    return note.decidedWhen || note.observedWhen || note.neededBy || note.createdAt || note.updatedAt || "";
+  }
+
+  function noteFieldsFor(row) {
+    const definition = BLOCKS.find(block => block.id === "B12");
+    const field = definition && findField(definition, "records");
+    return field ? field.fields.filter(column => !column.forTypes || column.forTypes.includes(row.type)) : [];
+  }
+
+  function noteControl(column, row, index) {
+    const attributes = `data-value-input data-block="B12" data-field="${column.key}" data-row="${index}" data-row-key="records"`;
+    if (column.type === "textarea") return `<textarea ${attributes} rows="${column.rows || 3}" placeholder="${esc(column.placeholder || "")}">${esc(row[column.key] || "")}</textarea>`;
+    if (column.type === "select") return `<select ${attributes}>${column.choices.map(choice => `<option value="${esc(choice)}" ${row[column.key] === choice ? "selected" : ""}>${esc(choice)}</option>`).join("")}</select>`;
+    return `<input ${attributes} type="${column.inputType || "text"}" value="${esc(row[column.key] || "")}" placeholder="${esc(column.placeholder || "")}">`;
+  }
+
+  function renderNoteEntry(row, index) {
+    const date = noteDate(row);
+    const fields = noteFieldsFor(row).map(column => `<label class="field ${column.type === "textarea" ? "field--wide" : ""}"><span>${esc(column.label)}</span>${noteControl(column, row, index)}</label>`).join("");
+    return `<details class="note-log-entry note-log-entry--${esc(row.type || "note")}" open>
+      <summary>
+        <span class="note-dot"></span>
+        <span class="note-summary-copy"><strong>${esc(row.statement || "Empty note")}</strong><small>${esc(noteTypeLabel(row.type))}${row.affects ? ` · ${esc(row.affects)}` : ""}${date ? ` · ${esc(date)}` : ""}</small></span>
+        <span class="status-chip status--${esc(row._status || "todo")}">${esc(statusLabel(row._status || "todo"))}</span>
+      </summary>
+      <div class="note-log-body">
+        <div class="note-meta-row">
+          <label class="field"><span>Status</span>${statusSelect(row._status || "todo", `data-row-status data-block="B12" data-field="records" data-row="${index}"`)}</label>
+          <label class="field"><span>Assigned to</span>${reviewerSelect(row._accountable || "", `data-row-meta="accountable" data-block="B12" data-field="records" data-row="${index}"`)}</label>
+        </div>
+        <label class="field"><span>Status note</span><input data-row-meta="note" data-block="B12" data-field="records" data-row="${index}" value="${esc(row._note || "")}"></label>
+        <div class="note-fields">${fields}</div>
+        <button class="remove-row" data-remove-row data-block="B12" data-field="records" data-row="${index}" type="button">Remove note</button>
+      </div>
+    </details>`;
+  }
+
+  function renderChangeLog() {
+    const entries = (state.changeLog || []).slice().reverse();
+    return entries.length ? `<div class="note-log-list note-log-list--changes">${entries.map(entry => `<article class="note-log-entry note-log-entry--system">
+      <div class="note-log-static"><span class="note-dot"></span><div><strong>${esc(entry.note || "Change recorded")}</strong><small>${esc(entry.version || "version")} · ${esc(entry.date ? new Date(entry.date).toLocaleString() : "no date")}</small></div></div>
+    </article>`).join("")}</div>` : `<p class="notes-empty">No log entries yet.</p>`;
+  }
+
+  function renderNotesPanel() {
     const inspector = $("#inspector");
     if (state.activePageId === DATA_SECTION_ID) { renderDataInspector(); return; }
     const page = activePage();
-    if (!page) return;
-    let definition = BLOCKS.find(block => block.id === selection.blockId) || BLOCKS[0];
-    let extra = "";
-    if (selection.kind === "field") {
-      const field = findField(definition, selection.fieldKey);
-      if (field) extra = `<div class="inspector-section"><h3>Question to ask</h3><p>${esc(field.question)}</p></div><div class="inspector-section"><h3>Input</h3><p>${field.type === "rows" ? "Repeatable structured records" : esc(field.label)}</p></div>`;
+    if (!page || !page.built || !page.blocks || !page.blocks.B12) {
+      inspector.innerHTML = `<div class="notes-panel"><div class="notes-panel-head"><span class="inspector-kicker">NOTES</span><h2>Activity log</h2></div><p class="notes-empty">Build this page before tracking notes.</p></div>`;
+      return;
     }
-    if (selection.kind === "row") {
-      const field = findField(definition, selection.fieldKey);
-      const row = field && (page.blocks[definition.id].values[field.key] || [])[selection.rowIndex];
-      if (row) extra = `<div class="inspector-section"><h3>Selected record</h3><div class="inspector-record">${Object.entries(row).filter(([key]) => !key.startsWith("_")).map(([key, value]) => `<div><span>${esc(key)}</span><strong>${esc(value || "—")}</strong></div>`).join("")}</div></div>`;
-    }
-    if (selection.kind === "record") {
-      const found = findRecord(page, selection.recordId);
-      if (found) {
-        definition = found.definition;
-        extra = inspectorRecordEditor(found, false);
-      } else extra = `<div class="inspector-section"><h3>No specification record</h3><p>This visible item has no record. Add it through the B04 Mock composer, or remove it from the mock.</p></div>`;
-    }
-    const block = page.blocks[definition.id];
-    inspector.innerHTML = `<span class="inspector-kicker">${definition.id}</span><h2>${esc(definition.title)}</h2><div class="inspector-owner">Answered by ${esc(definition.answeredBy)}</div>
-      <div class="inspector-section"><h3>Current honesty</h3><p><span class="status-chip status--${esc(block.status)}"><span class="status-dot"></span>${esc(statusLabel(block.status))}</span>${block.accountable ? ` · ${esc(block.accountable)}` : ""}</p></div>
-      ${extra}`;
+    const records = page.blocks.B12.values.records || [];
+    const counts = {
+      all: records.length,
+      decision: records.filter(row => row.type === "decision").length,
+      observation: records.filter(row => row.type === "observation").length,
+      question: records.filter(row => row.type === "question").length,
+      log: (state.changeLog || []).length
+    };
+    const active = NOTE_FILTERS.some(filter => filter.key === notesFilter) ? notesFilter : "all";
+    const visible = active === "all" ? records : records.filter(row => row.type === active);
+    const tabs = NOTE_FILTERS.map(filter => `<button class="${active === filter.key ? "is-active" : ""}" data-notes-filter="${filter.key}" type="button">${esc(filter.label)} <b>${esc(counts[filter.key] || 0)}</b></button>`).join("");
+    inspector.innerHTML = `<div class="notes-panel">
+      <div class="notes-panel-head"><span class="inspector-kicker">NOTES</span><h2>${esc(page.name || "Page")} activity</h2><p>Decisions, observations, and questions from B12.</p></div>
+      <div class="notes-tabs">${tabs}</div>
+      <div class="notes-quick-add"><button data-add-note-type="decision" type="button">+ Decision</button><button data-add-note-type="observation" type="button">+ Observation</button><button data-add-note-type="question" type="button">+ Question</button></div>
+      ${active === "log" ? renderChangeLog() : `<div class="note-log-list">${visible.length ? visible.map((row, index) => renderNoteEntry(row, records.indexOf(row))).join("") : `<p class="notes-empty">No ${active === "all" ? "notes" : active + "s"} yet.</p>`}</div>`}
+    </div>`;
+  }
+
+  function renderInspector() {
+    renderNotesPanel();
   }
 
   function renderPreview() {
@@ -2607,6 +2680,22 @@ Anything not covered above is unspecified. Add a question against this page rath
     if (event.target.closest("#export-button")) { exportPdf(); return; }
     if (event.target.closest("#reset-demo-button") && confirm("Reset this browser to the committed template menu? Browser-only Mockument changes will be cleared.")) { resetToCommittedTemplate(); return; }
     if (event.target.closest("#theme-button")) { cycleTheme(); return; }
+    const notesTab = event.target.closest("[data-notes-filter]");
+    if (notesTab) { notesFilter = notesTab.dataset.notesFilter || "all"; renderInspector(); return; }
+    const addNoteType = event.target.closest("[data-add-note-type]");
+    if (addNoteType) {
+      const page = currentEditablePage();
+      const definition = BLOCKS.find(item => item.id === "B12");
+      const fieldDefinition = definition && findField(definition, "records");
+      if (!page || !fieldDefinition) return;
+      const rows = page.blocks.B12.values.records;
+      const row = newRow(fieldDefinition, rows.length);
+      row.type = addNoteType.dataset.addNoteType || "observation";
+      row.createdAt = new Date().toISOString();
+      rows.push(row);
+      notesFilter = row.type;
+      saveState(); render(); return;
+    }
     if (event.target.closest("[data-open-preview]")) { previewMode = true; selectBlock("B04"); render(); return; }
     if (event.target.closest("[data-exit-preview]")) { previewMode = false; selectBlock("B04"); render(); revealActiveBlock(); return; }
     const dataView = event.target.closest("[data-data-view]");
