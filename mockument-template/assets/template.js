@@ -3,8 +3,8 @@
 
   const BLOCKS = window.MOCKUMENT_BLOCKS || [];
   const STORAGE_KEY = "honest-mockument-template-state";
-  const SCHEMA_VERSION = 36;
-  const TEMPLATE_VERSION = "0.40.0";
+  const SCHEMA_VERSION = 37;
+  const TEMPLATE_VERSION = "0.41.0";
   const FIDELITY_NOTE = "Structure only, example data, nothing here is proof that the application works.";
   const THEME_KEY = "mockument-theme";
   const THEME_CYCLE = ["system", "dark", "light"];
@@ -959,6 +959,14 @@
       if (!next.changeLog.some(entry => entry.version === "0.39.0")) next.changeLog.push({ version: "0.39.0", date: new Date().toISOString(), note: "Turned the right column into a page notes activity log and removed Scope as a note type." });
     }
     if (!next.changeLog.some(entry => entry.version === "0.40.0")) next.changeLog.push({ version: "0.40.0", date: new Date().toISOString(), note: "Added B04 in-document mock record editing and editable JSON import/export." });
+    if (previousSchemaVersion < 37) {
+      Object.values(next.pages).forEach(page => {
+        const notes = page.blocks && page.blocks.B12 && page.blocks.B12.values && page.blocks.B12.values.records;
+        if (!Array.isArray(notes)) return;
+        notes.forEach(note => { if (note.blockRef == null) note.blockRef = ""; });
+      });
+    }
+    if (!next.changeLog.some(entry => entry.version === "0.41.0")) next.changeLog.push({ version: "0.41.0", date: new Date().toISOString(), note: "Filtered right-column notes by the active Mockument block and added block-aware note creation." });
     return next;
   }
 
@@ -2179,6 +2187,17 @@ Anything not covered above is unspecified. Add a question against this page rath
     return note.decidedWhen || note.observedWhen || note.neededBy || note.createdAt || note.updatedAt || "";
   }
 
+  function activeNotesBlockId() {
+    return selection && selection.blockId ? selection.blockId : "B01";
+  }
+
+  function noteReferencesBlock(note, blockId) {
+    if (!blockId || blockId === "B01") return true;
+    if (note.blockRef === blockId) return true;
+    const pattern = new RegExp(`(^|[^a-z0-9])${blockId.toLowerCase()}([^a-z0-9]|$)`, "i");
+    return [note.affects, note.appliedTo, note.blocks, note.statement].some(value => pattern.test(String(value || "")));
+  }
+
   function noteFieldsFor(row) {
     const definition = BLOCKS.find(block => block.id === "B12");
     const field = definition && findField(definition, "records");
@@ -2198,7 +2217,7 @@ Anything not covered above is unspecified. Add a question against this page rath
     return `<details class="note-log-entry note-log-entry--${esc(row.type || "note")}" open>
       <summary>
         <span class="note-dot"></span>
-        <span class="note-summary-copy"><strong>${esc(row.statement || "Empty note")}</strong><small>${esc(noteTypeLabel(row.type))}${row.affects ? ` · ${esc(row.affects)}` : ""}${date ? ` · ${esc(date)}` : ""}</small></span>
+        <span class="note-summary-copy"><strong>${esc(row.statement || "Empty note")}</strong><small>${esc(noteTypeLabel(row.type))}${row.blockRef ? ` · ${esc(row.blockRef)}` : ""}${row.affects ? ` · ${esc(row.affects)}` : ""}${date ? ` · ${esc(date)}` : ""}</small></span>
         <span class="status-chip status--${esc(row._status || "todo")}">${esc(statusLabel(row._status || "todo"))}</span>
       </summary>
       <div class="note-log-body">
@@ -2229,21 +2248,27 @@ Anything not covered above is unspecified. Add a question against this page rath
       return;
     }
     const records = page.blocks.B12.values.records || [];
+    const blockId = activeNotesBlockId();
+    const blockScoped = blockId && blockId !== "B01";
+    const scopedRecords = records.filter(row => noteReferencesBlock(row, blockId));
+    if (blockScoped && notesFilter === "log") notesFilter = "all";
+    const filters = blockScoped ? NOTE_FILTERS.filter(filter => filter.key !== "log") : NOTE_FILTERS;
     const counts = {
-      all: records.length,
-      decision: records.filter(row => row.type === "decision").length,
-      observation: records.filter(row => row.type === "observation").length,
-      question: records.filter(row => row.type === "question").length,
+      all: scopedRecords.length,
+      decision: scopedRecords.filter(row => row.type === "decision").length,
+      observation: scopedRecords.filter(row => row.type === "observation").length,
+      question: scopedRecords.filter(row => row.type === "question").length,
       log: (state.changeLog || []).length
     };
-    const active = NOTE_FILTERS.some(filter => filter.key === notesFilter) ? notesFilter : "all";
-    const visible = active === "all" ? records : records.filter(row => row.type === active);
-    const tabs = NOTE_FILTERS.map(filter => `<button class="${active === filter.key ? "is-active" : ""}" data-notes-filter="${filter.key}" type="button">${esc(filter.label)} <b>${esc(counts[filter.key] || 0)}</b></button>`).join("");
+    const active = filters.some(filter => filter.key === notesFilter) ? notesFilter : "all";
+    const visible = active === "all" ? scopedRecords : scopedRecords.filter(row => row.type === active);
+    const tabs = filters.map(filter => `<button class="${active === filter.key ? "is-active" : ""}" data-notes-filter="${filter.key}" type="button">${esc(filter.label)} <b>${esc(counts[filter.key] || 0)}</b></button>`).join("");
+    const scopeLabel = blockScoped ? `${blockId} related notes` : "All page notes";
     inspector.innerHTML = `<div class="notes-panel">
-      <div class="notes-panel-head"><span class="inspector-kicker">NOTES</span><h2>${esc(page.name || "Page")} activity</h2><p>Decisions, observations, and questions from B12.</p></div>
+      <div class="notes-panel-head"><span class="inspector-kicker">NOTES</span><h2>${esc(page.name || "Page")} activity</h2><p>${esc(scopeLabel)} from B12. Add here to bind a note to the current block.</p></div>
       <div class="notes-tabs">${tabs}</div>
       <div class="notes-quick-add"><button data-add-note-type="decision" type="button">+ Decision</button><button data-add-note-type="observation" type="button">+ Observation</button><button data-add-note-type="question" type="button">+ Question</button></div>
-      ${active === "log" ? renderChangeLog() : `<div class="note-log-list">${visible.length ? visible.map((row, index) => renderNoteEntry(row, records.indexOf(row))).join("") : `<p class="notes-empty">No ${active === "all" ? "notes" : active + "s"} yet.</p>`}</div>`}
+      ${active === "log" ? renderChangeLog() : `<div class="note-log-list">${visible.length ? visible.map(row => renderNoteEntry(row, records.indexOf(row))).join("") : `<p class="notes-empty">No ${active === "all" ? "notes" : active + "s"} related to ${esc(blockScoped ? blockId : "this page")} yet.</p>`}</div>`}
     </div>`;
   }
 
@@ -2742,6 +2767,7 @@ Anything not covered above is unspecified. Add a question against this page rath
       const rows = page.blocks.B12.values.records;
       const row = newRow(fieldDefinition, rows.length);
       row.type = addNoteType.dataset.addNoteType || "observation";
+      row.blockRef = activeNotesBlockId() === "B01" ? "" : activeNotesBlockId();
       row.createdAt = new Date().toISOString();
       rows.push(row);
       notesFilter = row.type;

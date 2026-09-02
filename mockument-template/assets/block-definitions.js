@@ -221,6 +221,7 @@
       fields: [rows("records", "Notes", "What notes are related to this page?", [
         select("type", "Note type", "What kind of note is this?", ["decision", "observation", "question"]),
         textarea("statement", "Note", "What was decided, observed, or asked?"),
+        select("blockRef", "Related block", "Which Mockument block should show this note in the right panel? B01 shows all notes.", ["", "B02", "B03", "B04", "B05", "B06", "B07", "B08", "B09", "B10", "B11", "B12", "B13"]),
         text("affects", "Affected records", "Which stable page, data, component, action, condition, workflow, or wording IDs does this affect?"),
         select("decisionScope", "Decision scope", "How broadly does this accepted decision apply?", ["this page", "application-wide", "data or source", "workflow"], { forTypes: ["decision"] }),
         text("decidedBy", "Decided by", "Who had authority to make or accept this decision?", { forTypes: ["decision"] }),
