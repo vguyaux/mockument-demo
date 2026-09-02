@@ -3,8 +3,8 @@
 
   const BLOCKS = window.MOCKUMENT_BLOCKS || [];
   const STORAGE_KEY = "honest-mockument-template-state";
-  const SCHEMA_VERSION = 34;
-  const TEMPLATE_VERSION = "0.37.0";
+  const SCHEMA_VERSION = 35;
+  const TEMPLATE_VERSION = "0.38.0";
   const FIDELITY_NOTE = "Structure only, example data, nothing here is proof that the application works.";
   const THEME_KEY = "mockument-theme";
   const THEME_CYCLE = ["system", "dark", "light"];
@@ -211,7 +211,7 @@
   }
 
   function initialDataDictionary() {
-    return cloneImportedDataDictionary();
+    return emptyDataDictionary();
   }
 
   function createInitialState() {
@@ -304,19 +304,11 @@
 
   function syncDataDictionary(app) {
     if (!app.dataDictionary) app.dataDictionary = emptyDataDictionary();
-    const seed = importedDataDictionarySeed();
-    const seedVersion = dataDictionarySeedVersion(seed);
     const dictionary = app.dataDictionary;
     ["catalog", "routes", "providers", "feeds", "usages", "questions"].forEach(key => { if (!Array.isArray(dictionary[key])) dictionary[key] = []; });
-    const isEmpty = !dictionary.catalog.length && !dictionary.routes.length && !dictionary.providers.length && !dictionary.usages.length && !dictionary.questions.length;
-    if (seed && ((isEmpty && !dictionary.seeded) || (seed.resetLocalDataDictionaryOnVersionChange && dictionary.seedVersion !== seedVersion))) {
-      app.dataDictionary = cloneImportedDataDictionary();
-      return syncDataDictionary(app);
-    }
     if (dictionary.sourceWorkbook == null) dictionary.sourceWorkbook = "";
     if (dictionary.importedAt == null) dictionary.importedAt = "";
     if (dictionary.seeded == null) dictionary.seeded = false;
-    if (seed && !dictionary.seedVersion) dictionary.seedVersion = seedVersion;
     dictionary.catalog.forEach((record, index) => {
       syncDataRecord(record, "DATA", index);
       if (!record.cardinality) record.cardinality = "not yet defined";
@@ -946,6 +938,11 @@
       next.app.workflows = [];
       if (!next.changeLog.some(entry => entry.version === "0.37.0")) next.changeLog.push({ version: "0.37.0", date: new Date().toISOString(), note: "Moved workflow authoring out of Settings and back into B10 page-level workflow participation records." });
     }
+    if (previousSchemaVersion < 35) {
+      next.app.dataDictionary = emptyDataDictionary();
+      dataDictionaryAnchor = "";
+      if (!next.changeLog.some(entry => entry.version === "0.38.0")) next.changeLog.push({ version: "0.38.0", date: new Date().toISOString(), note: "Cleared the default Data Dictionary content so each app can define its own data tables." });
+    }
     return next;
   }
 
@@ -1111,23 +1108,12 @@
         </button>
       </div>
       ${roots.length ? roots.map(item).join("") : ""}
-      <details class="menu-disclosure" id="data-dictionary-menu" ${dataDictionaryMenuOpen ? "open" : ""}>
-        <summary class="menu-link ${state.activePageId === DATA_SECTION_ID ? "is-active" : ""}">
+      <div class="menu-item-wrap">
+        <button class="menu-link ${state.activePageId === DATA_SECTION_ID ? "is-active" : ""}" data-open-data-section type="button">
           <span class="menu-icon">D</span>
-          <span class="menu-copy"><strong>Data Dictionary</strong><small>catalog, feeds, routes</small></span>
-          <span class="menu-caret">▾</span>
-        </summary>
-        <div class="submenu">
-          ${[
-            ["catalog", "Data catalog"],
-            ["providers", "Provider registry"],
-            ["feeds", "Provider feeds"],
-            ["routes", "Source routes"],
-            ["usages", "Page usages"],
-            ["questions", "Data questions"]
-          ].map(([anchor, label]) => `<button class="menu-link ${state.activePageId === DATA_SECTION_ID && dataDictionaryAnchor === anchor ? "is-active" : ""}" data-open-data-section data-data-anchor="${anchor}" type="button"><span class="menu-copy"><strong>${label}</strong><small>Data Dictionary</small></span></button>`).join("")}
-        </div>
-      </details>`;
+          <span class="menu-copy"><strong>Data Dictionary</strong></span>
+        </button>
+      </div>`;
     const settingsLink = $("#settings-link");
     if (settingsLink) settingsLink.classList.toggle("is-active", state.activePageId === "settings");
     $("#app-name-small").textContent = state.app.name || "Application Name";
@@ -2004,38 +1990,12 @@ Anything not covered above is unspecified. Add a question against this page rath
 
   function renderDataDictionary() {
     document.title = `${state.app.name || "Application Name"} — Data Dictionary`;
-    const data = dictionary();
-    const counts = dataRecordCounts();
-    const imported = data.sourceWorkbook ? `Imported from ${data.sourceWorkbook}` : "No workbook imported yet";
-    const section = (key, title, description, renderer) => {
-      const mode = dataDictionaryViews[key] || "form";
-      const records = data[key] || [];
-      const body = mode === "table" ? renderDataTable(key, records) : `<div class="data-records">${records.map((record, index) => renderer(record, index, counts)).join("") || `<p class="repeater-empty">No records yet.</p>`}</div>`;
-      return `<section class="data-section" id="data-${esc(key)}"><div class="data-section-head"><div><span class="eyebrow">${esc(key)}</span><h2>${esc(title)}</h2><p>${esc(description)}</p></div><div class="data-section-actions"><div class="segment data-view-toggle"><button class="${mode === "form" ? "is-on" : ""}" data-data-view="form" data-data-section-view="${esc(key)}" type="button">Look in form</button><button class="${mode === "table" ? "is-on" : ""}" data-data-view="table" data-data-section-view="${esc(key)}" type="button">Look in tables</button></div><button class="button button--small" data-add-data-record="${esc(key)}" type="button">+ Add</button></div></div>${body}</section>`;
-    };
-    $("#document").innerHTML = `<header class="document-head data-document-head"><span class="eyebrow">Application source of truth</span><h1>Data Dictionary</h1><p class="document-lede">Application-level data dictionary for canonical fields, provider feeds, source routes, page usages and unresolved data questions. One field may have many source routes; each route must state the condition under which it applies.</p><div class="meta-strip"><span class="meta-chip">${esc(imported)}</span><span class="meta-chip">${esc((data.catalog || []).length)} fields</span><span class="meta-chip">${esc((data.providers || []).length)} providers</span><span class="meta-chip">${esc((data.feeds || []).length)} feeds</span><span class="meta-chip">${esc((data.routes || []).length)} source routes</span><span class="meta-chip">${esc((data.usages || []).length)} usages</span></div></header>
-      <section class="data-method-card"><strong>Honest data rule</strong><p>Do not guess the source. If a metric can come from two places, keep one canonical field and create separate source routes with explicit country, currency, security type, asset class, jurisdiction, or other routing conditions. Provider Registry column F is split into Provider feeds, and routes should link to exact Feed IDs wherever possible.</p></section>
-      <div class="overview-cards data-cards"><div><strong>${esc((data.catalog || []).length)}</strong><span>canonical fields</span></div><div><strong>${esc((data.feeds || []).length)}</strong><span>provider feeds</span></div><div><strong>${esc((data.routes || []).length)}</strong><span>source routes</span></div><div><strong>${esc(counts.unlinkedRouteFeeds)}</strong><span>routes without feed ID</span></div><div><strong>${esc(counts.routeIssues)}</strong><span>routes needing QA</span></div><div><strong>${esc(counts.missingMetricUsages)}</strong><span>usages without data ID</span></div></div>
-      ${section("catalog", "Data catalog", "Canonical fields/metrics. This replaces the Metric Catalog sheet and is what B03/B04 should select from.", renderCatalogRecord)}
-      ${section("providers", "Provider registry", "Data providers and internal sources. Provider facts belong here, not duplicated beside every field.", renderProviderRecord)}
-      ${section("feeds", "Provider feeds", "Structured records created from Provider Registry column F. Source routes should point to these exact Feed IDs rather than repeating source-file text.", renderFeedRecord)}
-      ${section("routes", "Source routes", "One canonical field can have many source routes. Routes own provider, feed, native field, DB field, transformation, refresh and visibility timing.", renderRouteRecord)}
-      ${section("usages", "Page and component usages", "Where fields appear in the app. Later these will attach directly to B04 component IDs.", renderUsageRecord)}
-      ${section("questions", "Data questions, decisions and scope", "Open data issues generated from the workbook plus future human decisions.", renderQuestionRecord)}`;
-    if (dataDictionaryAnchor) setTimeout(() => {
-      const target = document.getElementById(`data-${dataDictionaryAnchor}`);
-      if (target && typeof target.scrollIntoView === "function") target.scrollIntoView({ behavior: "smooth", block: "start" });
-    }, 0);
+    dataDictionaryAnchor = "";
+    $("#document").innerHTML = `<header class="document-head data-document-head"><span class="eyebrow">Application menu</span><h1>Data Dictionary</h1></header>`;
   }
 
   function renderDataInspector() {
-    const data = dictionary();
-    const counts = dataRecordCounts();
-    $("#inspector").innerHTML = `<span class="inspector-kicker">DATA</span><h2>Data Dictionary</h2><div class="inspector-owner">Application-level source of truth</div>
-      <div class="inspector-section"><h3>Definition</h3><p>Canonical application data catalog, provider registry, provider feeds from column F, source routing matrix, screen/component usages, and unresolved data questions.</p></div>
-      <div class="inspector-section"><h3>Why it exists</h3><p>Mockups and builds must select known fields, feeds and routes instead of inventing provider, source, timing or calculation details after the screen is drawn.</p></div>
-      <div class="inspector-section"><h3>Current honesty</h3><p>${esc((data.catalog || []).length)} fields, ${esc((data.providers || []).length)} providers, ${esc((data.feeds || []).length)} feeds, ${esc((data.routes || []).length)} routes, ${esc((data.usages || []).length)} usages.</p></div>
-      <div class="inspector-section"><h3>Data QA</h3><div class="readiness-details"><div class="readiness-detail readiness-detail--${counts.routeIssues ? "missing" : "ready"}"><b>R</b><span><strong>Routes</strong><small>${counts.routeIssues ? `${counts.routeIssues} route records are missing provider/source/native field/transformation or routing conditions.` : "Source routes have minimum routing evidence."}</small></span></div><div class="readiness-detail readiness-detail--${counts.unlinkedRouteFeeds ? "missing" : "ready"}"><b>F</b><span><strong>Feeds</strong><small>${counts.unlinkedRouteFeeds ? `${counts.unlinkedRouteFeeds} source routes do not yet point at an exact Provider Feed ID.` : "Every source route points at a provider feed."}</small></span></div><div class="readiness-detail readiness-detail--${counts.missingMetricUsages ? "missing" : "ready"}"><b>U</b><span><strong>Usages</strong><small>${counts.missingMetricUsages ? `${counts.missingMetricUsages} usage records do not yet point at a canonical data ID.` : "Every usage points at a canonical field."}</small></span></div></div></div>`;
+    $("#inspector").innerHTML = `<span class="inspector-kicker">DATA</span><h2>Data Dictionary</h2>`;
   }
 
   function renderApplicationOverview() {

@@ -24,18 +24,16 @@ http://127.0.0.1:8000/mockument-template/
 - New pages can be top-level menu items or submenus beneath an existing top-level page.
 - Planned pages can be added as `not drawn`, keeping proposed destinations visible until Template is copied into them.
 - **Settings** always exists as an application page. It begins as `not drawn` and can be built from Template.
-- **Data Dictionary** is an application-level left-menu section, not a page. It has submenu links for Data catalog, Provider registry, Provider feeds, Source routes, Page usages and Data questions. Each section can switch between **Look in form** and **Look in tables** views.
+- **Data Dictionary** is an application-level left-menu title, not a page. It is intentionally empty so each app can define its own data tables later.
 - Settings also contains the Mockument-wide application name and a clean list of people working on it. Human-review dropdowns use this same people list. Browser titles use `Application Name — Page Name`.
 - Every block has four human-review controls—Walk-through, Mockument QA, Build and Dev QA. Each box records the confirming person and date/time. A block must have Block status set to `Done` before its Walk-through AI stage can be ready. Mockument QA becomes available only after the Walk-through human check is confirmed, Build becomes available only after the Mockument QA human check is confirmed, and Dev QA becomes available once Build is confirmed.
 - The top navigator shows separate AI-stage and human-check matrices for all 13 blocks and acts as the block menu.
 - Focused block view is the default. B01 includes the page overview—Canonical page source/Mockument page heading, metadata, page tools and overall readiness—above the B01 block. B02–B13 hide that overview and render only the selected block beneath the pinned dashboard. A reserved scrollbar gutter prevents movement when block heights differ. Previous/Next controls and URL hashes support sequential and deep-linked navigation.
 - **View all blocks** remains available for printing, browser search and full-document review.
 
-## Data Dictionary, data definitions and mock composer
+## Data definitions and mock composer
 
-Data Dictionary is the application-wide source of truth for data. A canonical field belongs in the Data catalog once; if it can come from different places for CAD/USD, US/Canada, security/ETF/fund or any other condition, each option becomes a separate Source route with explicit routing conditions. Provider facts belong in the Provider registry. Provider Registry column F is split into Provider feeds so routes can point at exact feed/file IDs rather than repeating free text. Spreadsheet/source text is retained as raw imported evidence until a human turns it into verified routes.
-
-B03 defines page-specific business data before B04 composes the page. A B03 row can link to a Data Dictionary field or remain local/provisional. Cardinality (`one` or `many`) and structure (`value` or `record`) describe the data independently of its presentation. Data-bound mock records select a B03 definition, a Data Dictionary definition, remain explicitly unresolved, or create a new B03 definition directly from the inspector.
+B03 defines page-specific business data before B04 composes the page. A B03 row can remain local/provisional until the current app defines its own data-table model. Cardinality (`one` or `many`) and structure (`value` or `record`) describe the data independently of its presentation. Data-bound mock records can select a B03 definition, remain explicitly unresolved, or create a new B03 definition directly from the inspector.
 
 B04 begins as a blank layout canvas; it no longer assumes a fixed application menu, content column, or single panel row. A copied page can:
 
@@ -61,13 +59,13 @@ B08 explicitly records whether nothing changes without a person acting or refres
 
 B12 is **Notes**. Every note begins with a Decision, Observation, Question or Scope dropdown and reveals only the fields appropriate to that note type. Active decision notes are included in B13’s build contract only when their applied canonical references are recorded.
 
-Settings includes a generated Mockument overview: all drawn and not-drawn pages, page readiness, blocking questions, page-level data references and shared component references.
+Settings includes a generated Mockument overview: all drawn and not-drawn pages, page readiness, blocking questions, page-level data definitions and shared component references.
 
 Workflow participation is authored in B10 on each page. Each workflow record captures the workflow ID/name, step ID/name, targeted B04 surface or action, previous step, trigger, next step and terminal outcome. Settings no longer contains a workflow editor.
 
-## Data, menu seed and persistence
+## Menu seed and persistence
 
-The app stores the working Mockument, including Data Dictionary, in browser `localStorage` under `honest-mockument-template-state`. The data dictionary seed lives in `assets/seed-data-dictionary.js`. This copy currently restores the imported spreadsheet sample data so the Data Dictionary demo remains populated; replace that seed when returning the shared template to a market-neutral baseline.
+The app stores the working Mockument in browser `localStorage` under `honest-mockument-template-state`. The Data Dictionary menu item is intentionally a blank title; app-specific data tables should be designed per build.
 
 The demo application's committed main menu and sub-menu live in `assets/template-menu.js`. Edit that file when menu items should be part of the template and shared between GitHub Pages and local checkouts. The structure is:
 
