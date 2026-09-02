@@ -33,7 +33,7 @@ http://127.0.0.1:8000/mockument-template/
 
 ## Data definitions and mock composer
 
-B03 defines page-specific business data before B04 composes the page. A B03 row can remain local/provisional until the current app defines its own data-table model. Cardinality (`one` or `many`) and structure (`value` or `record`) describe the data independently of its presentation. Data-bound mock records can select a B03 definition, remain explicitly unresolved, or create a new B03 definition directly from the inspector.
+B03 defines page-specific business data before B04 composes the page. A B03 row can remain local/provisional until the current app defines its own data-table model. Cardinality (`one` or `many`) and structure (`value` or `record`) describe the data independently of its presentation. Data-bound mock records can select a B03 definition, remain explicitly unresolved, or create a new B03 definition directly from the B04 record editor.
 
 B04 begins as a blank layout canvas; it no longer assumes a fixed application menu, content column, or single panel row. A copied page can:
 
@@ -41,15 +41,15 @@ B04 begins as a blank layout canvas; it no longer assumes a fixed application me
 - Nest panels inside rows and rows inside panels, so headers, split content, inspectors, toolbars, footers and nested regions can be represented in either direction.
 - Give every row a stable `ROW-##` ID and every panel a stable `PNL-##` ID, semantic role, human-readable description and trace.
 - Size sibling panels and rows as responsive percentages. Drag the divider between panels to change width, or between rows to change height; the stored percentages resize with the browser.
-- Mark every row, panel, section, component and action as required, proposed, unanswered, observed or out of scope independently from its work status.
+- Mark every row, panel, section, component and action as required, proposed, unanswered, observed or out of scope independently from its work status. `Out of scope` is only a backing marker; any consequential exclusion should be explained as a B12 Decision or Observation.
 - Restrict rows, panels, sections, components and actions by role or page condition, so switching the mock controls changes what is visible.
 - Add content sections inside any row or panel and choose one, two or three inner columns per section.
 - Add static content, data-bound components, navigation, notices and actions to a content section.
 - Build application-page, current-surface, workflow-step or custom navigation only when the page actually needs it.
-- Click any row, panel, section or component and edit its canonical record in the permanent right inspector.
+- Click any row, panel, section or component and edit its canonical record in the selected-record editor inside B04.
 - Open a full-browser Preview that shows only the mock canvas filling the tab; the small arrow in the top-right returns to B04.
 
-B04 owns canonical row, panel, component and action records without rendering repeated registers. A data-bound component derives valid presentation choices from its B03 definition: one value, one record, or a many-item list/table presentation. Lists require an item definition and tables require named columns. Its grouped **Review view** offers Clean, Honesty, IDs, and Honesty + IDs modes so status evidence, backing markers and stable references remain independently inspectable without permanent visual clutter. The inspector also lists B12 notes that reference the selected mock item.
+B04 owns canonical row, panel, component and action records without rendering repeated registers. A data-bound component derives valid presentation choices from its B03 definition: one value, one record, or a many-item list/table presentation. Lists require an item definition and tables require named columns. Its grouped **Review view** offers Clean, Honesty, IDs, and Honesty + IDs modes so status evidence, backing markers and stable references remain independently inspectable without permanent visual clutter. The selected-record editor also lists B12 notes that reference the selected mock item.
 
 B05 records only material page-level departures from the automatic default condition. Sorting, filtering, column movement, selection and expansion remain B04 component behavior. Selecting a B05 condition annotates the mock with its changed message, affected components, unavailable actions and next step.
 
@@ -91,11 +91,11 @@ window.MOCKUMENT_TEMPLATE_MENU = {
 
 When `version` changes, browser-only page/menu state is reset once so the committed file becomes the source of truth. Use **Reset Demo** to clear browser-only changes and reload the committed template menu.
 
-Use **Export PDF** to print the complete Mockument.
+Use **Export PDF** to print the complete Mockument. Use **Export JSON** and **Import JSON** to move the editable local-first Mockument state between browsers, checkouts, or source control.
 
 ## App-wide changes
 
-Shared layout, definitions, validation and inspector behavior live in `assets/`. Existing pages store only page content. Schema changes should:
+Shared layout, definitions, validation, record editing and activity-log behavior live in `assets/`. Existing pages store only page content. Schema changes should:
 
 1. Update `block-definitions.js` and the canonical Template.
 2. Increase `SCHEMA_VERSION` and/or `TEMPLATE_VERSION` in `template.js`.

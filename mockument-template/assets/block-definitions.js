@@ -35,7 +35,7 @@
       why: "Presentation should select known business data rather than silently inventing meaning, provenance, timing or calculations after it has been drawn.",
       fields: [rows("data", "Data definitions for this page", "What business data can this page use?", [
         text("id", "Data ID", "What stable ID addresses this definition?", { placeholder: "DATA-01" }),
-        select("globalRef", "Data Dictionary field", "Which application-level data field defines this page data, if one already exists?", [], { dynamicOptions: "globalData", allowUnresolved: true }),
+        select("globalRef", "App data reference", "Which application-level data concept defines this page data, if one already exists?", [], { dynamicOptions: "globalData", allowUnresolved: true }),
         text("name", "Business name", "What is this data called?", { required: true }),
         textarea("meaning", "Meaning", "What does it mean in business words?", { required: true }),
         select("cardinality", "Cardinality", "Does this definition describe one item or many?", ["not yet defined", "one", "many"], { required: true }),
@@ -52,12 +52,12 @@
     },
     {
       id: "B04", group: "The mock", title: "Mock composer", answeredBy: "Page owner with business users",
-      definition: "Begin with a blank canvas, add rows and panels in either direction, then add content sections and components inside them. Every row, panel, section, component and action receives a stable record edited in the inspector.",
+      definition: "Begin with a blank canvas, add rows and panels in either direction, then add content sections and components inside them. Every row, panel, section, component and action receives a stable record edited in B04's selected-record editor.",
       why: "The Mockument must not assume a fixed sidebar, content column, or single horizontal split. Rows and panels make headers, navigation, primary content, details, inspectors, footers, split panes and nested regions explicit while preserving B03 data links and B10 workflow references.",
       custom: "mock",
       fields: [
         text("defaultRole", "Default role", "Which role opens first?"),
-        rows("rows", "Row records", "Canonical horizontal bands created by the mock composer and edited in the inspector.", [
+        rows("rows", "Row records", "Canonical horizontal bands created by the mock composer and edited in the B04 selected-record editor.", [
           text("id", "ID", "What stable ID addresses this row?", { placeholder: "ROW-01" }),
           text("name", "Row", "What is this row called?"),
           textarea("description", "Description", "What should appear next to this row reference so reviewers understand what this band represents?"),
@@ -65,9 +65,9 @@
           select("marker", "Backing", "Why is this row in the mock?", ["proposed", "required", "unanswered", "observed", "out of scope"]),
           text("visibleRoles", "Visible to roles", "Which roles see this row? Leave blank for all roles; separate names with commas."),
           text("visibleConditions", "Visible in conditions", "Which page conditions show this row? Leave blank for all conditions; separate names with commas."),
-          text("trace", "Traces to", "Which requirement, decision, question, or scope record accounts for this row?")
+          text("trace", "Traces to", "Which requirement, decision, observation, or question accounts for this row?")
         ], { idPrefix: "ROW", hidden: true }),
-        rows("panels", "Panel records", "Canonical layout regions created by the mock composer and edited in the inspector.", [
+        rows("panels", "Panel records", "Canonical layout regions created by the mock composer and edited in the B04 selected-record editor.", [
           text("id", "ID", "What stable ID addresses this panel?", { placeholder: "PNL-01" }),
           text("name", "Panel", "What is this panel called?"),
           textarea("description", "Description", "What should appear next to this panel reference so reviewers understand what this region represents?"),
@@ -76,9 +76,9 @@
           text("visibleRoles", "Visible to roles", "Which roles see this panel? Leave blank for all roles; separate names with commas."),
           text("visibleConditions", "Visible in conditions", "Which page conditions show this panel? Leave blank for all conditions; separate names with commas."),
           select("width", "Fallback width units", "If no percentage size is set yet, how many relative layout units does this panel occupy beside sibling panels?", ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"]),
-          text("trace", "Traces to", "Which requirement, decision, question, or scope record accounts for this panel?")
+          text("trace", "Traces to", "Which requirement, decision, observation, or question accounts for this panel?")
         ], { idPrefix: "PNL", hidden: true }),
-        rows("elements", "Component records", "Canonical content-section and component records created by the mock composer and edited in the inspector.", [
+        rows("elements", "Component records", "Canonical content-section and component records created by the mock composer and edited in the B04 selected-record editor.", [
           text("id", "ID", "What stable ID addresses this content section or component?", { placeholder: "EL-01" }),
           select("kind", "Kind", "What structural kind is this?", ["content", "data", "navigation", "notice", "section"]),
           select("marker", "Backing", "Why is this section or component in the mock?", ["proposed", "required", "unanswered", "observed", "out of scope"]),
@@ -87,7 +87,7 @@
           text("name", "Component or section", "What is this called?"),
           textarea("shows", "Shows or accepts", "What does it show or accept?"),
           select("dataRef", "Data definition", "Which B03 or Data Dictionary definition supplies this component?", [], { dynamicOptions: "data", allowUnresolved: true, forKinds: ["data"] }),
-          select("sourceRouteRef", "Source route", "Which Data Dictionary source route supplies this component, or should routing be selected by conditions?", [], { dynamicOptions: "sourceRoutes", allowUnresolved: true, forKinds: ["data"] }),
+          select("sourceRouteRef", "Source reference", "Which app-specific source reference supplies this component, or should source selection be decided by conditions?", [], { dynamicOptions: "sourceRoutes", allowUnresolved: true, forKinds: ["data"] }),
           select("presentation", "Presentation", "How should a person encounter the selected data?", [], { dynamicOptions: "presentation", forKinds: ["data"] }),
           select("surfaceRole", "Surface role", "Can a workflow target this section as a named surface?", ["ordinary section", "workflow section", "tab", "wizard step"], { forKinds: ["section"] }),
           select("navigationSource", "Navigation source", "Which canonical destinations supply this navigation?", ["application pages", "current-page surfaces", "workflow steps", "custom destinations"], { forKinds: ["navigation"] }),
@@ -103,7 +103,7 @@
           textarea("one", "One", "What appears when there is only one item?", { forPresentations: ["list", "table"] }),
           textarea("overflow", "More than fits", "What appears when there are more items than fit here?", { forPresentations: ["list", "table"] })
         ], { idPrefix: "EL", starter: true, hidden: true }),
-        rows("controls", "Control records", "Canonical controls created by the mock composer and edited in the inspector.", [
+        rows("controls", "Control records", "Canonical controls created by the mock composer and edited in the B04 selected-record editor.", [
           text("id", "ID", "What stable ID addresses this control?", { placeholder: "CTL-01" }),
           text("name", "Control", "What is the control called?"),
           select("marker", "Backing", "Why is this action in the mock?", ["proposed", "required", "unanswered", "observed", "out of scope"]),
@@ -111,7 +111,7 @@
           text("visibleConditions", "Visible in conditions", "Which page conditions show this action? Leave blank for all conditions; separate names with commas."),
           select("effect", "Business effect", "What does this control do?", ["acts on data", "changes the page", "both"]),
           select("dataRef", "Data definition", "Which B03 or Data Dictionary definition does this control read or change?", [], { dynamicOptions: "data", allowUnresolved: true }),
-          select("sourceRouteRef", "Source route", "Which Data Dictionary source route supplies this control, or should routing be selected by conditions?", [], { dynamicOptions: "sourceRoutes", allowUnresolved: true }),
+          select("sourceRouteRef", "Source reference", "Which app-specific source reference supplies this control, or should source selection be decided by conditions?", [], { dynamicOptions: "sourceRoutes", allowUnresolved: true }),
           select("serverData", "Server-only data", "Does it use information only the server knows?", ["yes", "no", "unknown"]),
           text("leadsTo", "Leads to", "Where does it lead?"),
           textarea("confirmation", "Confirm or undo", "What confirmation or undo must exist?")

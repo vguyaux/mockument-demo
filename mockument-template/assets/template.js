@@ -4,7 +4,7 @@
   const BLOCKS = window.MOCKUMENT_BLOCKS || [];
   const STORAGE_KEY = "honest-mockument-template-state";
   const SCHEMA_VERSION = 36;
-  const TEMPLATE_VERSION = "0.39.0";
+  const TEMPLATE_VERSION = "0.40.0";
   const FIDELITY_NOTE = "Structure only, example data, nothing here is proof that the application works.";
   const THEME_KEY = "mockument-theme";
   const THEME_CYCLE = ["system", "dark", "light"];
@@ -958,6 +958,7 @@
       });
       if (!next.changeLog.some(entry => entry.version === "0.39.0")) next.changeLog.push({ version: "0.39.0", date: new Date().toISOString(), note: "Turned the right column into a page notes activity log and removed Scope as a note type." });
     }
+    if (!next.changeLog.some(entry => entry.version === "0.40.0")) next.changeLog.push({ version: "0.40.0", date: new Date().toISOString(), note: "Added B04 in-document mock record editing and editable JSON import/export." });
     return next;
   }
 
@@ -995,6 +996,9 @@
     resetToCommittedTemplate,
     exportLocalState() {
       return JSON.stringify(state, null, 2);
+    },
+    importLocalState(json) {
+      importJsonState(json);
     }
   };
 
@@ -1647,7 +1651,7 @@ Use these B10 stable workflow participation, page surface, action, step, and tra
 ${workflowRecord}
 
 APPLICATION DATA REFERENCES
-Use these selected B03 / Data Dictionary field and source-route references. If the route is automatic/unselected, use source routing rules from Data Dictionary and stop if the required condition is missing.
+Use these selected B03 / app data references and source references. If a source is automatic/unselected, use the app-specific source rules and stop if the required condition is missing.
 ${dataReferenceRecord}
 
 ACTIVE DECISION PROVENANCE
@@ -1682,8 +1686,16 @@ Anything not covered above is unspecified. Add a question against this page rath
     }).join("")}</div></div>`;
   }
 
+  function renderSelectedRecordEditor(definition, page, templateMode) {
+    if (definition.id !== "B04" || selection.kind !== "record") return "";
+    const found = findRecord(page, selection.recordId);
+    if (!found || found.definition.id !== "B04") return "";
+    const recordId = found.row.id || found.row._id || selection.recordId;
+    return `<section class="selected-record-editor" id="selected-record-editor"><div class="selected-record-editor-head"><div><span class="eyebrow">Selected mock record</span><h2>${esc(recordId)} · ${esc(found.row.name || found.field.label || "Record")}</h2></div><button class="button button--small" data-clear-record-selection type="button">Close</button></div>${inspectorRecordEditor(found, templateMode)}</section>`;
+  }
+
   function renderBlock(definition, block, page, templateMode, aiStatuses, humanStatuses) {
-    const selected = selection.kind === "block" && selection.blockId === definition.id;
+    const selected = (selection.kind === "block" || selection.kind === "record") && selection.blockId === definition.id;
     const formFields = definition.fields.filter(field => !field.hidden && (!field.showWhen || block.values[field.showWhen.key] === field.showWhen.value)).map(field => field.type === "rows"
       ? renderRepeater(field, block.values[field.key] || [], definition.id, templateMode)
       : renderSimpleField(field, block.values[field.key], definition.id, templateMode)).join("");
@@ -1699,6 +1711,7 @@ Anything not covered above is unspecified. Add a question against this page rath
         </div>
         ${definition.custom === "mock" ? renderMock(page, templateMode) : ""}
         ${definition.custom === "workflowParticipation" ? renderWorkflowParticipation(page) : ""}
+        ${renderSelectedRecordEditor(definition, page, templateMode)}
         <div class="form-grid">${formFields}</div>
         ${definition.custom === "contract" ? `<div style="height:16px"></div><div class="contract">${esc(buildContract(page))}</div>` : ""}
       </div>
@@ -1984,7 +1997,7 @@ Anything not covered above is unspecified. Add a question against this page rath
         ${dataFieldLabel("usages", index, record, "context", "Context / period")}
         ${dataFieldLabel("usages", index, record, "displayLabel", "Display label")}
         ${dataFieldLabel("usages", index, record, "dataId", "Data ID")}
-        ${dataFieldLabel("usages", index, record, "routeId", "Source route ID")}
+        ${dataFieldLabel("usages", index, record, "routeId", "Source reference ID")}
         ${dataFieldLabel("usages", index, record, "requiredness", "Backing")}
         ${dataFieldLabel("usages", index, record, "providerText", "Imported provider text")}
         ${dataFieldLabel("usages", index, record, "sourceText", "Imported source text", { type: "textarea", wide: true })}
@@ -2474,6 +2487,42 @@ Anything not covered above is unspecified. Add a question against this page rath
     return `<div class="pdf-export-document"><header class="document-head pdf-export-title"><span class="eyebrow">PDF export</span><h1>${esc(state.app.name || "Application Name")} Mockument</h1><p class="document-lede">All documentation blocks for the current Mockument. Use the browser print dialog to save this as a PDF.</p><div class="meta-strip"><span class="meta-chip">${esc(pages.length)} application page${pages.length === 1 ? "" : "s"}</span><span class="meta-chip">Exported ${esc(new Date().toLocaleString())}</span></div></header>${renderApplicationSettings()}${pages.map(pageDocument).join("") || `<p class="repeater-empty">No application pages yet.</p>`}</div>`;
   }
 
+  function downloadText(filename, text, type = "application/json") {
+    const blob = new Blob([text], { type });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 0);
+  }
+
+  function safeFilename(value) {
+    return String(value || "mockument").toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "") || "mockument";
+  }
+
+  function exportJsonState() {
+    saveState(false);
+    const name = `${safeFilename(state.app && state.app.name || "mockument")}-state.json`;
+    downloadText(name, JSON.stringify(state, null, 2));
+    showToast("Mockument JSON exported");
+  }
+
+  function importJsonState(json) {
+    const candidate = typeof json === "string" ? JSON.parse(json) : json;
+    if (!candidate || typeof candidate !== "object" || !candidate.pages || !candidate.pageOrder) throw new Error("This does not look like a Mockument state export.");
+    const config = templateMenuConfig();
+    if (config && config.version) candidate.templateMenuVersion = String(config.version);
+    state = applyTemplateMenu(migrateState(candidate));
+    templatePreview = null;
+    if (!state.activePageId || (state.activePageId !== "template" && !state.pages[state.activePageId] && state.activePageId !== DATA_SECTION_ID)) state.activePageId = "template";
+    saveState(false);
+    render();
+    showToast("Mockument JSON imported");
+  }
+
   function exportPdf() {
     const previous = { activePageId: state.activePageId, showAllBlocks, previewMode, selection: { ...selection } };
     previewMode = false;
@@ -2678,6 +2727,8 @@ Anything not covered above is unspecified. Add a question against this page rath
     if (event.target.closest("#new-page-button, [data-open-new-page]")) { openNewPageDialog("copy"); return; }
     if (event.target.closest("#planned-page-button, [data-add-planned-page]")) { openNewPageDialog("planned"); return; }
     if (event.target.closest("#export-button")) { exportPdf(); return; }
+    if (event.target.closest("#export-json-button")) { exportJsonState(); return; }
+    if (event.target.closest("#import-json-button")) { const input = $("#import-json-input"); if (input) input.click(); return; }
     if (event.target.closest("#reset-demo-button") && confirm("Reset this browser to the committed template menu? Browser-only Mockument changes will be cleared.")) { resetToCommittedTemplate(); return; }
     if (event.target.closest("#theme-button")) { cycleTheme(); return; }
     const notesTab = event.target.closest("[data-notes-filter]");
@@ -2778,7 +2829,19 @@ Anything not covered above is unspecified. Add a question against this page rath
     const mockButton = event.target.closest("[data-mock-choice]");
     if (mockButton) { mockChoice[mockButton.dataset.mockChoice] = mockButton.dataset.value; renderDocument(); renderInspector(); return; }
     const record = event.target.closest("[data-mock-record]");
-    if (record) { selection = { kind: "record", recordId: record.dataset.mockRecord, blockId: "B04" }; updateBlockHash(); renderInspector(); $$("[data-mock-record]").forEach(node => node.classList.toggle("is-selected", node === record)); $$(".block-jump button").forEach(node => node.classList.toggle("is-active", node.dataset.jumpBlock === selection.blockId)); return; }
+    if (record) {
+      selection = { kind: "record", recordId: record.dataset.mockRecord, blockId: "B04" };
+      showAllBlocks = false;
+      updateBlockHash();
+      const scrollY = window.scrollY;
+      renderDocument();
+      renderInspector();
+      window.scrollTo(0, scrollY);
+      const editor = document.getElementById("selected-record-editor");
+      if (editor && typeof editor.scrollIntoView === "function") editor.scrollIntoView({ behavior: "smooth", block: "start" });
+      return;
+    }
+    if (event.target.closest("[data-clear-record-selection]")) { selectBlock("B04"); renderDocument(); renderInspector(); return; }
     const jump = event.target.closest("[data-jump-block]");
     if (jump) { selectBlock(jump.dataset.jumpBlock); renderDocument(); renderInspector(); revealActiveBlock(); return; }
     const row = event.target.closest("[data-inspect-row]");
@@ -2787,6 +2850,7 @@ Anything not covered above is unspecified. Add a question against this page rath
         ? { kind: "record", recordId: row.dataset.recordId, blockId: row.dataset.block }
         : { kind: "row", blockId: row.dataset.block, fieldKey: row.dataset.field, rowIndex: Number(row.dataset.row) };
       updateBlockHash();
+      if (selection.kind === "record" && selection.blockId === "B04") renderDocument();
       renderInspector();
       return;
     }
@@ -2883,6 +2947,24 @@ Anything not covered above is unspecified. Add a question against this page rath
       render();
       window.scrollTo(0, scrollY);
     }
+  });
+
+  const importInput = $("#import-json-input");
+  if (importInput) importInput.addEventListener("change", event => {
+    const file = event.target.files && event.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        importJsonState(String(reader.result || ""));
+      } catch (error) {
+        console.error(error);
+        alert(error && error.message ? error.message : "Could not import this Mockument JSON file.");
+      } finally {
+        event.target.value = "";
+      }
+    };
+    reader.readAsText(file);
   });
 
   $("#new-page-form").addEventListener("submit", event => {

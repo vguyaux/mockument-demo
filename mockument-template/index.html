@@ -44,6 +44,13 @@
           <button class="menu-action-link" id="export-button" type="button" title="Print all Mockument blocks to PDF">
             <span class="menu-icon">↓</span><span>Export PDF</span>
           </button>
+          <button class="menu-action-link" id="export-json-button" type="button" title="Download the editable Mockument JSON state">
+            <span class="menu-icon">{}</span><span>Export JSON</span>
+          </button>
+          <button class="menu-action-link" id="import-json-button" type="button" title="Load a previously exported Mockument JSON state">
+            <span class="menu-icon">↑</span><span>Import JSON</span>
+          </button>
+          <input id="import-json-input" type="file" accept="application/json,.json" hidden>
           <button class="menu-action-link" id="reset-demo-button" type="button" title="Clear browser-only changes and reload the committed template menu">
             <span class="menu-icon">↺</span><span>Reset Demo</span>
           </button>
@@ -60,7 +67,7 @@
       <div id="document"></div>
     </main>
 
-    <aside class="inspector-column" aria-label="Selection inspector">
+    <aside class="inspector-column" aria-label="Page activity log">
       <div class="inspector" id="inspector"></div>
     </aside>
   </div>

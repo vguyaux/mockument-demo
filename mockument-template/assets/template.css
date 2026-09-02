@@ -125,7 +125,7 @@ a { color: inherit; }
   cursor: pointer;
 }
 .menu-action-link:hover { background: var(--panel-2); color: var(--text); }
-.menu-actions .theme-button { grid-column: 2; grid-row: 1 / span 3; align-self: start; }
+.menu-actions .theme-button { grid-column: 2; grid-row: 1 / span 5; align-self: start; }
 .theme-button { width: 32px; padding: 6px 0; font-size: 14px; }
 .button, .icon-button {
   border: 1px solid var(--line-strong); background: var(--panel-2); border-radius: 7px; padding: 8px 11px; cursor: pointer;
@@ -484,6 +484,11 @@ input:focus, textarea:focus, select:focus { border-color: var(--accent); box-sha
 .composer-item-actions { display: flex; gap: 3px; }
 .composer-add { display: flex; gap: 7px; padding: 0 11px 11px; }
 .composer-add select { width: 150px; padding: 5px 7px; font-size: 11px; }
+.selected-record-editor { border: 1px solid var(--accent); border-radius: 10px; background: color-mix(in srgb, var(--accent) 5%, var(--panel)); padding: 14px; margin: 0 0 16px; scroll-margin-top: 104px; }
+.selected-record-editor-head { display: flex; justify-content: space-between; align-items: start; gap: 12px; padding-bottom: 10px; border-bottom: 1px solid color-mix(in srgb, var(--accent) 22%, var(--line)); }
+.selected-record-editor h2 { margin: 2px 0 0; font-size: 14px; }
+.selected-record-editor .inspector-section { margin-top: 12px; padding-top: 0; border-top: 0; }
+.selected-record-editor .inspector-section + .inspector-section { padding-top: 12px; border-top: 1px solid var(--line); }
 .is-previewing .menu-column, .is-previewing .inspector-column { display: none; }
 .is-previewing .app-shell { display: block; min-height: 100vh; }
 .is-previewing .document-column { padding: 0; min-height: 100vh; overflow: hidden; }
@@ -606,7 +611,7 @@ input:focus, textarea:focus, select:focus { border-color: var(--accent); box-sha
   }
   html, body { background: #ffffff !important; color: #111111 !important; font-size: 10pt; line-height: 1.35; }
   .app-shell { display: block; min-height: auto; }
-  .menu-column, .inspector-column, .block-status-nav, .document-toolbar, .block-pager, .composer-head-actions, .composer-add-layout, .composer-add, .composer-move, .remove-row, .mock-controls, .mock-resize-handle, .toast { display: none !important; }
+  .menu-column, .inspector-column, .block-status-nav, .document-toolbar, .block-pager, .composer-head-actions, .composer-add-layout, .composer-add, .composer-move, .remove-row, .mock-controls, .mock-resize-handle, .selected-record-editor, .toast { display: none !important; }
   .document-column { --document-top-pad: 0; --document-top-offset: 0; padding: 0; }
   .document-head, .block, .block-reminders, .application-settings, .app-overview, .data-section, .data-method-card, .pdf-page-document { max-width: none; }
   .pdf-export-title { break-after: page; }
