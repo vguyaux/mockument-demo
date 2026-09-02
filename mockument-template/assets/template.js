@@ -10,7 +10,7 @@
   const THEME_CYCLE = ["system", "dark", "light"];
   const BLOCK_SUMMARIES = {
     B01: "Page", B02: "Roles", B03: "Data", B04: "Mock", B05: "Conditions", B06: "Failures",
-    B07: "Memory", B08: "Changes", B09: "Connections", B10: "Workflows", B11: "Copy",
+    B07: "Memory", B08: "Changes", B09: "Connections", B10: "Workflows", B11: "Copywriting",
     B12: "Notes", B13: "Contract"
   };
   const DATA_SECTION_ID = "__all_data__";
@@ -1107,13 +1107,9 @@
           <span class="menu-copy"><strong>Template</strong><small>Permanent page source</small></span>
         </button>
       </div>
-      ${roots.length ? roots.map(item).join("") : ""}
-      <div class="menu-item-wrap">
-        <button class="menu-link ${state.activePageId === DATA_SECTION_ID ? "is-active" : ""}" data-open-data-section type="button">
-          <span class="menu-icon">D</span>
-          <span class="menu-copy"><strong>Data Dictionary</strong></span>
-        </button>
-      </div>`;
+      ${roots.length ? roots.map(item).join("") : ""}`;
+    const dataDictionaryLink = $("#data-dictionary-link");
+    if (dataDictionaryLink) dataDictionaryLink.classList.toggle("is-active", state.activePageId === DATA_SECTION_ID);
     const settingsLink = $("#settings-link");
     if (settingsLink) settingsLink.classList.toggle("is-active", state.activePageId === "settings");
     $("#app-name-small").textContent = state.app.name || "Application Name";

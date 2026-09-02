@@ -203,10 +203,10 @@
       ]
     },
     {
-      id: "B11", group: "Honesty", title: "Copy register", answeredBy: "Business user",
+      id: "B11", group: "Honesty", title: "Copywriting register", answeredBy: "Business user",
       definition: "Record every user-visible string and mark it as required wording or placeholder wording.",
       why: "Wording is where unattended builders invent most freely. A labeled placeholder is safe; an unlabeled one becomes product.",
-      fields: [rows("copy", "Copy register", "What exact words can a person see?", [
+      fields: [rows("copy", "Copywriting register", "What exact words can a person see?", [
         text("id", "Copy ID", "What stable ID addresses this string?", { placeholder: "COPY-01" }),
         text("where", "Where", "Where does it appear?"),
         textarea("string", "Exact string", "What exact words appear?"),
