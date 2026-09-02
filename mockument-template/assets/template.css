@@ -288,6 +288,13 @@ h2 { margin: 0; }
 .block-pager > button:first-child { justify-self: start; }
 .block-pager > button:last-child { justify-self: end; }
 .block-view-note { max-width: 1080px; margin: 0 auto 12px; padding: 8px 10px; border: 1px solid var(--line); border-radius: 7px; color: var(--text-3); font-size: 10px; text-align: center; }
+.block-reminders { max-width: 1080px; margin: 24px auto 0; display: grid; gap: 10px; }
+.block-reminder-card { border: 1px solid var(--line); border-radius: 12px; background: var(--panel); padding: 14px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+.block-reminder-card header { grid-column: 1 / -1; display: flex; align-items: center; gap: 8px; padding-bottom: 10px; border-bottom: 1px solid var(--line); }
+.block-reminder-card h2, .block-reminder-card h3, .block-reminder-card p { margin: 0; }
+.block-reminder-card h2 { font-size: 14px; }
+.block-reminder-card h3 { margin-bottom: 5px; color: var(--text-3); font-size: 10px; text-transform: uppercase; letter-spacing: .1em; }
+.block-reminder-card p { color: var(--text-2); font-size: 12px; line-height: 1.45; }
 .block { border: 1px solid var(--line); border-radius: 12px; background: var(--panel); margin: 0 0 18px; overflow: clip; scroll-margin-top: 190px; }
 .block.is-selected { border-color: var(--accent); box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent) 18%, transparent); }
 .block-head { display: grid; grid-template-columns: 54px minmax(0, 1fr) auto; align-items: center; min-height: 54px; border-bottom: 1px solid var(--line); cursor: pointer; }
@@ -570,11 +577,11 @@ input:focus, textarea:focus, select:focus { border-color: var(--accent); box-sha
   .app-shell { display: block; min-height: auto; }
   .menu-column, .inspector-column, .block-status-nav, .document-toolbar, .block-pager, .composer-head-actions, .composer-add-layout, .composer-add, .composer-move, .remove-row, .mock-controls, .mock-resize-handle, .toast { display: none !important; }
   .document-column { --document-top-pad: 0; --document-top-offset: 0; padding: 0; }
-  .document-head, .block, .application-settings, .app-overview, .data-section, .data-method-card, .pdf-page-document { max-width: none; }
+  .document-head, .block, .block-reminders, .application-settings, .app-overview, .data-section, .data-method-card, .pdf-page-document { max-width: none; }
   .pdf-export-title { break-after: page; }
   .pdf-page-document { break-after: page; margin: 0; }
   .pdf-page-document:last-child { break-after: auto; }
-  .document-head, .readiness, .block, .application-settings, .app-overview { break-inside: avoid; box-shadow: none !important; }
+  .document-head, .readiness, .block, .block-reminders, .application-settings, .app-overview { break-inside: avoid; box-shadow: none !important; }
   .block { margin: 0 0 18px; border-color: #cfcfcf; background: #ffffff; }
   .block-head { position: static; top: auto; background: #eeeeee; color: #111111; }
   .block-form, .human-review-footer, .repeater-row, .compact-record, .composer-region, .composer-section, .mock-shell { background: #ffffff; }
@@ -608,5 +615,6 @@ input:focus, textarea:focus, select:focus { border-color: var(--accent); box-sha
   .document-column { --document-top-pad: 26px; --document-top-offset: -26px; padding: var(--document-top-pad) 16px 50px; }
   .readiness { grid-template-columns: 1fr; }
   .document-head-readiness .readiness { grid-template-columns: 1fr; }
+  .block-reminder-card { grid-template-columns: 1fr; }
   .honesty-bar, .form-grid, .row-fields, .row-accountability, .application-settings, .human-review-grid, .reviewer-list, .workflow-step-fields, .workflow-transition { grid-template-columns: 1fr; }
 }

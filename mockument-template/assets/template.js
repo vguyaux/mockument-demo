@@ -1792,6 +1792,19 @@ Anything not covered above is unspecified. Add a question against this page rath
     return `<nav class="block-pager" aria-label="Move between Mockument blocks"><button class="button button--small" data-previous-block type="button" ${previous ? "" : "disabled"}>← ${previous ? `${esc(previous.id)} ${esc(BLOCK_SUMMARIES[previous.id])}` : "Previous"}</button><span><strong>${esc(BLOCKS[index].id)}</strong> ${esc(BLOCK_SUMMARIES[BLOCKS[index].id])}<button class="block-view-link" data-toggle-block-view type="button">View all blocks</button></span><button class="button button--small" data-next-block type="button" ${next ? "" : "disabled"}>${next ? `${esc(next.id)} ${esc(BLOCK_SUMMARIES[next.id])}` : "Next"} →</button></nav>`;
   }
 
+  function renderBlockReminder(definitions) {
+    const visible = (definitions || []).filter(Boolean);
+    if (!visible.length) return "";
+    return `<section class="block-reminders" aria-label="Block reminders">
+      <span class="eyebrow">Reminder</span>
+      ${visible.map(definition => `<article class="block-reminder-card">
+        <header><span class="row-id">${esc(definition.id)}</span><h2>${esc(definition.title)}</h2></header>
+        <div><h3>Definition</h3><p>${esc(definition.definition)}</p></div>
+        <div><h3>Why it exists</h3><p>${esc(definition.why)}</p></div>
+      </article>`).join("")}
+    </section>`;
+  }
+
   function routeConditionSummary(route) {
     return [route.country, route.currency, route.securityType, route.assetClass, route.jurisdiction, route.otherCondition].map(value => String(value || "").trim()).filter(Boolean).join(" · ") || "condition not specified";
   }
@@ -2053,10 +2066,12 @@ Anything not covered above is unspecified. Add a question against this page rath
       </div>
       <aside class="document-head-readiness" aria-label="Page readiness">${renderReadiness(page)}</aside>
     </header>` : "";
+    const visibleBlocks = showAllBlocks ? BLOCKS : BLOCKS.filter(definition => definition.id === selection.blockId);
     $("#document").innerHTML = `${renderBlockJump(page, aiStatuses, humanStatuses)}${pageOverview}
     ${renderBlockPager()}
-    <div class="block-list">${(showAllBlocks ? BLOCKS : BLOCKS.filter(definition => definition.id === selection.blockId)).map(definition => renderBlock(definition, page.blocks[definition.id], page, false, aiStatuses, humanStatuses)).join("")}</div>
-    ${showAllBlocks ? "" : renderBlockPager()}`;
+    <div class="block-list">${visibleBlocks.map(definition => renderBlock(definition, page.blocks[definition.id], page, false, aiStatuses, humanStatuses)).join("")}</div>
+    ${showAllBlocks ? "" : renderBlockPager()}
+    ${renderBlockReminder(visibleBlocks)}`;
   }
 
   function findField(definition, key) {
@@ -2146,8 +2161,6 @@ Anything not covered above is unspecified. Add a question against this page rath
     }
     const block = page.blocks[definition.id];
     inspector.innerHTML = `<span class="inspector-kicker">${definition.id}</span><h2>${esc(definition.title)}</h2><div class="inspector-owner">Answered by ${esc(definition.answeredBy)}</div>
-      <div class="inspector-section"><h3>Definition</h3><p>${esc(definition.definition)}</p></div>
-      <div class="inspector-section"><h3>Why it exists</h3><p>${esc(definition.why)}</p></div>
       <div class="inspector-section"><h3>Current honesty</h3><p><span class="status-chip status--${esc(block.status)}"><span class="status-dot"></span>${esc(statusLabel(block.status))}</span>${block.accountable ? ` · ${esc(block.accountable)}` : ""}</p></div>
       ${extra}`;
   }
